@@ -1,0 +1,44 @@
+<view class="container">
+  <view class="header">
+    <text class="title">使用记录</text>
+  </view>
+
+  <view wx:if="{{loading && list.length === 0}}" class="card">
+    <text class="loading">正在加载...</text>
+  </view>
+
+  <view wx:elif="{{list.length === 0}}" class="card">
+    <text class="empty">暂无使用记录</text>
+  </view>
+
+  <view wx:else>
+    <view
+      wx:for="{{list}}"
+      wx:key="_id"
+      class="record-card"
+    >
+      <view class="record-row">
+        <text class="record-app">{{item.appKey}}</text>
+        <text class="record-status" style="color: {{item.statusColor}};">{{item.statusText}}</text>
+      </view>
+      <view class="record-row">
+        <text wx:if="{{item.costPoints > 0}}" class="record-cost">消耗 {{item.costPoints}} 积分</text>
+        <text wx:else class="record-cost">免费</text>
+      </view>
+      <view wx:if="{{item.errorMessage}}" class="record-row">
+        <text class="record-error">{{item.errorMessage}}</text>
+      </view>
+      <view class="record-row">
+        <text class="record-time">{{item.startedAtText}}</text>
+        <text wx:if="{{item.finishedAtText !== '-'}}" class="record-time">完成于 {{item.finishedAtText}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{hasMore}}" class="load-more" bindtap="onReachBottom">
+      <text class="load-more-text">加载更多...</text>
+    </view>
+    <view wx:elif="{{list.length > 0}}" class="load-more">
+      <text class="load-more-text">没有更多记录了</text>
+    </view>
+  </view>
+</view>

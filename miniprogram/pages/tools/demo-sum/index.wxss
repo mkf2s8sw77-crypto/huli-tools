@@ -1,0 +1,76 @@
+.container {
+  padding: 32rpx;
+}
+
+.header {
+  margin-bottom: 48rpx;
+  text-align: center;
+}
+
+.title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.cost-points {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #ff9900;
+}
+
+input {
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  font-size: 30rpx;
+}
+
+.result .value {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #07c160;
+  margin-top: 16rpx;
+}
+
+.subvalue {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.error {
+  color: #fa5151;
+}
+
+.error text {
+  display: block;
+  font-size: 28rpx;
+  text-align: center;
+}

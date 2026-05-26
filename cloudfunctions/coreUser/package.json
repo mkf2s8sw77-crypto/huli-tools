@@ -1,0 +1,9 @@
+{
+  "name": "coreUser",
+  "version": "1.0.0",
+  "description": "用户身份与积分账户 bootstrap",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

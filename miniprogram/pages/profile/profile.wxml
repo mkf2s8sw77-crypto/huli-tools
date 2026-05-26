@@ -3,8 +3,47 @@
     <text class="title">我的</text>
   </view>
 
-  <view class="card">
-    <text class="label">版本号</text>
-    <text class="value">{{version}}</text>
+  <view wx:if="{{loading}}" class="card">
+    <text class="loading">正在加载...</text>
+  </view>
+
+  <view wx:elif="{{!user}}" class="card">
+    <text class="empty">未获取到用户信息</text>
+    <button size="mini" bindtap="loadProfile">重试</button>
+  </view>
+
+  <view wx:else>
+    <view class="card">
+      <text class="label">用户身份</text>
+      <text class="value">{{maskedOpenid}}</text>
+    </view>
+
+    <view class="card points-card">
+      <text class="label">可用积分</text>
+      <text class="points">{{points.availablePoints}}</text>
+      <view class="points-sub">
+        <text wx:if="{{points.frozenPoints > 0}}" class="frozen">冻结中: {{points.frozenPoints}}</text>
+        <text class="sub">累计充值: {{points.totalRechargedPoints}} / 累计消费: {{points.totalConsumedPoints}}</text>
+      </view>
+    </view>
+
+    <view class="menu">
+      <view class="menu-item" bindtap="onGoRecharge">
+        <text class="menu-text">积分充值</text>
+        <text class="menu-arrow">&gt;</text>
+      </view>
+      <view class="menu-item" bindtap="onGoOrders">
+        <text class="menu-text">我的订单</text>
+        <text class="menu-arrow">&gt;</text>
+      </view>
+      <view class="menu-item" bindtap="onGoTransactions">
+        <text class="menu-text">积分流水</text>
+        <text class="menu-arrow">&gt;</text>
+      </view>
+      <view class="menu-item" bindtap="onGoUsageRecords">
+        <text class="menu-text">使用记录</text>
+        <text class="menu-arrow">&gt;</text>
+      </view>
+    </view>
   </view>
 </view>

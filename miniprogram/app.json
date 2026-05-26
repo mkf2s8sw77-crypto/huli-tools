@@ -1,7 +1,12 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/tools/demo-sum/index",
+    "pages/recharge/recharge",
+    "pages/orders/orders",
+    "pages/transactions/transactions",
+    "pages/usage-records/usage-records"
   ],
   "window": {
     "backgroundTextStyle": "light",

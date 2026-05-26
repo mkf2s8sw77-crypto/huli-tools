@@ -1,0 +1,70 @@
+# huli-tools 运行清单
+# 本文件列出每个 phase 的静态 gate 和部署后验收命令。
+# 命令必须能在项目根目录直接解析。
+
+[project]
+name = "huli-tools"
+root = "."
+env_id = "cloudbase-3gphz7fk0fe1b760"
+
+[gate.static]
+description = "每次提交前必须通过的静态检查"
+commands = [
+  "git status --short --branch",
+  "bash scripts/check-js.sh",
+  "git diff --check",
+]
+
+[gate.deploy]
+description = "云函数部署后人工/半自动验收步骤"
+steps = [
+  "1. 在微信开发者工具中右键部署所有 cloudfunctions",
+  "2. 创建数据库集合（见 docs/cloud_collections.md）",
+  "3. 配置云函数环境变量（见 docs/dev_setup.md）",
+  "4. 调用 adminCore.initSchema 写入 seed 数据",
+]
+
+[phase.1]
+description = "工程底座、集合契约、用户 bootstrap、应用目录 seed"
+actions = ["创建/更新云函数 coreUser、adminCore", "创建 docs/cloud_collections.md"]
+
+[phase.2]
+description = "共享积分账本、冻结/结算/释放、示例工具扣费链路"
+actions = ["创建/更新云函数 corePoints、coreApp、demoSum", "验证积分冻结->结算/释放链路"]
+
+[phase.3]
+description = "固定充值包、支付订单、mock 支付到账、真实支付预留"
+actions = ["创建/更新云函数 corePayment", "验证 mock 支付到账"]
+
+[phase.4]
+description = "首页/我的/充值/订单/流水/示例工具前端体验"
+actions = ["创建前端页面和 tabbar", "验证页面跳转和数据展示"]
+
+[phase.5]
+description = "管理员接口、审计、安全加固、集成测试和交接文档"
+actions = [
+  "完善 adminCore：upsertApp、upsertPackage、listAuditLogs",
+  "加固 corePoints 内部接口 _internalToken",
+  "更新测试文档和运行清单",
+  "创建 docs/admin_operations.md 和 AGENTS.md",
+]
+
+[env.required]
+description = "云函数环境变量（开发阶段最小集）"
+vars = [
+  { name = "ADMIN_OPENIDS", example = "openid1,openid2", note = "管理员白名单，逗号分隔" },
+  { name = "PAYMENT_PROVIDER", example = "mock", note = "mock 或 wechat" },
+  { name = "MOCK_PAYMENT_ENABLED", example = "true", note = "开发测试用，生产必须 false" },
+  { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，生产环境必须更换默认值" },
+]
+
+[env.wechat_payment]
+description = "真实微信支付环境变量（仅当 PAYMENT_PROVIDER=wechat 时需要）"
+vars = [
+  "WX_PAY_MCH_ID",
+  "WX_PAY_APPID",
+  "WX_PAY_API_V3_KEY",
+  "WX_PAY_SERIAL_NO",
+  "WX_PAY_PRIVATE_KEY",
+  "WX_PAY_NOTIFY_URL",
+]

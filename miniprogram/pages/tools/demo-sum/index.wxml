@@ -1,0 +1,43 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{appInfo ? appInfo.name : '积分示例工具'}}</text>
+    <text class="subtitle">演示积分扣费链路</text>
+  </view>
+
+  <view class="card" wx:if="{{appInfo && appInfo.pricing && appInfo.pricing.mode === 'fixed'}}">
+    <text class="label">本次消耗</text>
+    <text class="cost-points">{{appInfo.pricing.costPoints}} 积分</text>
+  </view>
+
+  <view class="card">
+    <text class="label">数字 A</text>
+    <input type="number" value="{{a}}" bindinput="onInputA" placeholder="请输入数字" />
+  </view>
+
+  <view class="card">
+    <text class="label">数字 B</text>
+    <input type="number" value="{{b}}" bindinput="onInputB" placeholder="请输入数字" />
+  </view>
+
+  <view class="card">
+    <switch checked="{{triggerFail}}" bindchange="onToggleFail" />
+    <text class="label" style="display:inline;margin-left:20rpx;">模拟业务失败（测试释放积分）</text>
+  </view>
+
+  <button type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="onCalc">计算求和</button>
+
+  <view wx:if="{{usageId}}" class="card">
+    <text class="label">使用记录 ID</text>
+    <text class="subvalue">{{usageId}}</text>
+    <text wx:if="{{costPoints > 0}}" class="subvalue">消耗 {{costPoints}} 积分</text>
+  </view>
+
+  <view wx:if="{{result !== null}}" class="card result">
+    <text class="label">结果</text>
+    <text class="value">{{result}}</text>
+  </view>
+
+  <view wx:if="{{error}}" class="card error">
+    <text>{{error}}</text>
+  </view>
+</view>

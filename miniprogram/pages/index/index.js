@@ -1,25 +1,56 @@
+const api = require("../../services/api");
+
 Page({
   data: {
     message: "欢迎使用沪里工具",
-    userInfo: null,
+    loading: true,
+    error: null,
+    userSummary: null,
+    apps: [],
   },
 
   onLoad() {
-    this.getUserInfo();
+    this.loadHomeData();
   },
 
-  async getUserInfo() {
+  async loadHomeData() {
+    this.setData({ loading: true, error: null });
+
     try {
-      const { result } = await wx.cloud.callFunction({
-        name: "getOpenId",
-      });
+      const [userData, appsData] = await Promise.all([
+        api.bootstrapUser(),
+        api.listApps(),
+      ]);
+
       this.setData({
-        userInfo: {
-          openid: result.openid,
-        },
+        userSummary: userData || null,
+        apps: appsData.apps || [],
+        loading: false,
       });
     } catch (err) {
-      console.error("获取用户信息失败:", err);
+      console.error("首页数据加载失败:", err);
+      this.setData({
+        error: err.message || "加载失败，请稍后重试",
+        loading: false,
+      });
     }
+  },
+
+  onTapApp(event) {
+    const { app } = event.currentTarget.dataset;
+    if (!app || !app.entryPage) {
+      wx.showToast({ title: "应用入口未配置", icon: "none" });
+      return;
+    }
+    if (app.status !== "active") {
+      wx.showToast({ title: "该应用暂未开放", icon: "none" });
+      return;
+    }
+    wx.navigateTo({
+      url: app.entryPage,
+      fail: () => {
+        wx.showToast({ title: "页面跳转失败", icon: "none" });
+      },
+    });
   },
 });

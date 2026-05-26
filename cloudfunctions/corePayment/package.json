@@ -1,0 +1,9 @@
+{
+  "name": "corePayment",
+  "version": "1.0.0",
+  "description": "支付订单与充值包",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

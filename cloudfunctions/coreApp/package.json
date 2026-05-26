@@ -1,0 +1,9 @@
+{
+  "name": "coreApp",
+  "version": "1.0.0",
+  "description": "应用目录查询",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -1,0 +1,90 @@
+@import "../../app.wxss";
+
+.header {
+  margin-bottom: 48rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.loading {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+}
+
+.empty {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+}
+
+.tx-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.tx-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  flex-wrap: wrap;
+}
+
+.tx-row:last-child {
+  margin-bottom: 0;
+}
+
+.tx-type {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.tx-date {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.tx-delta {
+  font-size: 26rpx;
+  color: #333;
+  margin-right: 16rpx;
+}
+
+.tx-after {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.tx-note {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.load-more {
+  text-align: center;
+  padding: 24rpx;
+}
+
+.load-more-text {
+  font-size: 26rpx;
+  color: #999;
+}

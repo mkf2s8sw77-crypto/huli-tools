@@ -1,0 +1,60 @@
+# AGENTS.md: huli-tools 工程规则
+
+> 长期约束与架构规则。后续 coding Agent 维护本项目前应先阅读本文件。
+
+## 1. 语言与沟通
+
+- 除专有名词外，默认使用中文与用户交互，文档默认中文。
+
+## 2. 技术栈边界
+
+- 微信小程序原生语法，不引入 Taro、uni-app、React/Vue 或大型状态管理库。
+- 后端仅使用微信云开发（云函数 + 云数据库），不引入独立外部服务。
+- 代码风格保持 CommonJS，两空格缩进。
+
+## 3. 安全铁律
+
+- **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
+- **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
+- **金额与积分**：金额统一用整数“分”，积分统一用整数，时间统一用服务端 `Date`。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints` 仅供其他云函数内部调用，必须校验 `_internalToken`。
+- **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
+
+## 4. Collection 与数据契约
+
+- 公共集合见 `docs/cloud_collections.md`。
+- 业务工具私有 collection 必须以 `app_<appKey>_` 为前缀，不得把业务字段塞进公共集合。
+- 客户端对敏感 collection 应无写权限，只读权限也尽量限制为“仅自己”。
+
+## 5. 云函数接口风格
+
+- 公共云函数使用 action 风格，统一返回：
+  ```js
+  { ok: true, data: {}, requestId: "" }
+  // 失败时
+  { ok: false, error: { code: "", message: "" }, requestId: "" }
+  ```
+- 管理操作必须写入 `admin_audit_logs`。
+
+## 6. 幂等与状态机
+
+- 所有会改变余额、订单、使用记录状态的写操作必须具备幂等键。
+- 重复支付回调不能重复到账；重复 finish/fail usage 不能重复结算或释放。
+- 失败路径返回稳定错误码，不得静默吞掉异常。
+
+## 7. 环境变量
+
+开发最小集：
+- `ADMIN_OPENIDS` — 管理员白名单
+- `PAYMENT_PROVIDER` — `mock` 或 `wechat`
+- `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
+- `INTERNAL_API_SECRET` — 云函数间调用凭据，生产必须更换默认值
+
+真实微信支付额外需要：
+- `WX_PAY_MCH_ID`、`WX_PAY_APPID`、`WX_PAY_API_V3_KEY`、`WX_PAY_SERIAL_NO`、`WX_PAY_PRIVATE_KEY`、`WX_PAY_NOTIFY_URL`
+
+## 8. 测试与交付
+
+- 每次提交前运行 `bash scripts/check-js.sh`。
+- 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
+- 新增云函数、页面或 collection 时同步更新 `docs/`、`test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。
