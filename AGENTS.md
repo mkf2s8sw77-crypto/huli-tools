@@ -17,7 +17,7 @@
 - **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
 - **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
 - **金额与积分**：金额统一用整数“分”，积分统一用整数，时间统一用服务端 `Date`。
-- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints` 仅供其他云函数内部调用，必须校验 `_internalToken`。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints` 仅供其他云函数内部调用，必须校验 `_internalToken`。
 - **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
 
 ## 4. Collection 与数据契约
@@ -48,7 +48,7 @@
 - `ADMIN_OPENIDS` — 管理员白名单
 - `PAYMENT_PROVIDER` — `mock` 或 `wechat`
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
-- `INTERNAL_API_SECRET` — 云函数间调用凭据，生产必须更换默认值
+- `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串；未配置时内部写入接口应拒绝执行
 
 真实微信支付额外需要：
 - `WX_PAY_MCH_ID`、`WX_PAY_APPID`、`WX_PAY_API_V3_KEY`、`WX_PAY_SERIAL_NO`、`WX_PAY_PRIVATE_KEY`、`WX_PAY_NOTIFY_URL`

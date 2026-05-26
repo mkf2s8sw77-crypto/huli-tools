@@ -13,6 +13,13 @@ Page({
     this.loadHomeData();
   },
 
+  onShow() {
+    const tabBar = this.getTabBar && this.getTabBar();
+    if (tabBar) {
+      tabBar.setData({ selected: 0 });
+    }
+  },
+
   async loadHomeData() {
     this.setData({ loading: true, error: null });
 

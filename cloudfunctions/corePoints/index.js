@@ -12,11 +12,22 @@ function makeResponse(ok, dataOrError, requestId) {
 }
 
 function getInternalToken() {
-  return process.env.INTERNAL_API_SECRET || "huli-tools-internal";
+  return process.env.INTERNAL_API_SECRET || "";
 }
 
-function checkInternalToken(event) {
-  return event._internalToken === getInternalToken();
+function getInternalAuthError(event) {
+  const token = getInternalToken();
+  if (!token) {
+    return { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" };
+  }
+  if (event._internalToken !== token) {
+    return { code: "FORBIDDEN", message: "内部接口，禁止直接调用" };
+  }
+  return null;
+}
+
+function resolveTargetUserId(event, fallbackOpenid) {
+  return event.userId || fallbackOpenid || "";
 }
 
 async function getBalance(event, context) {
@@ -81,12 +92,13 @@ async function listTransactions(event, context) {
 // 内部 helper：冻结积分（仅供其他云函数调用，需 _internalToken）
 async function freezePoints(event, context) {
   const wxContext = cloud.getWXContext();
-  const openid = wxContext.OPENID;
+  const openid = resolveTargetUserId(event, wxContext.OPENID);
   const requestId = context.requestId || Date.now().toString();
   const { costPoints, relatedAppKey, relatedUsageId, idempotencyKey } = event;
 
-  if (!checkInternalToken(event)) {
-    return makeResponse(false, { code: "FORBIDDEN", message: "内部接口，禁止直接调用" }, requestId);
+  const authError = getInternalAuthError(event);
+  if (authError) {
+    return makeResponse(false, authError, requestId);
   }
   if (!openid) {
     return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
@@ -128,13 +140,19 @@ async function freezePoints(event, context) {
 
   // 原子更新账户
   try {
-    await db.collection("point_accounts").doc(account._id).update({
+    const updateRes = await db.collection("point_accounts").where({
+      _id: account._id,
+      availablePoints: _.gte(costPoints),
+    }).update({
       data: {
         availablePoints: _.inc(-costPoints),
         frozenPoints: _.inc(costPoints),
         updatedAt: now,
       },
     });
+    if (!updateRes.stats || updateRes.stats.updated === 0) {
+      return makeResponse(false, { code: "BALANCE_NOT_ENOUGH", message: "余额不足" }, requestId);
+    }
   } catch (err) {
     return makeResponse(false, { code: "DB_ERROR", message: "冻结积分失败: " + err.message }, requestId);
   }
@@ -169,12 +187,13 @@ async function freezePoints(event, context) {
 // 内部 helper：结算冻结积分（仅供其他云函数调用，需 _internalToken）
 async function settleFrozenPoints(event, context) {
   const wxContext = cloud.getWXContext();
-  const openid = wxContext.OPENID;
+  const openid = resolveTargetUserId(event, wxContext.OPENID);
   const requestId = context.requestId || Date.now().toString();
   const { costPoints, relatedAppKey, relatedUsageId, idempotencyKey } = event;
 
-  if (!checkInternalToken(event)) {
-    return makeResponse(false, { code: "FORBIDDEN", message: "内部接口，禁止直接调用" }, requestId);
+  const authError = getInternalAuthError(event);
+  if (authError) {
+    return makeResponse(false, authError, requestId);
   }
   if (!openid) {
     return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
@@ -216,13 +235,19 @@ async function settleFrozenPoints(event, context) {
 
   // 原子更新账户
   try {
-    await db.collection("point_accounts").doc(account._id).update({
+    const updateRes = await db.collection("point_accounts").where({
+      _id: account._id,
+      frozenPoints: _.gte(costPoints),
+    }).update({
       data: {
         frozenPoints: _.inc(-costPoints),
         totalConsumedPoints: _.inc(costPoints),
         updatedAt: now,
       },
     });
+    if (!updateRes.stats || updateRes.stats.updated === 0) {
+      return makeResponse(false, { code: "FROZEN_NOT_ENOUGH", message: "冻结积分不足" }, requestId);
+    }
   } catch (err) {
     return makeResponse(false, { code: "DB_ERROR", message: "结算积分失败: " + err.message }, requestId);
   }
@@ -257,12 +282,13 @@ async function settleFrozenPoints(event, context) {
 // 内部 helper：释放冻结积分（仅供其他云函数调用，需 _internalToken）
 async function releaseFrozenPoints(event, context) {
   const wxContext = cloud.getWXContext();
-  const openid = wxContext.OPENID;
+  const openid = resolveTargetUserId(event, wxContext.OPENID);
   const requestId = context.requestId || Date.now().toString();
   const { costPoints, relatedAppKey, relatedUsageId, idempotencyKey } = event;
 
-  if (!checkInternalToken(event)) {
-    return makeResponse(false, { code: "FORBIDDEN", message: "内部接口，禁止直接调用" }, requestId);
+  const authError = getInternalAuthError(event);
+  if (authError) {
+    return makeResponse(false, authError, requestId);
   }
   if (!openid) {
     return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
@@ -304,13 +330,19 @@ async function releaseFrozenPoints(event, context) {
 
   // 原子更新账户：恢复可用，减少冻结
   try {
-    await db.collection("point_accounts").doc(account._id).update({
+    const updateRes = await db.collection("point_accounts").where({
+      _id: account._id,
+      frozenPoints: _.gte(costPoints),
+    }).update({
       data: {
         availablePoints: _.inc(costPoints),
         frozenPoints: _.inc(-costPoints),
         updatedAt: now,
       },
     });
+    if (!updateRes.stats || updateRes.stats.updated === 0) {
+      return makeResponse(false, { code: "FROZEN_NOT_ENOUGH", message: "冻结积分不足" }, requestId);
+    }
   } catch (err) {
     return makeResponse(false, { code: "DB_ERROR", message: "释放积分失败: " + err.message }, requestId);
   }
@@ -349,8 +381,9 @@ async function creditPoints(event, context) {
   const requestId = context.requestId || Date.now().toString();
   const { points, relatedOrderId, idempotencyKey, userId: targetUserId } = event;
 
-  if (!checkInternalToken(event)) {
-    return makeResponse(false, { code: "FORBIDDEN", message: "内部接口，禁止直接调用" }, requestId);
+  const authError = getInternalAuthError(event);
+  if (authError) {
+    return makeResponse(false, authError, requestId);
   }
   const openid = targetUserId || callerOpenid;
   if (!openid) {
@@ -429,21 +462,12 @@ async function creditPoints(event, context) {
 
 // 管理员调整积分
 async function adminAdjustPoints(event, context) {
-  const wxContext = cloud.getWXContext();
-  const openid = wxContext.OPENID;
   const requestId = context.requestId || Date.now().toString();
-  const { targetUserId, deltaPoints, note } = event;
+  const { targetUserId, deltaPoints, note, operatorOpenid } = event;
 
-  if (!openid) {
-    return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
-  }
-
-  const adminOpenids = (process.env.ADMIN_OPENIDS || "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (adminOpenids.length === 0) {
-    return makeResponse(false, { code: "ADMIN_NOT_CONFIGURED", message: "管理员未配置" }, requestId);
-  }
-  if (!adminOpenids.includes(openid)) {
-    return makeResponse(false, { code: "FORBIDDEN", message: "无权访问管理接口" }, requestId);
+  const authError = getInternalAuthError(event);
+  if (authError) {
+    return makeResponse(false, authError, requestId);
   }
 
   if (!targetUserId) {
@@ -453,7 +477,7 @@ async function adminAdjustPoints(event, context) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "积分变动量无效" }, requestId);
   }
 
-  const idempotencyKey = event.idempotencyKey || `admin_adjust_${openid}_${targetUserId}_${deltaPoints}_${Date.now()}`;
+  const idempotencyKey = event.idempotencyKey || `admin_adjust_${operatorOpenid || "admin"}_${targetUserId}_${deltaPoints}_${Date.now()}`;
 
   // 幂等检查
   try {
@@ -485,12 +509,19 @@ async function adminAdjustPoints(event, context) {
 
   // 原子更新账户
   try {
-    await db.collection("point_accounts").doc(account._id).update({
+    const query = { _id: account._id };
+    if (deltaPoints < 0) {
+      query.availablePoints = _.gte(Math.abs(deltaPoints));
+    }
+    const updateRes = await db.collection("point_accounts").where(query).update({
       data: {
         availablePoints: _.inc(deltaPoints),
         updatedAt: now,
       },
     });
+    if (!updateRes.stats || updateRes.stats.updated === 0) {
+      return makeResponse(false, { code: "BALANCE_NOT_ENOUGH", message: "调整后余额不能为负" }, requestId);
+    }
   } catch (err) {
     return makeResponse(false, { code: "DB_ERROR", message: "调整积分失败: " + err.message }, requestId);
   }

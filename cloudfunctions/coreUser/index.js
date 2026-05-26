@@ -2,13 +2,45 @@ const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
-const _ = db.command;
 
 function makeResponse(ok, dataOrError, requestId) {
   if (ok) {
     return { ok: true, data: dataOrError || {}, requestId };
   }
   return { ok: false, error: dataOrError || { code: "UNKNOWN", message: "未知错误" }, requestId };
+}
+
+async function ensurePointAccount(openid, now) {
+  const accountRes = await db.collection("point_accounts").where({ userId: openid }).get();
+  const account = accountRes.data[0] || null;
+  if (account) {
+    return account;
+  }
+
+  try {
+    await db.collection("point_accounts").add({
+      data: {
+        _id: openid,
+        userId: openid,
+        availablePoints: 0,
+        frozenPoints: 0,
+        totalRechargedPoints: 0,
+        totalConsumedPoints: 0,
+        createdAt: now,
+        updatedAt: now,
+      },
+    });
+  } catch (err) {
+    const retryRes = await db.collection("point_accounts").where({ userId: openid }).get();
+    const retryAccount = retryRes.data[0] || null;
+    if (retryAccount) {
+      return retryAccount;
+    }
+    throw err;
+  }
+
+  const createdRes = await db.collection("point_accounts").where({ userId: openid }).get();
+  return createdRes.data[0] || null;
 }
 
 async function bootstrap(event, context) {
@@ -55,22 +87,6 @@ async function bootstrap(event, context) {
       return makeResponse(false, { code: "DB_ERROR", message: "创建用户失败: " + err.message }, requestId);
     }
 
-    // 创建积分账户
-    try {
-      await db.collection("point_accounts").add({
-        data: {
-          userId: openid,
-          availablePoints: 0,
-          frozenPoints: 0,
-          totalRechargedPoints: 0,
-          totalConsumedPoints: 0,
-          createdAt: now,
-          updatedAt: now,
-        },
-      });
-    } catch (err) {
-      return makeResponse(false, { code: "DB_ERROR", message: "创建积分账户失败: " + err.message }, requestId);
-    }
   } else {
     // 更新最后登录时间
     try {
@@ -87,6 +103,12 @@ async function bootstrap(event, context) {
     } catch (err) {
       // 非致命错误，继续返回用户信息
     }
+  }
+
+  try {
+    await ensurePointAccount(openid, now);
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "创建积分账户失败: " + err.message }, requestId);
   }
 
   // 读取用户和积分账户

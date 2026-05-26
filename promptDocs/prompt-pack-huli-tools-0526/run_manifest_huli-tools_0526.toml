@@ -1,0 +1,87 @@
+version = 1
+project_name = "huli-tools"
+repo_path = "/Users/huli-dev/Documents/huli-tools"
+workspace_mode = "worktree"
+workspace_ref = "main"
+cleanup_on_success = true
+cleanup_on_failure = false
+claude_command = "claude"
+default_max_turns = 80
+default_effort = "medium"
+
+[docs]
+master_spec = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/master_spec_huli-tools_0526.md"
+test_case = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md"
+
+[bootstrap]
+init_git_if_missing = false
+commands = [
+  "git status --short --branch",
+  "test -f project.config.json",
+  "test -d miniprogram",
+  "test -d cloudfunctions",
+  "node -v"
+]
+
+[gates]
+preflight = [
+  "git status --short --branch",
+  "test -f project.config.json",
+  "test -d miniprogram",
+  "test -d cloudfunctions"
+]
+post_phase = [
+  "git diff --check"
+]
+
+[review]
+max_rounds = 3
+
+[smoke]
+max_rounds = 3
+
+[deploy]
+enabled = false
+start_command = ""
+healthcheck_url = ""
+
+[[phases]]
+id = "p1"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p1_0526.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p2"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p2_0526.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p3"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p3_0526.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p4"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p4_0526.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p5"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p5_0526.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "git diff --check",
+  "git status --short --branch"
+]

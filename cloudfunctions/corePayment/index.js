@@ -17,7 +17,7 @@ function getEnv(name, defaultValue) {
 }
 
 function getInternalToken() {
-  return process.env.INTERNAL_API_SECRET || "huli-tools-internal";
+  return process.env.INTERNAL_API_SECRET || "";
 }
 
 function getPaymentProvider() {
@@ -289,30 +289,19 @@ async function mockPayOrder(event, context) {
   }
 
   const now = new Date();
-
-  // 更新订单为已支付
-  try {
-    await db.collection("payment_orders").doc(order._id).update({
-      data: {
-        status: "paid",
-        paidAt: now,
-        providerTradeNo: `MOCK_${Date.now()}`,
-        callbackDigest: "mock_payment",
-        updatedAt: now,
-      },
-    });
-  } catch (err) {
-    return makeResponse(false, { code: "DB_ERROR", message: "更新订单状态失败: " + err.message }, requestId);
+  const token = getInternalToken();
+  if (!token) {
+    return makeResponse(false, { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" }, requestId);
   }
 
-  // 调用 corePoints.creditPoints 充值到账（确保积分到订单归属用户而非调用者）
+  // 先到账，再标记 paid。若订单状态更新失败，重复调用可通过幂等键重试补齐订单状态。
   const creditIdempotencyKey = `recharge_${orderNo}`;
   try {
     const creditRes = await cloud.callFunction({
       name: "corePoints",
       data: {
         action: "creditPoints",
-        _internalToken: getInternalToken(),
+        _internalToken: token,
         userId: order.userId,
         points: order.pointsTotal,
         relatedOrderId: orderNo,
@@ -327,6 +316,21 @@ async function mockPayOrder(event, context) {
     }
   } catch (err) {
     return makeResponse(false, { code: "CREDIT_FAILED", message: "积分到账调用失败: " + err.message }, requestId);
+  }
+
+  // 更新订单为已支付
+  try {
+    await db.collection("payment_orders").doc(order._id).update({
+      data: {
+        status: "paid",
+        paidAt: now,
+        providerTradeNo: `MOCK_${Date.now()}`,
+        callbackDigest: "mock_payment",
+        updatedAt: now,
+      },
+    });
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "积分已到账，但更新订单状态失败，可重复发起以补齐状态: " + err.message }, requestId);
   }
 
   return makeResponse(true, { orderNo, status: "paid", pointsTotal: order.pointsTotal }, requestId);

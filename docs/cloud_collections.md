@@ -50,6 +50,7 @@
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
+| `_id` | string | 建议与 `userId` 一致，降低重复账户风险 |
 | `userId` | string | 关联 `users._id` |
 | `availablePoints` | number | 可用积分，默认 `0` |
 | `frozenPoints` | number | 冻结积分，默认 `0` |
@@ -65,7 +66,7 @@
 
 ### seed 数据
 
-无默认 seed，由 `coreUser.bootstrap` 在首次调用时自动创建。
+无默认 seed，由 `coreUser.bootstrap` 在首次调用时自动创建；新账户建议使用 `_id = openid`。
 
 ## 3. point_transactions
 

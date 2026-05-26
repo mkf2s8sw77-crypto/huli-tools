@@ -39,7 +39,7 @@
 | `ADMIN_OPENIDS` | 管理员 openid 白名单，逗号分隔 | `openid1,openid2` |
 | `PAYMENT_PROVIDER` | 支付提供商 | `mock`（开发阶段） |
 | `MOCK_PAYMENT_ENABLED` | 是否启用模拟支付 | `true`（开发阶段） |
-| `INTERNAL_API_SECRET` | 云函数间内部调用凭据 | 随机字符串（生产环境必须更换） |
+| `INTERNAL_API_SECRET` | 云函数间内部调用凭据 | 必须显式配置为随机字符串；未配置时扣费、到账、管理调分会失败 |
 
 真实微信支付预留变量（仅当 `PAYMENT_PROVIDER=wechat` 时需要）：
 

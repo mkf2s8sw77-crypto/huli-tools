@@ -10,6 +10,22 @@ function makeResponse(ok, dataOrError, requestId) {
   return { ok: false, error: dataOrError || { code: "UNKNOWN", message: "未知错误" }, requestId };
 }
 
+function getInternalToken() {
+  return process.env.INTERNAL_API_SECRET || "";
+}
+
+function buildUsageActionData(openid, data) {
+  const token = getInternalToken();
+  if (!token) {
+    return data;
+  }
+  return {
+    ...data,
+    _internalToken: token,
+    userId: openid,
+  };
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
@@ -47,12 +63,12 @@ exports.main = async (event, context) => {
     try {
       const failRes = await cloud.callFunction({
         name: "coreApp",
-        data: {
+        data: buildUsageActionData(openid, {
           action: "failUsage",
           usageId,
           errorCode: "DEMO_FAIL",
           errorMessage: "模拟业务失败",
-        },
+        }),
       });
       const failResult = failRes.result;
       if (!failResult || !failResult.ok) {
@@ -73,12 +89,12 @@ exports.main = async (event, context) => {
     try {
       const failRes = await cloud.callFunction({
         name: "coreApp",
-        data: {
+        data: buildUsageActionData(openid, {
           action: "failUsage",
           usageId,
           errorCode: "INVALID_INPUT",
           errorMessage: "输入必须是数字",
-        },
+        }),
       });
       const failResult = failRes.result;
       if (!failResult || !failResult.ok) {
@@ -98,11 +114,11 @@ exports.main = async (event, context) => {
   try {
     const finishRes = await cloud.callFunction({
       name: "coreApp",
-      data: {
+      data: buildUsageActionData(openid, {
         action: "finishUsage",
         usageId,
         resultRef: `${numA} + ${numB} = ${result}`,
-      },
+      }),
     });
     const finishResult = finishRes.result;
     if (!finishResult || !finishResult.ok) {

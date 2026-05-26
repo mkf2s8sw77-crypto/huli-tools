@@ -55,7 +55,7 @@ vars = [
   { name = "ADMIN_OPENIDS", example = "openid1,openid2", note = "管理员白名单，逗号分隔" },
   { name = "PAYMENT_PROVIDER", example = "mock", note = "mock 或 wechat" },
   { name = "MOCK_PAYMENT_ENABLED", example = "true", note = "开发测试用，生产必须 false" },
-  { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，生产环境必须更换默认值" },
+  { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，必须显式配置且所有公共云函数保持一致" },
 ]
 
 [env.wechat_payment]

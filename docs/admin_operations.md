@@ -3,8 +3,9 @@
 ## 前置条件
 
 1. 将管理员微信号的小程序 openid 配置到云函数环境变量 `ADMIN_OPENIDS`（逗号分隔）。
-2. 部署 `adminCore` 云函数。
-3. 数据库集合 `admin_audit_logs` 已创建。
+2. 在 `adminCore` 和 `corePoints` 中配置相同的 `INTERNAL_API_SECRET` 随机字符串。
+3. 部署 `adminCore` 和 `corePoints` 云函数。
+4. 数据库集合 `admin_audit_logs` 已创建。
 
 > 未配置 `ADMIN_OPENIDS` 时，所有管理操作返回 `ADMIN_NOT_CONFIGURED`。
 

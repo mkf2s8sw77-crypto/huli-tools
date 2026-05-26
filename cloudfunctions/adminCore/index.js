@@ -22,6 +22,10 @@ function isAdmin(openid) {
   return admins.includes(openid);
 }
 
+function getInternalToken() {
+  return process.env.INTERNAL_API_SECRET || "";
+}
+
 async function checkCollectionsExist() {
   const required = [
     "users",
@@ -119,11 +123,18 @@ async function adjustPoints(event, context) {
 
   // 调用 corePoints 调整积分
   let adjustResult;
+  const token = getInternalToken();
+  if (!token) {
+    return makeResponse(false, { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" }, requestId);
+  }
+
   try {
     const res = await cloud.callFunction({
       name: "corePoints",
       data: {
         action: "adminAdjustPoints",
+        _internalToken: token,
+        operatorOpenid: openid,
         targetUserId,
         deltaPoints,
         note: note || "管理员调试调整",
@@ -459,6 +470,15 @@ async function initSchema(event, context) {
       results.errors.push("recharge_packages seed 失败: " + err.message);
     }
   }
+
+  await writeAuditLog(openid, "initSchema", "system_configs", "seed", {}, {
+    seeded: {
+      systemConfigs: results.systemConfigs,
+      apps: results.apps,
+      rechargePackages: results.rechargePackages,
+    },
+    errors: results.errors,
+  }, requestId);
 
   return makeResponse(true, {
     message: "initSchema 完成",

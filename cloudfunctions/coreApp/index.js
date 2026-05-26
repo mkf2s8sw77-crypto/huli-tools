@@ -12,7 +12,40 @@ function makeResponse(ok, dataOrError, requestId) {
 }
 
 function getInternalToken() {
-  return process.env.INTERNAL_API_SECRET || "huli-tools-internal";
+  return process.env.INTERNAL_API_SECRET || "";
+}
+
+function getInternalAuthError(event) {
+  const token = getInternalToken();
+  if (!token) {
+    return { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" };
+  }
+  if (event._internalToken !== token) {
+    return { code: "FORBIDDEN", message: "内部接口，禁止直接调用" };
+  }
+  return null;
+}
+
+function resolveUsageActor(event) {
+  const wxContext = cloud.getWXContext();
+  const wxOpenid = wxContext.OPENID;
+
+  if (event.userId || event._internalToken) {
+    const authError = getInternalAuthError(event);
+    if (authError) {
+      return { ok: false, error: authError };
+    }
+    const userId = event.userId || wxOpenid;
+    if (!userId) {
+      return { ok: false, error: { code: "UNAUTHORIZED", message: "无法获取用户身份" } };
+    }
+    return { ok: true, userId, internal: true };
+  }
+
+  if (!wxOpenid) {
+    return { ok: false, error: { code: "UNAUTHORIZED", message: "无法获取用户身份" } };
+  }
+  return { ok: true, userId: wxOpenid, internal: false };
 }
 
 async function listApps(event, context) {
@@ -116,44 +149,17 @@ async function createUsage(event, context) {
   const costPoints = app.pricing && app.pricing.mode === "fixed" ? (app.pricing.costPoints || 0) : 0;
 
   const now = new Date();
-  const idempotencyKey = `usage_${appKey}_${openid}_${now.getTime()}`;
 
-  // 冻结积分（若需要）
-  let freezeTransactionId = null;
-  if (costPoints > 0) {
-    try {
-      const freezeRes = await cloud.callFunction({
-        name: "corePoints",
-        data: {
-          action: "freezePoints",
-          _internalToken: getInternalToken(),
-          costPoints,
-          relatedAppKey: appKey,
-          idempotencyKey,
-        },
-      });
-      const freezeResult = freezeRes.result;
-      if (!freezeResult || !freezeResult.ok) {
-        const errCode = freezeResult && freezeResult.error ? freezeResult.error.code : "FREEZE_FAILED";
-        const errMsg = freezeResult && freezeResult.error ? freezeResult.error.message : "冻结积分失败";
-        return makeResponse(false, { code: errCode, message: errMsg }, requestId);
-      }
-      freezeTransactionId = freezeResult.data.transactionId;
-    } catch (err) {
-      return makeResponse(false, { code: "FREEZE_FAILED", message: "冻结积分调用失败: " + err.message }, requestId);
-    }
-  }
-
-  // 创建使用记录
+  // 先创建使用记录，再用 usageId 作为幂等键冻结积分，避免冻结成功后记录创建失败。
   let usageId;
   try {
     const usageRes = await db.collection("app_usage_records").add({
       data: {
         userId: openid,
         appKey,
-        status: costPoints > 0 ? "frozen" : "created",
+        status: "created",
         costPoints,
-        freezeTransactionId,
+        freezeTransactionId: null,
         settleTransactionId: null,
         releaseTransactionId: null,
         inputSummary: inputSummary || null,
@@ -170,17 +176,110 @@ async function createUsage(event, context) {
     return makeResponse(false, { code: "DB_ERROR", message: "创建使用记录失败: " + err.message }, requestId);
   }
 
+  // 冻结积分（若需要）
+  let freezeTransactionId = null;
+  if (costPoints > 0) {
+    const token = getInternalToken();
+    if (!token) {
+      await db.collection("app_usage_records").doc(usageId).update({
+        data: {
+          status: "failed",
+          errorCode: "INTERNAL_SECRET_NOT_CONFIGURED",
+          errorMessage: "内部调用凭据未配置",
+          updatedAt: new Date(),
+          finishedAt: new Date(),
+        },
+      });
+      return makeResponse(false, { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" }, requestId);
+    }
+
+    try {
+      const freezeRes = await cloud.callFunction({
+        name: "corePoints",
+        data: {
+          action: "freezePoints",
+          _internalToken: token,
+          userId: openid,
+          costPoints,
+          relatedAppKey: appKey,
+          relatedUsageId: usageId,
+          idempotencyKey: `freeze_${usageId}`,
+        },
+      });
+      const freezeResult = freezeRes.result;
+      if (!freezeResult || !freezeResult.ok) {
+        const errCode = freezeResult && freezeResult.error ? freezeResult.error.code : "FREEZE_FAILED";
+        const errMsg = freezeResult && freezeResult.error ? freezeResult.error.message : "冻结积分失败";
+        await db.collection("app_usage_records").doc(usageId).update({
+          data: {
+            status: "failed",
+            errorCode: errCode,
+            errorMessage: errMsg,
+            updatedAt: new Date(),
+            finishedAt: new Date(),
+          },
+        });
+        return makeResponse(false, { code: errCode, message: errMsg }, requestId);
+      }
+      freezeTransactionId = freezeResult.data.transactionId;
+    } catch (err) {
+      await db.collection("app_usage_records").doc(usageId).update({
+        data: {
+          status: "failed",
+          errorCode: "FREEZE_FAILED",
+          errorMessage: "冻结积分调用失败: " + err.message,
+          updatedAt: new Date(),
+          finishedAt: new Date(),
+        },
+      });
+      return makeResponse(false, { code: "FREEZE_FAILED", message: "冻结积分调用失败: " + err.message }, requestId);
+    }
+
+    try {
+      await db.collection("app_usage_records").doc(usageId).update({
+        data: {
+          status: "frozen",
+          freezeTransactionId,
+          updatedAt: new Date(),
+        },
+      });
+    } catch (err) {
+      await cloud.callFunction({
+        name: "corePoints",
+        data: {
+          action: "releaseFrozenPoints",
+          _internalToken: token,
+          userId: openid,
+          costPoints,
+          relatedAppKey: appKey,
+          relatedUsageId: usageId,
+          idempotencyKey: `release_${usageId}_rollback`,
+        },
+      });
+      await db.collection("app_usage_records").doc(usageId).update({
+        data: {
+          status: "released",
+          releaseTransactionId: null,
+          errorCode: "USAGE_UPDATE_FAILED",
+          errorMessage: "冻结后更新使用记录失败，已尝试释放积分",
+          updatedAt: new Date(),
+          finishedAt: new Date(),
+        },
+      });
+      return makeResponse(false, { code: "DB_ERROR", message: "冻结后更新使用记录失败: " + err.message }, requestId);
+    }
+  }
+
   return makeResponse(true, { usageId, appKey, costPoints, status: costPoints > 0 ? "frozen" : "created" }, requestId);
 }
 
 async function finishUsage(event, context) {
-  const wxContext = cloud.getWXContext();
-  const openid = wxContext.OPENID;
   const requestId = context.requestId || Date.now().toString();
   const { usageId, resultRef } = event;
+  const actor = resolveUsageActor(event);
 
-  if (!openid) {
-    return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
+  if (!actor.ok) {
+    return makeResponse(false, actor.error, requestId);
   }
   if (!usageId) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId" }, requestId);
@@ -198,7 +297,7 @@ async function finishUsage(event, context) {
   if (!usage) {
     return makeResponse(false, { code: "USAGE_NOT_FOUND", message: "使用记录不存在" }, requestId);
   }
-  if (usage.userId !== openid) {
+  if (usage.userId !== actor.userId) {
     return makeResponse(false, { code: "FORBIDDEN", message: "无权操作该使用记录" }, requestId);
   }
 
@@ -239,6 +338,7 @@ async function finishUsage(event, context) {
       data: {
         action: "settleFrozenPoints",
         _internalToken: getInternalToken(),
+        userId: usage.userId,
         costPoints: usage.costPoints,
         relatedAppKey: usage.appKey,
         relatedUsageId: usageId,
@@ -276,13 +376,12 @@ async function finishUsage(event, context) {
 }
 
 async function failUsage(event, context) {
-  const wxContext = cloud.getWXContext();
-  const openid = wxContext.OPENID;
   const requestId = context.requestId || Date.now().toString();
   const { usageId, errorCode, errorMessage } = event;
+  const actor = resolveUsageActor(event);
 
-  if (!openid) {
-    return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
+  if (!actor.ok) {
+    return makeResponse(false, actor.error, requestId);
   }
   if (!usageId) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId" }, requestId);
@@ -300,7 +399,7 @@ async function failUsage(event, context) {
   if (!usage) {
     return makeResponse(false, { code: "USAGE_NOT_FOUND", message: "使用记录不存在" }, requestId);
   }
-  if (usage.userId !== openid) {
+  if (usage.userId !== actor.userId) {
     return makeResponse(false, { code: "FORBIDDEN", message: "无权操作该使用记录" }, requestId);
   }
 
@@ -342,6 +441,7 @@ async function failUsage(event, context) {
       data: {
         action: "releaseFrozenPoints",
         _internalToken: getInternalToken(),
+        userId: usage.userId,
         costPoints: usage.costPoints,
         relatedAppKey: usage.appKey,
         relatedUsageId: usageId,

@@ -13,6 +13,7 @@ huli-tools 支持两种支付模式：
 
 1. 云函数环境变量 `PAYMENT_PROVIDER=mock`
 2. 云函数环境变量 `MOCK_PAYMENT_ENABLED=true`
+3. 云函数环境变量 `INTERNAL_API_SECRET` 已在 `corePayment` 和 `corePoints` 中配置为同一个随机字符串
 
 ### 使用方式
 
@@ -27,6 +28,7 @@ huli-tools 支持两种支付模式：
 - `mockPayOrder` 只能操作当前用户自己的订单。
 - 管理员可通过 `asAdmin=true` 参数代操作，但调用者必须是 `ADMIN_OPENIDS` 白名单中的管理员。
 - 生产环境务必关闭：`MOCK_PAYMENT_ENABLED=false`。
+- 不允许依赖默认内部凭据；`INTERNAL_API_SECRET` 未配置时，模拟支付不会执行积分到账。
 
 ## 微信支付（真实线上）
 
