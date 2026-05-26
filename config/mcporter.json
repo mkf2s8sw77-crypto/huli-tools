@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "cloudbase": {
+      "command": "/opt/homebrew/bin/cloudbase-mcp",
+      "args": [],
+      "description": "CloudBase MCP v2.20.0-beta.0",
+      "lifecycle": "keep-alive"
+    }
+  }
+}

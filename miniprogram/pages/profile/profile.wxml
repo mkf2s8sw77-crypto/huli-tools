@@ -1,0 +1,10 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的</text>
+  </view>
+
+  <view class="card">
+    <text class="label">版本号</text>
+    <text class="value">{{version}}</text>
+  </view>
+</view>

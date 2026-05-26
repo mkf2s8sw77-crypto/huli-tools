@@ -1,0 +1,14 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{message}}</text>
+  </view>
+
+  <view class="card" wx:if="{{userInfo}}">
+    <text class="label">你的 OPENID:</text>
+    <text class="openid">{{userInfo.openid}}</text>
+  </view>
+
+  <view class="card" wx:else>
+    <text class="loading">正在连接云开发...</text>
+  </view>
+</view>
