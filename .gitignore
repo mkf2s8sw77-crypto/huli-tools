@@ -29,3 +29,6 @@ cloudfunctions/*/package-lock.json
 # 本地环境变量
 .env
 .env.local
+
+# 小程序代码上传密钥
+private.*.key
