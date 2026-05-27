@@ -21,7 +21,7 @@
 
 当前是微信小程序原生骨架：
 
-- `project.config.json`：`miniprogramRoot = miniprogram/`，`cloudfunctionRoot = cloudfunctions/`，`appid` 仍是 `wx_appid_placeholder`。
+- `project.config.json`：`miniprogramRoot = miniprogram/`，`cloudfunctionRoot = cloudfunctions/`，当前 `appid` 为 `wx1654159e6e3bb334`。
 - `miniprogram/app.js`：已调用 `wx.cloud.init`，环境 ID 为 `cloudbase-3gphz7fk0fe1b760`。
 - 页面：只有 `pages/index/index` 和 `pages/profile/profile`。
 - 自定义 tabbar：`custom-tab-bar/index`，包含“首页”“我的”。
@@ -110,8 +110,8 @@
   - `listApps`：返回可展示应用列表。
   - `getAppDetail`：返回某个应用详情。
   - `createUsage`：为某应用创建使用记录并冻结积分。
-  - `finishUsage`：业务成功后结算冻结积分。
-  - `failUsage`：业务失败后释放冻结积分。
+  - `finishUsage`：业务成功后结算冻结积分，仅允许带 `_internalToken` 的应用云函数内部调用。
+  - `failUsage`：业务失败后释放冻结积分，仅允许带 `_internalToken` 的应用云函数内部调用。
 - `corePoints`
   - `getBalance`：查询余额。
   - `listTransactions`：分页查询积分流水。
@@ -201,7 +201,7 @@ git diff --check
 
 ## 11. 未决问题
 
-- 真实微信小程序 `appid` 仍是占位符，需用户在微信开发者工具或项目配置中替换。
+- 当前微信小程序 `appid` 已配置为 `wx1654159e6e3bb334`；如复制为其他小程序项目，需在微信开发者工具或项目配置中替换。
 - 真实微信支付商户号和证书变量暂未提供；首版以 mock 支付完成开发验收。
 - 管理员 openid 需要用户提供或在测试环境通过云函数环境变量配置。
 - 是否要把 collection 直接创建到线上云环境，取决于 coding Agent 当时是否具备 CloudBase MCP/CLI 登录态；若不具备，必须交付手工创建清单。

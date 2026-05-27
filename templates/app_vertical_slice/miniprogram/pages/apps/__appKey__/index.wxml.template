@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="header">
+    <text class="title">__appName__</text>
+  </view>
+
+  <!-- TODO: 添加业务表单 -->
+  <view class="form-section">
+    <text class="hint">请输入参数</text>
+  </view>
+
+  <button
+    class="btn-primary"
+    bindtap="onExecute"
+    disabled="{{loading}}"
+    loading="{{loading}}"
+  >
+    执行
+  </button>
+
+  <view wx:if="{{result}}" class="result-section">
+    <text class="result-label">结果：</text>
+    <text class="result-value">{{result}}</text>
+  </view>
+
+  <view wx:if="{{errorMsg}}" class="error-section">
+    <text class="error-text">{{errorMsg}}</text>
+  </view>
+</view>

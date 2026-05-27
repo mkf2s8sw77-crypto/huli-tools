@@ -15,7 +15,7 @@
 ## 微信开发者工具配置
 
 1. 用微信开发者工具打开项目根目录 `/Users/huli-dev/Documents/huli-tools`。
-2. 在 `project.config.json` 中，将 `appid` 从 `wx_appid_placeholder` 替换为真实小程序 APPID。
+2. `project.config.json` 当前已配置 APPID：`wx1654159e6e3bb334`。如复制为其他小程序项目，再替换为对应 APPID。
 3. 确保「云开发」已初始化，且环境 ID 匹配。
 
 ## 云函数部署
@@ -40,6 +40,8 @@
 | `PAYMENT_PROVIDER` | 支付提供商 | `mock`（开发阶段） |
 | `MOCK_PAYMENT_ENABLED` | 是否启用模拟支付 | `true`（开发阶段） |
 | `INTERNAL_API_SECRET` | 云函数间内部调用凭据 | 必须显式配置为随机字符串；未配置时扣费、到账、管理调分会失败 |
+
+`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`。
 
 真实微信支付预留变量（仅当 `PAYMENT_PROVIDER=wechat` 时需要）：
 
@@ -66,6 +68,10 @@
 
 ```bash
 bash scripts/check-js.sh
+bash scripts/check-boundaries.sh
 ```
 
-此命令在每次提交前运行，检查 `miniprogram/**/*.js` 和 `cloudfunctions/**/*.js` 的语法。
+- `check-js.sh`：检查 `miniprogram/**/*.js`、`cloudfunctions/**/*.js` 和 `templates/**/*.js.template` 的语法。
+- `check-boundaries.sh`：启发式检查应用边界违规（客户端越权写公共集合、调用内部 action 等）。
+
+两个脚本在每次提交前都应运行。

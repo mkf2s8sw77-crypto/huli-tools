@@ -1,0 +1,60 @@
+.container {
+  padding: 32rpx;
+}
+
+.header {
+  margin-bottom: 32rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-section {
+  margin-bottom: 32rpx;
+}
+
+.hint {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.btn-primary {
+  background-color: #1890ff;
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  margin-top: 24rpx;
+}
+
+.result-section {
+  margin-top: 32rpx;
+  padding: 24rpx;
+  background-color: #f6ffed;
+  border-radius: 12rpx;
+}
+
+.result-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.result-value {
+  font-size: 32rpx;
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.error-section {
+  margin-top: 32rpx;
+  padding: 24rpx;
+  background-color: #fff2f0;
+  border-radius: 12rpx;
+}
+
+.error-text {
+  font-size: 28rpx;
+  color: #ff4d4f;
+}

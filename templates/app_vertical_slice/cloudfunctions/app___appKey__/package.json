@@ -1,0 +1,9 @@
+{
+  "name": "app___appKey__",
+  "version": "1.0.0",
+  "description": "应用云函数: __appKey__",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

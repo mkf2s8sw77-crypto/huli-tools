@@ -45,12 +45,6 @@ module.exports = {
   createUsage(appKey, inputSummary) {
     return callCloud("coreApp", { action: "createUsage", appKey, inputSummary });
   },
-  finishUsage(usageId, resultRef) {
-    return callCloud("coreApp", { action: "finishUsage", usageId, resultRef });
-  },
-  failUsage(usageId, errorCode, errorMessage) {
-    return callCloud("coreApp", { action: "failUsage", usageId, errorCode, errorMessage });
-  },
 
   // 积分
   getBalance() {

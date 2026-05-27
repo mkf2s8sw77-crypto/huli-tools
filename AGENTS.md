@@ -17,7 +17,7 @@
 - **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
 - **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
 - **金额与积分**：金额统一用整数“分”，积分统一用整数，时间统一用服务端 `Date`。
-- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints` 仅供其他云函数内部调用，必须校验 `_internalToken`。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，以及 `coreApp` 的 `finishUsage`、`failUsage` 仅供其他云函数内部调用，必须校验 `_internalToken`。
 - **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
 
 ## 4. Collection 与数据契约
@@ -40,6 +40,7 @@
 
 - 所有会改变余额、订单、使用记录状态的写操作必须具备幂等键。
 - 重复支付回调不能重复到账；重复 finish/fail usage 不能重复结算或释放。
+- 积分账户余额和积分流水必须在 `corePoints` 内同一事务完成，禁止先改余额再另行写流水。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
 ## 7. 环境变量
@@ -53,8 +54,16 @@
 真实微信支付额外需要：
 - `WX_PAY_MCH_ID`、`WX_PAY_APPID`、`WX_PAY_API_V3_KEY`、`WX_PAY_SERIAL_NO`、`WX_PAY_PRIVATE_KEY`、`WX_PAY_NOTIFY_URL`
 
-## 8. 测试与交付
+## 8. 应用接入边界
 
-- 每次提交前运行 `bash scripts/check-js.sh`。
+- 三层架构：公共底座层 → 接入层 → 业务应用私有层。详见 `docs/app_boundary_and_onboarding.md`。
+- 新应用 `appKey` 使用小写 snake_case；页面放 `miniprogram/pages/apps/<appKey>/`；云函数命名 `app_<appKey>`；私有集合 `app_<appKey>_*`。
+- 新应用竖切模板见 `templates/app_vertical_slice/`。
+- 应用不得绕过 `coreApp.createUsage` / `finishUsage` / `failUsage` 直接操作积分；应用云函数仅允许只读当前 `app_usage_records` 做执行校验，不得直接写公共集合。
+- 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。
+
+## 9. 测试与交付
+
+- 每次提交前运行 `bash scripts/check-js.sh` 和 `bash scripts/check-boundaries.sh`。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。

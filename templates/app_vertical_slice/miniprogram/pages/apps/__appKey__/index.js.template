@@ -1,0 +1,40 @@
+var api = require("../../../services/api");
+
+Page({
+  data: {
+    loading: false,
+    usageId: null,
+    result: null,
+    errorMsg: "",
+    // TODO: 添加业务表单字段
+  },
+
+  onLoad: function () {
+    // 页面加载时的初始化
+  },
+
+  onExecute: function () {
+    var that = this;
+
+    if (that.data.loading) return;
+    that.setData({ loading: true, result: null, errorMsg: "" });
+
+    // 1. 创建 usage（冻结积分）
+    api.createUsage("__appKey__", { /* inputSummary */ })
+      .then(function (data) {
+        that.setData({ usageId: data.usageId });
+        // 2. 调用应用云函数
+        return api.callCloud("app___appKey__", {
+          usageId: data.usageId,
+          // TODO: 传入业务参数
+        });
+      })
+      .then(function (data) {
+        that.setData({ result: data.result, loading: false });
+      })
+      .catch(function (err) {
+        that.setData({ errorMsg: err.message || "执行失败", loading: false });
+        api.toastError(err);
+      });
+  },
+});

@@ -31,6 +31,7 @@ preflight = [
   "test -d cloudfunctions"
 ]
 post_phase = [
+  "bash scripts/check-boundaries.sh",
   "git diff --check"
 ]
 
@@ -50,6 +51,7 @@ id = "p1"
 prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p1_0526.md"
 gate_commands = [
   "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
   "git diff --check"
 ]
 
@@ -58,6 +60,7 @@ id = "p2"
 prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p2_0526.md"
 gate_commands = [
   "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
   "git diff --check"
 ]
 
@@ -66,6 +69,7 @@ id = "p3"
 prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p3_0526.md"
 gate_commands = [
   "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
   "git diff --check"
 ]
 
@@ -74,6 +78,7 @@ id = "p4"
 prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p4_0526.md"
 gate_commands = [
   "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
   "git diff --check"
 ]
 
@@ -82,6 +87,7 @@ id = "p5"
 prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-0526/LLM_prompt_huli-tools-p5_0526.md"
 gate_commands = [
   "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
   "git diff --check",
   "git status --short --branch"
 ]

@@ -12,6 +12,7 @@ description = "每次提交前必须通过的静态检查"
 commands = [
   "git status --short --branch",
   "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
   "git diff --check",
 ]
 
@@ -47,6 +48,16 @@ actions = [
   "加固 corePoints 内部接口 _internalToken",
   "更新测试文档和运行清单",
   "创建 docs/admin_operations.md 和 AGENTS.md",
+]
+
+[phase.6]
+description = "应用接入边界治理与底座升级机制"
+actions = [
+  "创建 docs/app_boundary_and_onboarding.md 三层边界文档",
+  "创建 templates/app_vertical_slice/ 新应用竖切模板",
+  "创建 docs/templates/core_change_rfc.md 公共底座变更 RFC 模板",
+  "创建 scripts/check-boundaries.sh 边界检查脚本",
+  "更新 AGENTS.md 加入边界治理规则",
 ]
 
 [env.required]

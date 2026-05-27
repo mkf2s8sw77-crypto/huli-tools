@@ -26,11 +26,12 @@ function getInternalAuthError(event) {
   return null;
 }
 
-function resolveUsageActor(event) {
+function resolveUsageActor(event, options) {
+  const requireInternal = options && options.requireInternal;
   const wxContext = cloud.getWXContext();
   const wxOpenid = wxContext.OPENID;
 
-  if (event.userId || event._internalToken) {
+  if (requireInternal || event.userId || event._internalToken) {
     const authError = getInternalAuthError(event);
     if (authError) {
       return { ok: false, error: authError };
@@ -276,7 +277,7 @@ async function createUsage(event, context) {
 async function finishUsage(event, context) {
   const requestId = context.requestId || Date.now().toString();
   const { usageId, resultRef } = event;
-  const actor = resolveUsageActor(event);
+  const actor = resolveUsageActor(event, { requireInternal: true });
 
   if (!actor.ok) {
     return makeResponse(false, actor.error, requestId);
@@ -378,7 +379,7 @@ async function finishUsage(event, context) {
 async function failUsage(event, context) {
   const requestId = context.requestId || Date.now().toString();
   const { usageId, errorCode, errorMessage } = event;
-  const actor = resolveUsageActor(event);
+  const actor = resolveUsageActor(event, { requireInternal: true });
 
   if (!actor.ok) {
     return makeResponse(false, actor.error, requestId);

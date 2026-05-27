@@ -18,6 +18,7 @@
 ```bash
 git status --short --branch
 bash scripts/check-js.sh
+bash scripts/check-boundaries.sh
 git diff --check
 ```
 
@@ -191,10 +192,73 @@ git diff --check
   - 审计日志中包含 `upsertApp` 和 `upsertPackage` 记录。
   - 每条记录包含 `adminUserId`、`action`、`targetId`、`beforeSummary`、`afterSummary`。
 
+### TC-14 边界检查脚本通过
+
+- 目标：验证边界检查脚本能在当前代码库通过。
+- 前置条件：项目根目录有 `scripts/check-boundaries.sh`。
+- 步骤：
+  1. 执行 `bash scripts/check-boundaries.sh`。
+- 断言：
+  - 脚本退出码为 0。
+  - 输出"边界检查全部通过"。
+
+### TC-15 新应用接入边界：客户端不可直接写公共集合
+
+- 目标：验证边界检查脚本能发现客户端越界写操作。
+- 前置条件：临时在 `miniprogram/` 某 js 文件中添加 `db.collection("point_accounts").add(...)`。
+- 步骤：
+  1. 执行 `bash scripts/check-boundaries.sh`。
+- 断言：
+  - 脚本退出码为 1。
+  - 输出中包含违规文件和集合名。
+- 善后：恢复临时修改。
+
+### TC-16 新应用接入边界：客户端不可调用内部 action
+
+- 目标：验证边界检查脚本能发现客户端直接调用内部 action。
+- 前置条件：临时在 `miniprogram/` 某 js 文件中添加 `action: "freezePoints"` 或 `action: "finishUsage"`。
+- 步骤：
+  1. 执行 `bash scripts/check-boundaries.sh`。
+- 断言：
+  - 脚本退出码为 1。
+  - 输出中包含违规文件和 action 名。
+- 善后：恢复临时修改。
+
+### TC-17 coreApp finish/fail 仅限内部调用
+
+- 目标：验证客户端不能绕过业务云函数直接结算或释放 usage。
+- 前置条件：已部署 `coreApp`，且存在当前用户的 `usageId`。
+- 步骤：
+  1. 从前端或开发者工具直接调用 `coreApp.finishUsage`，不传 `_internalToken`。
+  2. 从前端或开发者工具直接调用 `coreApp.failUsage`，不传 `_internalToken`。
+- 断言：
+  - 均返回 `FORBIDDEN` 或 `INTERNAL_SECRET_NOT_CONFIGURED`。
+  - 使用记录和积分余额不发生结算/释放变化。
+
+### TC-18 新应用竖切模板完整性
+
+- 目标：验证竖切模板文件齐全且可用。
+- 步骤：
+  1. 检查 `templates/app_vertical_slice/` 目录结构。
+  2. 确认包含 README.md、云函数模板、页面模板（js/wxml/wxss/json）、交付说明模板。
+  3. 按 README.md 步骤模拟复制一个 `test_app`（不注册到 app.json）。
+- 断言：
+  - 所有模板文件存在。
+  - 复制后的云函数模板文件能通过 `node --check`（语法检查）。
+
+### TC-19 公共底座 RFC 模板存在
+
+- 目标：验证 RFC 模板文件完整。
+- 步骤：
+  1. 检查 `docs/templates/core_change_rfc.md` 存在。
+  2. 确认包含：标题、背景、涉及云函数/集合、兼容性、迁移方案、安全影响、测试计划、回滚方案等章节。
+- 断言：
+  - 文件存在且章节齐全。
+
 ## 4. 人工检查项
 
 - 微信开发者工具中无明显编译错误。
-- `project.config.json` 的 `appid` 如仍为 `wx_appid_placeholder`，需要在真实开发前替换。
+- `project.config.json` 当前 APPID 应为 `wx1654159e6e3bb334`；如复制为其他小程序项目，需要替换为对应 APPID。
 - 云开发控制台 collection 权限符合“客户端只读必要公开数据，敏感写入走云函数”的原则。
 - mock 支付入口在生产配置中关闭（`MOCK_PAYMENT_ENABLED=false`）。
 - 管理员 openid 未配置时，管理接口不会放开权限（返回 `ADMIN_NOT_CONFIGURED`）。

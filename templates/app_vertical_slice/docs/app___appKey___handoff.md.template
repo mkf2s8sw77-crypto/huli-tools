@@ -1,0 +1,34 @@
+# 应用交付说明: __appName__ (__appKey__)
+
+## 1. 概述
+
+- appKey: `__appKey__`
+- 应用名称: __appName__
+- 云函数: `app___appKey__`
+- 入口页面: `/pages/apps/__appKey__/index`
+- 积分定价: `{ mode: "fixed", costPoints: N }`
+
+## 2. 功能描述
+
+TODO: 描述应用的核心功能。
+
+## 3. 私有集合
+
+| 集合名 | 用途 |
+|---|---|
+| `app___appKey___xxx` | TODO: 说明集合用途 |
+
+## 4. 部署步骤
+
+1. 在微信开发者工具中部署云函数 `app___appKey__`。
+2. 在云开发控制台创建私有集合（如有）。
+3. 管理员调用 `adminCore.upsertApp` 注册应用。
+4. 在 `miniprogram/app.json` 中注册页面路径。
+
+## 5. 测试用例
+
+参见 `test_case_huli-tools_0526.md` 中对应用例。
+
+## 6. 已知限制
+
+TODO: 列出当前版本的已知限制。

@@ -2,7 +2,6 @@ const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
-const _ = db.command;
 
 function makeResponse(ok, dataOrError, requestId) {
   if (ok) {
@@ -99,7 +98,7 @@ async function writeAuditLog(openid, action, targetCollection, targetId, beforeS
 async function adjustPoints(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const { targetUserId, deltaPoints, note } = event;
+  const { targetUserId, deltaPoints, note, idempotencyKey } = event;
 
   const adminCheck = validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
@@ -110,6 +109,9 @@ async function adjustPoints(event, context) {
   }
   if (typeof deltaPoints !== "number" || deltaPoints === 0 || !Number.isInteger(deltaPoints)) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "积分变动量必须为整数且不能为0" }, requestId);
+  }
+  if (idempotencyKey && typeof idempotencyKey !== "string") {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "idempotencyKey 必须为字符串" }, requestId);
   }
 
   // 读取调整前余额用于审计
@@ -138,6 +140,7 @@ async function adjustPoints(event, context) {
         targetUserId,
         deltaPoints,
         note: note || "管理员调试调整",
+        idempotencyKey: idempotencyKey || `admin_adjust_${requestId}`,
       },
     });
     adjustResult = res.result;

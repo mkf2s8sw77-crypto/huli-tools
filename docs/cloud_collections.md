@@ -74,6 +74,7 @@
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
+| `_id` | string | 新流水使用 `idempotencyKey` 的哈希作为文档 ID，历史流水可能为自动 ID |
 | `userId` | string | 关联用户 |
 | `type` | string | `freeze` / `settle` / `release` / `recharge` / `admin_adjust` |
 | `deltaAvailable` | number | 可用积分变化量 |
