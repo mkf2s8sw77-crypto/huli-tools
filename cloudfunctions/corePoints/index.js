@@ -68,22 +68,16 @@ async function runPointMutation(userId, idempotencyKey, mutate) {
         return transactionResultFromDoc(docExist.data);
       }
     } catch (err) {
-      // 文档不存在时继续；兼容历史自动 _id 流水，下面再按 idempotencyKey 查询。
+      // 文档不存在时继续；历史自动 _id 流水在进入事务前已按 idempotencyKey 查询。
     }
 
-    const exist = await transaction.collection("point_transactions")
-      .where({ idempotencyKey })
-      .limit(1)
-      .get();
-    if (exist.data.length > 0) {
-      return transactionResultFromDoc(exist.data[0]);
+    let account;
+    try {
+      const accountRes = await transaction.collection("point_accounts").doc(userId).get();
+      account = accountRes.data || null;
+    } catch (err) {
+      throw makeCodedError("ACCOUNT_NOT_FOUND", "积分账户不存在");
     }
-
-    const accountRes = await transaction.collection("point_accounts")
-      .where({ userId })
-      .limit(1)
-      .get();
-    const account = accountRes.data[0] || null;
     if (!account) {
       throw makeCodedError("ACCOUNT_NOT_FOUND", "积分账户不存在");
     }

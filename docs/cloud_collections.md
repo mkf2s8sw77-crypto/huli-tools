@@ -50,7 +50,7 @@
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| `_id` | string | 建议与 `userId` 一致，降低重复账户风险 |
+| `_id` | string | 必须与 `userId` 一致；`corePoints` 事务按该文档 ID 读写账户 |
 | `userId` | string | 关联 `users._id` |
 | `availablePoints` | number | 可用积分，默认 `0` |
 | `frozenPoints` | number | 冻结积分，默认 `0` |

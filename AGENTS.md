@@ -24,6 +24,7 @@
 
 - 公共集合见 `docs/cloud_collections.md`。
 - 业务工具私有 collection 必须以 `app_<appKey>_` 为前缀，不得把业务字段塞进公共集合。
+- `point_accounts._id` 必须与 `userId` 一致，`corePoints` 事务依赖该文档 ID 读写账户。
 - 客户端对敏感 collection 应无写权限，只读权限也尽量限制为“仅自己”。
 
 ## 5. 云函数接口风格
