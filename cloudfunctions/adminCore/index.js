@@ -36,6 +36,7 @@ async function checkCollectionsExist() {
     "payment_orders",
     "admin_audit_logs",
     "system_configs",
+    "app_ai_draw_tasks",
   ];
 
   const missing = [];
@@ -400,11 +401,11 @@ async function initSchema(event, context) {
     {
       appKey: "ai_draw",
       name: "AI 绘图",
-      description: "输入文字描述，AI 生成图片",
+      description: "输入描述生成图片，演示异步任务与积分结算链路",
       entryPage: "/pages/apps/ai_draw/index",
       cloudFunctionName: "app_ai_draw",
       status: "active",
-      pricing: { mode: "fixed", costPoints: 0 },
+      pricing: { mode: "fixed", costPoints: 1 },
       sortOrder: 2,
       createdAt: now,
       updatedAt: now,

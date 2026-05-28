@@ -52,7 +52,4 @@
     <text>{{errorMsg}}</text>
   </view>
 
-  <view wx:if="{{usageId && !imageUrl && !errorMsg}}" class="card debug">
-    <text class="debug-text">使用记录: {{usageId}}</text>
-  </view>
 </view>

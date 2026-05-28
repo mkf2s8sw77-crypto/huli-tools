@@ -20,24 +20,19 @@ Page({
     this.loadAppInfo();
   },
 
-  async onUnload() {
-    await this.cancelIfPolling();
+  onUnload() {
+    this.cancelIfPolling("用户离开页面");
+    this.clearPollTimer();
   },
 
-  async cancelIfPolling() {
-    if (this.data.polling && this.data.usageId) {
-      try {
-        await api.callCloud("app_ai_draw", {
-          usageId: this.data.usageId,
-          action: "fail",
-          errorCode: "USER_CANCEL",
-          errorMessage: "用户离开页面",
-        });
-      } catch (err) {
-        console.error("离开页面释放积分失败:", err);
-      }
-    }
+  onHide() {
     this.clearPollTimer();
+  },
+
+  onShow() {
+    if (this.data.polling && this.data.jobId && !this.pollTimer) {
+      this.startPolling();
+    }
   },
 
   async loadAppInfo() {
@@ -54,27 +49,20 @@ Page({
   },
 
   async onCancel() {
-    const { usageId, polling } = this.data;
-    if (!polling || !usageId) return;
+    const { usageId, jobId, polling } = this.data;
+    if (!polling || !usageId || !jobId) return;
     this.clearPollTimer();
-    try {
-      await api.callCloud("app_ai_draw", {
-        usageId,
-        action: "fail",
-        errorCode: "USER_CANCEL",
-        errorMessage: "用户手动取消",
-      });
-      this.setData({
-        polling: false,
-        errorMsg: "已取消生成",
-      });
-    } catch (err) {
-      console.error("取消失败:", err);
-      this.setData({
-        polling: false,
-        errorMsg: "取消失败: " + (err.message || "未知错误"),
-      });
-    }
+    const cancelled = await this.cancelGeneration("用户手动取消");
+    this.setData({
+      polling: false,
+      errorMsg: cancelled ? "已取消生成" : "取消失败，请稍后检查积分流水",
+    });
+  },
+
+  async cancelIfPolling(reason) {
+    const { usageId, jobId, polling } = this.data;
+    if (!polling || !usageId || !jobId) return false;
+    return this.cancelGeneration(reason);
   },
 
   async onGenerate() {
@@ -109,6 +97,7 @@ Page({
       if (genRes.status === "succeeded") {
         this.setData({
           imageUrl: genRes.imageUrl,
+          jobId: genRes.jobId || "",
           loading: false,
         });
         this.refreshHomeBalance();
@@ -134,6 +123,7 @@ Page({
   },
 
   startPolling() {
+    this.clearPollTimer();
     this.pollTimer = setInterval(() => {
       this.pollQuery();
     }, POLL_INTERVAL);
@@ -143,21 +133,15 @@ Page({
     const { jobId, usageId, pollCount } = this.data;
     if (!jobId || pollCount >= MAX_POLL_COUNT) {
       this.clearPollTimer();
-      if (pollCount >= MAX_POLL_COUNT && usageId) {
-        try {
-          await api.callCloud("app_ai_draw", {
-            usageId,
-            action: "fail",
-            errorCode: "POLL_TIMEOUT",
-            errorMessage: "前端轮询超时",
-          });
-        } catch (failErr) {
-          console.error("超时释放积分失败:", failErr);
-        }
+      let cancelled = false;
+      if (jobId && usageId && pollCount >= MAX_POLL_COUNT) {
+        cancelled = await this.cancelGeneration("生成超时，已释放本次冻结积分");
       }
       this.setData({
         polling: false,
-        errorMsg: pollCount >= MAX_POLL_COUNT ? "生成超时，请重试" : "",
+        errorMsg: pollCount >= MAX_POLL_COUNT
+          ? (cancelled ? "生成超时，已释放本次冻结积分" : "生成超时，请稍后检查积分流水")
+          : "",
       });
       return;
     }
@@ -187,6 +171,30 @@ Page({
       }
     } catch (err) {
       console.error("轮询失败:", err);
+      this.clearPollTimer();
+      this.setData({
+        polling: false,
+        errorMsg: err.message || "图片生成失败",
+      });
+      this.refreshHomeBalance();
+    }
+  },
+
+  async cancelGeneration(reason) {
+    const { jobId, usageId } = this.data;
+    if (!jobId || !usageId) return false;
+    try {
+      await api.callCloud("app_ai_draw", {
+        action: "cancel",
+        jobId,
+        usageId,
+        reason,
+      });
+      this.refreshHomeBalance();
+      return true;
+    } catch (err) {
+      console.error("取消生成失败:", err);
+      return false;
     }
   },
 

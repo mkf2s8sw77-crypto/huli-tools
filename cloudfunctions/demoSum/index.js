@@ -2,6 +2,7 @@ const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
+const APP_KEY = "demo_sum";
 
 function makeResponse(ok, dataOrError, requestId) {
   if (ok) {
@@ -53,6 +54,9 @@ exports.main = async (event, context) => {
   }
   if (usage.userId !== openid) {
     return makeResponse(false, { code: "FORBIDDEN", message: "无权操作该使用记录" }, requestId);
+  }
+  if (usage.appKey !== APP_KEY) {
+    return makeResponse(false, { code: "APP_MISMATCH", message: "使用记录不属于积分示例工具" }, requestId);
   }
   if (usage.status !== "frozen" && usage.status !== "created") {
     return makeResponse(false, { code: "INVALID_STATUS", message: "使用记录状态不可执行" }, requestId);

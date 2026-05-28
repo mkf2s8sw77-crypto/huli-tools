@@ -1,9 +1,9 @@
 # CloudBase Collections 契约文档
 
-> 本文档描述 `huli-tools` 公共集合的字段、权限建议、seed 数据及手工创建步骤。
+> 本文档描述 `huli-tools` 公共集合、已启用应用私有集合的字段、权限建议、seed 数据及手工创建步骤。
 > 若 CloudBase MCP/CLI 无法自动创建集合，请按以下清单在微信开发者工具云开发控制台手工创建。
 
-## 公共集合清单
+## 集合清单
 
 | 集合名 | 用途 | 首版是否必须创建 |
 |---|---|---|
@@ -16,6 +16,7 @@
 | `payment_orders` | 支付订单 | 是 |
 | `admin_audit_logs` | 管理员操作审计 | 是 |
 | `system_configs` | 系统配置（开关、白名单等） | 是 |
+| `app_ai_draw_tasks` | AI 绘图任务与 usage/job 绑定 | 是（AI 绘图应用启用时） |
 
 ## 1. users
 
@@ -119,16 +120,28 @@
 ### seed 数据（由 `adminCore.initSchema` 写入）
 
 ```json
-{
-  "appKey": "demo_sum",
-  "name": "积分示例工具",
-  "description": "输入两个数字求和，演示积分扣费链路",
-  "entryPage": "/pages/tools/demo-sum/index",
-  "cloudFunctionName": "demoSum",
-  "status": "active",
-  "pricing": { "mode": "fixed", "costPoints": 1 },
-  "sortOrder": 1
-}
+[
+  {
+    "appKey": "demo_sum",
+    "name": "积分示例工具",
+    "description": "输入两个数字求和，演示积分扣费链路",
+    "entryPage": "/pages/tools/demo-sum/index",
+    "cloudFunctionName": "demoSum",
+    "status": "active",
+    "pricing": { "mode": "fixed", "costPoints": 1 },
+    "sortOrder": 1
+  },
+  {
+    "appKey": "ai_draw",
+    "name": "AI 绘图",
+    "description": "输入描述生成图片，演示异步任务与积分结算链路",
+    "entryPage": "/pages/apps/ai_draw/index",
+    "cloudFunctionName": "app_ai_draw",
+    "status": "active",
+    "pricing": { "mode": "fixed", "costPoints": 1 },
+    "sortOrder": 2
+  }
+]
 ```
 
 ## 5. app_usage_records
@@ -282,15 +295,41 @@
 ]
 ```
 
+## 10. app_ai_draw_tasks
+
+AI 绘图应用私有集合，用于把外部图片生成任务 `jobId` 绑定到当前用户的 `usageId`，防止跨应用 usage 复用、跨任务查询和重复结算。
+
+### 字段
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `_id` | string | 与 `usageId` 一致 |
+| `userId` | string | 关联用户 |
+| `usageId` | string | 关联 `app_usage_records._id` |
+| `jobId` | string | 外部图片生成任务 ID |
+| `prompt` | string | 用户绘图描述 |
+| `status` | string | `processing` / `succeeded` / `failed` / `cancelled` |
+| `imageUrl` | string | 成功后的图片 URL |
+| `errorCode` | string | 错误码（可选） |
+| `errorMessage` | string | 错误信息（可选） |
+| `createdAt` | Date | 创建时间 |
+| `updatedAt` | Date | 更新时间 |
+| `finishedAt` | Date | 结束时间 |
+
+### 权限建议
+
+- 客户端：无直接读写权限。
+- 云函数：仅 `app_ai_draw` 和管理员维护工具读写。
+
 ## 手工创建步骤
 
 若当前环境无法通过脚本自动创建集合，请按以下步骤操作：
 
 1. 打开微信开发者工具，进入「云开发」控制台。
 2. 在「数据库」面板中，依次点击「添加集合」。
-3. 按上表创建 9 个集合。
+3. 按上表创建 10 个集合。
 4. 为每个集合设置权限：
    - `apps`、`recharge_packages`：可设置「所有用户可读，仅创建者可写」或「所有用户可读，仅管理端可写」。
-   - 其余集合（`users`、`point_accounts`、`point_transactions`、`app_usage_records`、`payment_orders`、`admin_audit_logs`、`system_configs`）：建议设置为「仅管理端可读写」，所有客户端写操作必须走云函数。
-5. 创建完成后，部署 `coreUser`、`coreApp`、`adminCore` 云函数。
+   - 其余集合（`users`、`point_accounts`、`point_transactions`、`app_usage_records`、`payment_orders`、`admin_audit_logs`、`system_configs`、`app_ai_draw_tasks`）：建议设置为「仅管理端可读写」，所有客户端写操作必须走云函数。
+5. 创建完成后，部署 `coreUser`、`coreApp`、`adminCore`、`app_ai_draw` 云函数。
 6. 调用 `adminCore.initSchema` 写入 seed 数据。

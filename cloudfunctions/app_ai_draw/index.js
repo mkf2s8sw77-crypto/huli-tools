@@ -3,8 +3,11 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
 
+const APP_KEY = "ai_draw";
+const TASK_COLLECTION = "app_ai_draw_tasks";
 const GPT_IMAGE_API_HOST = "dev.huli.sh.cn";
 const GPT_IMAGE_API_BASE = "/gpt-image-2";
+const MAX_PROMPT_LENGTH = 500;
 
 function makeResponse(ok, dataOrError, requestId) {
   if (ok) {
@@ -31,6 +34,14 @@ function buildUsageActionData(openid, data) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function normalizePrompt(prompt) {
+  return typeof prompt === "string" ? prompt.trim() : "";
+}
+
+function getImageUrl(result) {
+  return result && result.images && result.images[0] ? result.images[0].public_url : null;
 }
 
 function httpsRequest(hostname, path, method, postData) {
@@ -68,7 +79,7 @@ function httpsRequest(hostname, path, method, postData) {
   });
 }
 
-async function validateUsage(usageId, openid, expectedAppKey, requestId) {
+async function validateUsage(usageId, openid, requestId, allowedStatuses) {
   let usage;
   try {
     const usageRes = await db.collection("app_usage_records").doc(usageId).get();
@@ -83,10 +94,11 @@ async function validateUsage(usageId, openid, expectedAppKey, requestId) {
   if (usage.userId !== openid) {
     return { ok: false, response: makeResponse(false, { code: "FORBIDDEN", message: "无权操作该使用记录" }, requestId) };
   }
-  if (expectedAppKey && usage.appKey !== expectedAppKey) {
-    return { ok: false, response: makeResponse(false, { code: "FORBIDDEN", message: "使用记录不属于当前应用" }, requestId) };
+  if (usage.appKey !== APP_KEY) {
+    return { ok: false, response: makeResponse(false, { code: "APP_MISMATCH", message: "使用记录不属于 AI 绘图应用" }, requestId) };
   }
-  if (usage.status !== "frozen" && usage.status !== "created") {
+  const statuses = allowedStatuses || ["frozen", "created"];
+  if (!statuses.includes(usage.status)) {
     return { ok: false, response: makeResponse(false, { code: "INVALID_STATUS", message: "使用记录状态不可执行" }, requestId) };
   }
 
@@ -105,7 +117,11 @@ async function callFinishUsage(openid, usageId, resultRef, requestId) {
     });
     const finishResult = finishRes.result;
     if (!finishResult || !finishResult.ok) {
-      return { ok: false, error: finishResult && finishResult.error ? finishResult.error : { code: "FINISH_FAILED", message: "结算失败" } };
+      const error = finishResult && finishResult.error ? finishResult.error : { code: "FINISH_FAILED", message: "结算失败" };
+      if (error.code === "USAGE_ALREADY_FINISHED") {
+        return { ok: true, alreadyFinished: true };
+      }
+      return { ok: false, error };
     }
     return { ok: true };
   } catch (err) {
@@ -126,7 +142,11 @@ async function callFailUsage(openid, usageId, errorCode, errorMessage, requestId
     });
     const failResult = failRes.result;
     if (!failResult || !failResult.ok) {
-      return { ok: false, error: failResult && failResult.error ? failResult.error : { code: "FAIL_USAGE_FAILED", message: "释放积分失败" } };
+      const error = failResult && failResult.error ? failResult.error : { code: "FAIL_USAGE_FAILED", message: "释放积分失败" };
+      if (error.code === "USAGE_ALREADY_FAILED") {
+        return { ok: true, alreadyFailed: true };
+      }
+      return { ok: false, error };
     }
     return { ok: true };
   } catch (err) {
@@ -141,6 +161,61 @@ async function createGenerationTask(prompt) {
     "POST",
     { prompt }
   );
+}
+
+async function getTask(usageId) {
+  try {
+    const res = await db.collection(TASK_COLLECTION).doc(usageId).get();
+    return res.data || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function saveTask(data) {
+  const now = new Date();
+  await db.collection(TASK_COLLECTION).doc(data.usageId).set({
+    data: {
+      userId: data.userId,
+      usageId: data.usageId,
+      jobId: data.jobId,
+      prompt: data.prompt,
+      status: data.status,
+      imageUrl: data.imageUrl || null,
+      errorCode: data.errorCode || null,
+      errorMessage: data.errorMessage || null,
+      createdAt: data.createdAt || now,
+      updatedAt: now,
+      finishedAt: data.finishedAt || null,
+    },
+  });
+}
+
+async function updateTask(usageId, data) {
+  try {
+    await db.collection(TASK_COLLECTION).doc(usageId).update({
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.error("更新 AI 绘图任务失败:", err.message);
+  }
+}
+
+async function validateTask(usageId, jobId, openid, requestId) {
+  const task = await getTask(usageId);
+  if (!task) {
+    return { ok: false, response: makeResponse(false, { code: "TASK_NOT_FOUND", message: "AI 绘图任务不存在或未创建成功" }, requestId) };
+  }
+  if (task.userId !== openid) {
+    return { ok: false, response: makeResponse(false, { code: "FORBIDDEN", message: "无权操作该绘图任务" }, requestId) };
+  }
+  if (task.jobId !== jobId) {
+    return { ok: false, response: makeResponse(false, { code: "JOB_MISMATCH", message: "任务编号与使用记录不匹配" }, requestId) };
+  }
+  return { ok: true, task };
 }
 
 async function queryGenerationStatus(jobId) {
@@ -162,11 +237,41 @@ async function pollGenerationStatus(jobId, maxAttempts, intervalMs) {
   return { status: "processing", jobId };
 }
 
+async function finishWithImage(openid, usageId, jobId, imageUrl, requestId) {
+  const finishRes = await callFinishUsage(openid, usageId, imageUrl, requestId);
+  if (!finishRes.ok) {
+    return makeResponse(false, finishRes.error, requestId);
+  }
+  await updateTask(usageId, {
+    status: "succeeded",
+    imageUrl,
+    errorCode: null,
+    errorMessage: null,
+    finishedAt: new Date(),
+  });
+  return makeResponse(true, { imageUrl, status: "succeeded", jobId }, requestId);
+}
+
+async function failGeneration(openid, usageId, jobId, errorCode, errorMessage, requestId) {
+  const failRes = await callFailUsage(openid, usageId, errorCode, errorMessage, requestId);
+  await updateTask(usageId, {
+    status: "failed",
+    errorCode,
+    errorMessage,
+    finishedAt: new Date(),
+  });
+  if (!failRes.ok) {
+    return makeResponse(false, failRes.error, requestId);
+  }
+  return makeResponse(false, { code: errorCode, message: errorMessage }, requestId);
+}
+
 async function generate(event, context) {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
   const requestId = context.requestId || Date.now().toString();
   const { usageId, prompt } = event;
+  const cleanPrompt = normalizePrompt(prompt);
 
   if (!openid) {
     return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
@@ -174,19 +279,39 @@ async function generate(event, context) {
   if (!usageId) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId" }, requestId);
   }
-  if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
+  if (!cleanPrompt) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "请输入绘图描述" }, requestId);
   }
+  if (cleanPrompt.length > MAX_PROMPT_LENGTH) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "绘图描述不能超过 500 字" }, requestId);
+  }
 
-  const usageCheck = await validateUsage(usageId, openid, "ai_draw", requestId);
+  const usageCheck = await validateUsage(usageId, openid, requestId);
   if (!usageCheck.ok) {
     return usageCheck.response;
   }
 
+  const existingTask = await getTask(usageId);
+  if (existingTask) {
+    if (existingTask.userId !== openid) {
+      return makeResponse(false, { code: "FORBIDDEN", message: "无权操作该绘图任务" }, requestId);
+    }
+    if (existingTask.status === "succeeded" && existingTask.imageUrl) {
+      return makeResponse(true, { imageUrl: existingTask.imageUrl, status: "succeeded", jobId: existingTask.jobId }, requestId);
+    }
+    if (existingTask.status === "processing") {
+      return makeResponse(true, { status: "processing", jobId: existingTask.jobId }, requestId);
+    }
+    if (existingTask.status === "failed" || existingTask.status === "cancelled") {
+      return makeResponse(false, { code: "TASK_ALREADY_FAILED", message: existingTask.errorMessage || "任务已失败" }, requestId);
+    }
+  }
+
   let createResult;
   try {
-    createResult = await createGenerationTask(prompt.trim());
+    createResult = await createGenerationTask(cleanPrompt);
   } catch (err) {
+    await callFailUsage(openid, usageId, "API_ERROR", "创建图片生成任务失败: " + err.message, requestId);
     return makeResponse(false, { code: "API_ERROR", message: "创建图片生成任务失败: " + err.message }, requestId);
   }
 
@@ -202,32 +327,41 @@ async function generate(event, context) {
     return makeResponse(false, { code: "API_ERROR", message: "任务创建未返回 job_id" }, requestId);
   }
 
+  try {
+    await saveTask({
+      userId: openid,
+      usageId,
+      jobId,
+      prompt: cleanPrompt,
+      status: "processing",
+    });
+  } catch (err) {
+    await callFailUsage(openid, usageId, "TASK_RECORD_FAILED", "保存绘图任务失败: " + err.message, requestId);
+    return makeResponse(false, { code: "TASK_RECORD_FAILED", message: "保存绘图任务失败，请确认 app_ai_draw_tasks 集合已创建" }, requestId);
+  }
+
   let pollResult;
   try {
     pollResult = await pollGenerationStatus(jobId, 15, 2000);
   } catch (err) {
+    await updateTask(usageId, { status: "processing", errorCode: "POLL_ERROR", errorMessage: err.message });
     return makeResponse(true, { status: "processing", jobId }, requestId);
   }
 
   if (pollResult.status === "succeeded") {
-    const imageUrl = pollResult.images && pollResult.images[0] ? pollResult.images[0].public_url : null;
+    const imageUrl = getImageUrl(pollResult);
     if (!imageUrl) {
-      await callFailUsage(openid, usageId, "API_ERROR", "任务成功但未返回图片 URL", requestId);
-      return makeResponse(false, { code: "API_ERROR", message: "任务成功但未返回图片 URL" }, requestId);
+      return failGeneration(openid, usageId, jobId, "API_ERROR", "任务成功但未返回图片 URL", requestId);
     }
-    const finishRes = await callFinishUsage(openid, usageId, imageUrl, requestId);
-    if (!finishRes.ok) {
-      return makeResponse(false, finishRes.error, requestId);
-    }
-    return makeResponse(true, { imageUrl, status: "succeeded", jobId }, requestId);
+    return finishWithImage(openid, usageId, jobId, imageUrl, requestId);
   }
 
   if (pollResult.status === "failed") {
     const errMsg = pollResult.message || "图片生成失败";
-    await callFailUsage(openid, usageId, "GENERATION_FAILED", errMsg, requestId);
-    return makeResponse(false, { code: "GENERATION_FAILED", message: errMsg }, requestId);
+    return failGeneration(openid, usageId, jobId, "GENERATION_FAILED", errMsg, requestId);
   }
 
+  await updateTask(usageId, { status: "processing" });
   return makeResponse(true, { status: "processing", jobId }, requestId);
 }
 
@@ -243,73 +377,85 @@ async function query(event, context) {
   if (!jobId) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 jobId" }, requestId);
   }
+  if (!usageId) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId" }, requestId);
+  }
 
-  // 如果传了 usageId，强制校验归属
-  if (usageId) {
-    const usageCheck = await validateUsage(usageId, openid, "ai_draw", requestId);
-    if (!usageCheck.ok) {
-      return usageCheck.response;
-    }
+  const usageCheck = await validateUsage(usageId, openid, requestId, ["created", "frozen", "succeeded"]);
+  if (!usageCheck.ok) {
+    return usageCheck.response;
+  }
+
+  const taskCheck = await validateTask(usageId, jobId, openid, requestId);
+  if (!taskCheck.ok) {
+    return taskCheck.response;
+  }
+  if (taskCheck.task.status === "succeeded" && taskCheck.task.imageUrl) {
+    return makeResponse(true, { imageUrl: taskCheck.task.imageUrl, status: "succeeded", jobId }, requestId);
+  }
+  if (taskCheck.task.status === "failed" || taskCheck.task.status === "cancelled") {
+    return makeResponse(false, { code: "TASK_ALREADY_FAILED", message: taskCheck.task.errorMessage || "任务已失败" }, requestId);
   }
 
   let queryResult;
   try {
     queryResult = await queryGenerationStatus(jobId);
   } catch (err) {
-    return makeResponse(false, { code: "API_ERROR", message: "查询任务状态失败: " + err.message }, requestId);
+    await updateTask(usageId, { status: "processing", errorCode: "POLL_ERROR", errorMessage: err.message });
+    return makeResponse(true, { status: "processing", jobId, lastError: "查询任务状态失败: " + err.message }, requestId);
   }
 
   if (queryResult.status === "succeeded") {
-    const imageUrl = queryResult.images && queryResult.images[0] ? queryResult.images[0].public_url : null;
+    const imageUrl = getImageUrl(queryResult);
     if (!imageUrl) {
-      if (usageId) {
-        await callFailUsage(openid, usageId, "API_ERROR", "任务成功但未返回图片 URL", requestId);
-      }
-      return makeResponse(false, { code: "API_ERROR", message: "任务成功但未返回图片 URL" }, requestId);
+      return failGeneration(openid, usageId, jobId, "API_ERROR", "任务成功但未返回图片 URL", requestId);
     }
-    if (usageId) {
-      const finishRes = await callFinishUsage(openid, usageId, imageUrl, requestId);
-      if (!finishRes.ok) {
-        return makeResponse(false, finishRes.error, requestId);
-      }
-    }
-    return makeResponse(true, { imageUrl, status: "succeeded", jobId }, requestId);
+    return finishWithImage(openid, usageId, jobId, imageUrl, requestId);
   }
 
   if (queryResult.status === "failed") {
     const errMsg = queryResult.message || "图片生成失败";
-    if (usageId) {
-      await callFailUsage(openid, usageId, "GENERATION_FAILED", errMsg, requestId);
-    }
-    return makeResponse(false, { code: "GENERATION_FAILED", message: errMsg }, requestId);
+    return failGeneration(openid, usageId, jobId, "GENERATION_FAILED", errMsg, requestId);
   }
 
+  await updateTask(usageId, { status: "processing" });
   return makeResponse(true, { status: "processing", jobId }, requestId);
 }
 
-async function fail(event, context) {
+async function cancel(event, context) {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
   const requestId = context.requestId || Date.now().toString();
-  const { usageId, errorCode, errorMessage } = event;
+  const { jobId, usageId, reason } = event;
 
   if (!openid) {
     return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
   }
-  if (!usageId) {
-    return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId" }, requestId);
+  if (!usageId || !jobId) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId 或 jobId" }, requestId);
   }
 
-  const usageCheck = await validateUsage(usageId, openid, "ai_draw", requestId);
+  const usageCheck = await validateUsage(usageId, openid, requestId, ["created", "frozen"]);
   if (!usageCheck.ok) {
     return usageCheck.response;
   }
+  const taskCheck = await validateTask(usageId, jobId, openid, requestId);
+  if (!taskCheck.ok) {
+    return taskCheck.response;
+  }
 
-  const failRes = await callFailUsage(openid, usageId, errorCode || "USER_CANCEL", errorMessage || "用户取消或超时", requestId);
+  const message = reason || "用户取消或等待超时";
+  const failRes = await callFailUsage(openid, usageId, "GENERATION_CANCELLED", message, requestId);
+  await updateTask(usageId, {
+    status: "cancelled",
+    errorCode: "GENERATION_CANCELLED",
+    errorMessage: message,
+    finishedAt: new Date(),
+  });
   if (!failRes.ok) {
     return makeResponse(false, failRes.error, requestId);
   }
-  return makeResponse(true, { usageId, status: "failed" }, requestId);
+  return makeResponse(true, { status: "cancelled", jobId }, requestId);
 }
 
 exports.main = async (event, context) => {
@@ -322,8 +468,8 @@ exports.main = async (event, context) => {
   if (action === "query") {
     return query(event, context);
   }
-  if (action === "fail") {
-    return fail(event, context);
+  if (action === "cancel") {
+    return cancel(event, context);
   }
 
   return makeResponse(false, { code: "UNKNOWN_ACTION", message: "未知 action: " + action }, requestId);

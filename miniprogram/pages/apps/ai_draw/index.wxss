@@ -96,12 +96,3 @@
   font-size: 28rpx;
   text-align: center;
 }
-
-.debug {
-  padding: 16rpx 32rpx;
-}
-
-.debug-text {
-  font-size: 22rpx;
-  color: #bbb;
-}

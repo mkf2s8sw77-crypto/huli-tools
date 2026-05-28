@@ -52,6 +52,7 @@ huli-tools/
 │       ├── orders/               # 我的订单
 │       ├── transactions/         # 积分流水
 │       ├── usage-records/        # 使用记录
+│       ├── apps/ai_draw/         # AI 绘图应用
 │       └── tools/demo-sum/       # 示例工具：求和
 └── cloudfunctions/               # 云函数目录
     ├── coreUser/                 # 用户身份与积分账户 bootstrap
@@ -60,6 +61,7 @@ huli-tools/
     ├── corePayment/              # 支付订单与充值包
     ├── adminCore/                # 管理接口与数据 seed
     ├── demoSum/                  # 示例业务云函数（求和）
+    ├── app_ai_draw/              # AI 绘图应用云函数
     ├── getOpenId/                # 获取用户 OPENID（示例）
     └── sum/                      # 求和示例（最简云函数）
 ```
@@ -86,7 +88,7 @@ huli-tools/
 │  │ coreUser │ │ coreApp  │ │corePoints│ │corePayment│       │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
-│  │ adminCore│ │ demoSum  │ │ 其他示例  │                    │
+│  │ adminCore│ │ demoSum  │ │app_ai_draw│                   │
 │  └──────────┘ └──────────┘ └──────────┘                    │
 └──────────────────────────┬──────────────────────────────────┘
                            │ wx-server-sdk
@@ -127,7 +129,7 @@ huli-tools/
 
 #### app.json
 
-- **页面列表**：`pages/index/index`、`pages/profile/profile`、`pages/tools/demo-sum/index`、`pages/recharge/recharge`、`pages/orders/orders`、`pages/transactions/transactions`、`pages/usage-records/usage-records`
+- **页面列表**：`pages/index/index`、`pages/profile/profile`、`pages/tools/demo-sum/index`、`pages/apps/ai_draw/index`、`pages/recharge/recharge`、`pages/orders/orders`、`pages/transactions/transactions`、`pages/usage-records/usage-records`
 - **TabBar**：自定义 TabBar（`custom: true`），包含首页和我的两个入口。
 - **云开发**：`"cloud": true`
 
@@ -276,7 +278,7 @@ huli-tools/
 **关键函数**：
 
 - `getInternalAuthError(event)`：校验 `_internalToken` 是否匹配环境变量 `INTERNAL_API_SECRET`。
-- `freezePoints` / `settleFrozenPoints` / `releaseFrozenPoints` / `creditPoints` / `adminAdjustPoints`：均具备幂等检查（通过 `idempotencyKey` 查 `point_transactions`），使用原子更新（`_.gte` + `_.inc`）防止并发超卖。
+- `freezePoints` / `settleFrozenPoints` / `releaseFrozenPoints` / `creditPoints` / `adminAdjustPoints`：均具备幂等检查（通过 `idempotencyKey` 的哈希文档 ID 和历史查询兼容），账户与流水在同一事务内更新。
 
 #### corePayment — 支付订单与充值
 
@@ -308,7 +310,7 @@ huli-tools/
 **关键函数**：
 
 - `validateAdmin(wxContext, requestId)`：校验调用者是否在 `ADMIN_OPENIDS` 白名单中。
-- `checkCollectionsExist()`：检查 9 个必需集合是否存在。
+- `checkCollectionsExist()`：检查公共集合和已启用应用私有集合是否存在。
 - `writeAuditLog(...)`：所有管理操作自动写入 `admin_audit_logs`。
 - `initSchema`：幂等 seed，重复执行会更新已有数据，不会删除用户数据。
 
@@ -318,10 +320,19 @@ huli-tools/
 
 - **职责**：演示完整的"创建 usage → 执行业务 → 结算/释放"链路。
 - **流程**：
-  1. 校验 `usageId` 存在且属于当前用户，状态为 `frozen` 或 `created`。
+  1. 校验 `usageId` 存在、属于当前用户、`appKey` 为 `demo_sum`，且状态为 `frozen` 或 `created`。
   2. 若 `triggerFail=true`，调用 `coreApp.failUsage` 模拟失败并释放积分。
   3. 若输入非数字，调用 `coreApp.failUsage` 释放积分。
   4. 业务成功（求和），调用 `coreApp.finishUsage` 结算积分。
+
+#### app_ai_draw — AI 绘图应用
+
+- **职责**：调用外部图片生成服务，演示异步任务与积分扣费链路。
+- **关键约束**：
+  1. `usageId` 必须属于当前用户且 `appKey` 必须为 `ai_draw`。
+  2. `app_ai_draw_tasks` 使用 `usageId` 作为文档 ID，绑定 `userId`、`usageId`、`jobId` 和任务状态。
+  3. `query` 必须同时校验 `usageId` 和 `jobId`，避免跨任务结算。
+  4. 生成失败、外部任务失败或前端超时取消时调用 `coreApp.failUsage` 释放冻结积分。
 
 ### 4.4 遗留/示例云函数
 
@@ -536,7 +547,7 @@ demoSum (业务示例)
 
 微信开发者工具 → 云开发 → 云函数 → 选中函数 → 版本与配置 → 环境变量
 
-> 注意：`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore` 中配置为**相同的随机字符串**。
+> 注意：`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw` 中配置为**相同的随机字符串**。
 
 ---
 
@@ -553,9 +564,9 @@ demoSum (业务示例)
 1. **打开项目**：用微信开发者工具打开项目根目录。
 2. **配置 APPID**：在 `project.config.json` 中将 `appid` 替换为真实小程序 APPID。
 3. **部署云函数**：右键以下云函数 → 「创建并部署：云端安装依赖」
-   - `coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`
+   - `coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`
 4. **配置环境变量**：为上述云函数配置 `ADMIN_OPENIDS`、`INTERNAL_API_SECRET`、`PAYMENT_PROVIDER`、`MOCK_PAYMENT_ENABLED`。
-5. **创建数据库集合**：在微信开发者工具云开发控制台中创建 9 个集合（详见 `docs/cloud_collections.md`）。
+5. **创建数据库集合**：在微信开发者工具云开发控制台中创建 10 个集合（详见 `docs/cloud_collections.md`）。
 6. **初始化 seed 数据**：调用 `adminCore.initSchema`：
    ```js
    wx.cloud.callFunction({
@@ -595,10 +606,10 @@ bash scripts/check-js.sh
 
 ### 10.1 新增业务工具
 
-1. **创建业务云函数**：在 `cloudfunctions/` 下新建云函数（如 `myTool`）。
+1. **创建业务云函数**：在 `cloudfunctions/` 下新建 `app_<appKey>` 云函数（如 `app_my_tool`）。
 2. **注册应用**：调用 `adminCore.upsertApp` 注册应用信息，包括 `appKey`、`name`、`entryPage`、`cloudFunctionName`、`pricing`。
-3. **实现业务逻辑**：参考 `demoSum` 实现 `createUsage` → 执行业务 → `finishUsage`/`failUsage` 的完整链路。
-4. **创建前端页面**：在 `miniprogram/pages/tools/` 下新建页面，调用 `api.createUsage` 和对应的业务云函数。
+3. **实现业务逻辑**：参考 `demoSum` 实现 `createUsage` → 校验 `usage.appKey` → 执行业务 → `finishUsage`/`failUsage` 的完整链路。
+4. **创建前端页面**：在 `miniprogram/pages/apps/<appKey>/` 下新建页面，调用 `api.createUsage` 和对应的业务云函数。
 5. **更新文档**：同步更新本文档、`cloud_collections.md`、`test_case_huli-tools_0526.md`。
 
 ### 10.2 业务工具私有 Collection

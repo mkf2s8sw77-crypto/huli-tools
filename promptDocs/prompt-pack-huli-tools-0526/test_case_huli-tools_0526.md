@@ -8,7 +8,7 @@
 - 启动方式：用微信开发者工具打开项目根目录；命令行只负责静态检查和文档/脚本验证。
 - 测试账号：任意可登录微信开发者工具的微信号；管理员测试需要把该账号 openid 配入 `ADMIN_OPENIDS`。
 - 支付模式：首版默认 `PAYMENT_PROVIDER=mock`、`MOCK_PAYMENT_ENABLED=true`；真实微信支付未配置前不得按真实支付验收。
-- 数据准备：先按 `docs/cloud_collections.md` 创建公共集合，再部署云函数，调用 `adminCore.initSchema` seed 默认应用和充值包。
+- 数据准备：先按 `docs/cloud_collections.md` 创建集合（含 `app_ai_draw_tasks`），再部署云函数，调用 `adminCore.initSchema` seed 默认应用和充值包。
 - reset 方式：开发环境可清空公共集合后重新调用 `adminCore.initSchema`；不要在生产环境执行清空。
 
 ## 2. 自动 Gate
@@ -254,6 +254,35 @@ git diff --check
   2. 确认包含：标题、背景、涉及云函数/集合、兼容性、迁移方案、安全影响、测试计划、回滚方案等章节。
 - 断言：
   - 文件存在且章节齐全。
+
+### TC-20 AI 绘图 usage/job 绑定与扣费状态机
+
+- 目标：验证 `app_ai_draw` 不允许复用其他应用 usage，且异步任务能在成功、失败、取消时正确结算或释放积分。
+- 前置条件：已创建 `app_ai_draw_tasks` 集合；`app_ai_draw`、`coreApp`、`corePoints` 已部署并配置相同 `INTERNAL_API_SECRET`；当前用户可用积分不少于 `ai_draw` 价格。
+- 步骤：
+  1. 调用 `api.createUsage("ai_draw", { prompt })` 获取 `usageId`。
+  2. 调用 `app_ai_draw.generate`，传入该 `usageId` 和合法 prompt。
+  3. 若返回 `processing`，继续调用 `app_ai_draw.query`，必须同时传入 `usageId` 和返回的 `jobId`。
+  4. 临时尝试用 `demo_sum` 的 `usageId` 调用 `app_ai_draw.generate`。
+  5. 临时尝试用不匹配的 `jobId` 调用 `app_ai_draw.query`。
+- 断言：
+  - 正常成功时 usage 状态为 `succeeded`，流水包含 `freeze` 和 `settle`。
+  - 失败或取消时 usage 状态为 `released`，流水包含 `freeze` 和 `release`。
+  - 其他应用 usage 返回 `APP_MISMATCH`，不触发外部绘图任务。
+  - 不匹配的 `jobId` 返回 `JOB_MISMATCH`，不会结算积分。
+
+### TC-21 业务云函数必须校验 usage.appKey
+
+- 目标：验证示例和后续业务云函数不能复用其他应用的 usage。
+- 前置条件：已部署 `demoSum`、`app_ai_draw`、`coreApp`，当前用户可创建两个应用的 usage。
+- 步骤：
+  1. 调用 `api.createUsage("ai_draw", { prompt: "test" })` 获取 `usageId`。
+  2. 用该 `usageId` 调用 `demoSum`，传入合法数字参数。
+  3. 调用 `api.createUsage("demo_sum", { a: 1, b: 2 })` 获取另一个 `usageId`。
+  4. 用该 `usageId` 调用 `app_ai_draw.generate`。
+- 断言：
+  - 两次跨应用调用均返回 `APP_MISMATCH`。
+  - 被误用的 usage 不会被结算为 `succeeded`。
 
 ## 4. 人工检查项
 

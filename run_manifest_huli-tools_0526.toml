@@ -19,8 +19,8 @@ commands = [
 [gate.deploy]
 description = "云函数部署后人工/半自动验收步骤"
 steps = [
-  "1. 在微信开发者工具中右键部署所有 cloudfunctions",
-  "2. 创建数据库集合（见 docs/cloud_collections.md）",
+  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 app_ai_draw）",
+  "2. 创建数据库集合（见 docs/cloud_collections.md，含 app_ai_draw_tasks）",
   "3. 配置云函数环境变量（见 docs/dev_setup.md）",
   "4. 调用 adminCore.initSchema 写入 seed 数据",
 ]
@@ -58,6 +58,14 @@ actions = [
   "创建 docs/templates/core_change_rfc.md 公共底座变更 RFC 模板",
   "创建 scripts/check-boundaries.sh 边界检查脚本",
   "更新 AGENTS.md 加入边界治理规则",
+]
+
+[phase.7]
+description = "AI 绘图基础应用与异步任务计费链路"
+actions = [
+  "新增 app_ai_draw 云函数和 pages/apps/ai_draw 页面",
+  "创建 app_ai_draw_tasks 私有集合绑定 usageId/jobId",
+  "验证 AI 绘图成功结算、失败释放和超时取消",
 ]
 
 [env.required]
