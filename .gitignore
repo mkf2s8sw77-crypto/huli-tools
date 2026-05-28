@@ -32,3 +32,6 @@ cloudfunctions/*/package-lock.json
 
 # 小程序代码上传密钥
 private.*.key
+
+# CloudBase CLI 配置（含环境变量）
+cloudbaserc.json

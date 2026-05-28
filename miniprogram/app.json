@@ -3,6 +3,7 @@
     "pages/index/index",
     "pages/profile/profile",
     "pages/tools/demo-sum/index",
+    "pages/apps/ai_draw/index",
     "pages/recharge/recharge",
     "pages/orders/orders",
     "pages/transactions/transactions",

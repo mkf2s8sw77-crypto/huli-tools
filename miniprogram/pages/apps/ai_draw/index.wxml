@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{appInfo ? appInfo.name : 'AI 绘图'}}</text>
+    <text class="subtitle">输入描述，AI 为您生成图片</text>
+  </view>
+
+  <view class="card" wx:if="{{appInfo && appInfo.pricing}}">
+    <text class="label">本次消耗</text>
+    <text class="cost-points">{{appInfo.pricing.costPoints}} 积分</text>
+  </view>
+
+  <view class="card">
+    <text class="label">绘图描述</text>
+    <textarea
+      class="prompt-input"
+      value="{{prompt}}"
+      bindinput="onInputPrompt"
+      placeholder="请描述您想要的图片，例如：一只可爱的猫咪在草地上奔跑"
+      maxlength="500"
+      auto-height
+    />
+    <text class="char-count">{{prompt.length}}/500</text>
+  </view>
+
+  <button
+    type="primary"
+    loading="{{loading || polling}}"
+    disabled="{{loading || polling || !prompt}}"
+    bindtap="onGenerate"
+  >
+    {{loading ? '生成中...' : (polling ? '生成中(' + pollCount + ')...' : '生成图片')}}
+  </button>
+
+  <view wx:if="{{imageUrl}}" class="card image-card">
+    <text class="label">生成结果</text>
+    <image class="result-image" mode="aspectFit" src="{{imageUrl}}" show-menu-by-longpress />
+    <button class="save-btn" type="default" bindtap="onSaveImage">保存到相册</button>
+  </view>
+
+  <view wx:if="{{errorMsg}}" class="card error">
+    <text>{{errorMsg}}</text>
+  </view>
+
+  <view wx:if="{{usageId && !imageUrl && !errorMsg}}" class="card debug">
+    <text class="debug-text">使用记录: {{usageId}}</text>
+  </view>
+</view>
