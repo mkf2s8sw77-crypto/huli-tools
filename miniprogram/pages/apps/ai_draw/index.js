@@ -20,11 +20,23 @@ Page({
     this.loadAppInfo();
   },
 
-  onUnload() {
-    this.clearPollTimer();
+  async onUnload() {
+    await this.cancelIfPolling();
   },
 
-  onHide() {
+  async cancelIfPolling() {
+    if (this.data.polling && this.data.usageId) {
+      try {
+        await api.callCloud("app_ai_draw", {
+          usageId: this.data.usageId,
+          action: "fail",
+          errorCode: "USER_CANCEL",
+          errorMessage: "用户离开页面",
+        });
+      } catch (err) {
+        console.error("离开页面释放积分失败:", err);
+      }
+    }
     this.clearPollTimer();
   },
 
@@ -39,6 +51,30 @@ Page({
 
   onInputPrompt(e) {
     this.setData({ prompt: e.detail.value });
+  },
+
+  async onCancel() {
+    const { usageId, polling } = this.data;
+    if (!polling || !usageId) return;
+    this.clearPollTimer();
+    try {
+      await api.callCloud("app_ai_draw", {
+        usageId,
+        action: "fail",
+        errorCode: "USER_CANCEL",
+        errorMessage: "用户手动取消",
+      });
+      this.setData({
+        polling: false,
+        errorMsg: "已取消生成",
+      });
+    } catch (err) {
+      console.error("取消失败:", err);
+      this.setData({
+        polling: false,
+        errorMsg: "取消失败: " + (err.message || "未知错误"),
+      });
+    }
   },
 
   async onGenerate() {
@@ -107,6 +143,18 @@ Page({
     const { jobId, usageId, pollCount } = this.data;
     if (!jobId || pollCount >= MAX_POLL_COUNT) {
       this.clearPollTimer();
+      if (pollCount >= MAX_POLL_COUNT && usageId) {
+        try {
+          await api.callCloud("app_ai_draw", {
+            usageId,
+            action: "fail",
+            errorCode: "POLL_TIMEOUT",
+            errorMessage: "前端轮询超时",
+          });
+        } catch (failErr) {
+          console.error("超时释放积分失败:", failErr);
+        }
+      }
       this.setData({
         polling: false,
         errorMsg: pollCount >= MAX_POLL_COUNT ? "生成超时，请重试" : "",

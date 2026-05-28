@@ -68,7 +68,7 @@ function httpsRequest(hostname, path, method, postData) {
   });
 }
 
-async function validateUsage(usageId, openid, requestId) {
+async function validateUsage(usageId, openid, expectedAppKey, requestId) {
   let usage;
   try {
     const usageRes = await db.collection("app_usage_records").doc(usageId).get();
@@ -82,6 +82,9 @@ async function validateUsage(usageId, openid, requestId) {
   }
   if (usage.userId !== openid) {
     return { ok: false, response: makeResponse(false, { code: "FORBIDDEN", message: "无权操作该使用记录" }, requestId) };
+  }
+  if (expectedAppKey && usage.appKey !== expectedAppKey) {
+    return { ok: false, response: makeResponse(false, { code: "FORBIDDEN", message: "使用记录不属于当前应用" }, requestId) };
   }
   if (usage.status !== "frozen" && usage.status !== "created") {
     return { ok: false, response: makeResponse(false, { code: "INVALID_STATUS", message: "使用记录状态不可执行" }, requestId) };
@@ -175,7 +178,7 @@ async function generate(event, context) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "请输入绘图描述" }, requestId);
   }
 
-  const usageCheck = await validateUsage(usageId, openid, requestId);
+  const usageCheck = await validateUsage(usageId, openid, "ai_draw", requestId);
   if (!usageCheck.ok) {
     return usageCheck.response;
   }
@@ -241,6 +244,14 @@ async function query(event, context) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 jobId" }, requestId);
   }
 
+  // 如果传了 usageId，强制校验归属
+  if (usageId) {
+    const usageCheck = await validateUsage(usageId, openid, "ai_draw", requestId);
+    if (!usageCheck.ok) {
+      return usageCheck.response;
+    }
+  }
+
   let queryResult;
   try {
     queryResult = await queryGenerationStatus(jobId);
@@ -276,6 +287,31 @@ async function query(event, context) {
   return makeResponse(true, { status: "processing", jobId }, requestId);
 }
 
+async function fail(event, context) {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  const requestId = context.requestId || Date.now().toString();
+  const { usageId, errorCode, errorMessage } = event;
+
+  if (!openid) {
+    return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
+  }
+  if (!usageId) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 usageId" }, requestId);
+  }
+
+  const usageCheck = await validateUsage(usageId, openid, "ai_draw", requestId);
+  if (!usageCheck.ok) {
+    return usageCheck.response;
+  }
+
+  const failRes = await callFailUsage(openid, usageId, errorCode || "USER_CANCEL", errorMessage || "用户取消或超时", requestId);
+  if (!failRes.ok) {
+    return makeResponse(false, failRes.error, requestId);
+  }
+  return makeResponse(true, { usageId, status: "failed" }, requestId);
+}
+
 exports.main = async (event, context) => {
   const { action } = event;
   const requestId = context.requestId || Date.now().toString();
@@ -285,6 +321,9 @@ exports.main = async (event, context) => {
   }
   if (action === "query") {
     return query(event, context);
+  }
+  if (action === "fail") {
+    return fail(event, context);
   }
 
   return makeResponse(false, { code: "UNKNOWN_ACTION", message: "未知 action: " + action }, requestId);

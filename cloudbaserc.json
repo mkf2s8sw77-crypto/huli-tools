@@ -1,0 +1,70 @@
+{
+  "version": "2.0",
+  "envId": "cloudbase-3gphz7fk0fe1b760",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "adminCore",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "coreApp",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "corePayment",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "corePoints",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "coreUser",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "demoSum",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "getOpenId",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "sum",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "installDependency": true
+    },
+    {
+      "name": "app_ai_draw",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 60,
+      "installDependency": true
+    }
+  ]
+}

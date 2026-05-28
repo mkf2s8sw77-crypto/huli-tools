@@ -76,6 +76,17 @@
   margin-top: 16rpx;
 }
 
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.cancel-btn {
+  margin-top: 8rpx;
+}
+
 .error {
   color: #fa5151;
 }

@@ -151,8 +151,6 @@ huli-tools/
 | `listApps()` | `coreApp` | `listApps` | 获取应用目录 |
 | `getAppDetail(appKey)` | `coreApp` | `getAppDetail` | 获取应用详情 |
 | `createUsage(appKey, inputSummary)` | `coreApp` | `createUsage` | 创建使用记录并冻结积分 |
-| `finishUsage(usageId, resultRef)` | `coreApp` | `finishUsage` | 结算使用记录 |
-| `failUsage(...)` | `coreApp` | `failUsage` | 失败使用记录，释放积分 |
 | `getBalance()` | `corePoints` | `getBalance` | 查询积分余额 |
 | `listTransactions(page, pageSize)` | `corePoints` | `listTransactions` | 查询积分流水 |
 | `listPackages()` | `corePayment` | `listPackages` | 查询充值包 |
@@ -254,8 +252,8 @@ huli-tools/
 | `listApps` | 任意用户 | 查询 `active` 和 `coming_soon` 状态的应用列表 |
 | `getAppDetail` | 任意用户 | 根据 `appKey` 查询应用详情 |
 | `createUsage` | 登录用户 | 创建使用记录，若需扣费则调用 `corePoints.freezePoints` 冻结积分 |
-| `finishUsage` | 登录用户 / 内部调用 | 结算使用记录，调用 `corePoints.settleFrozenPoints` |
-| `failUsage` | 登录用户 / 内部调用 | 失败使用记录，调用 `corePoints.releaseFrozenPoints` 释放积分 |
+| `finishUsage` | **内部调用** | 结算使用记录，调用 `corePoints.settleFrozenPoints`，需 `_internalToken` |
+| `failUsage` | **内部调用** | 失败使用记录，调用 `corePoints.releaseFrozenPoints` 释放积分，需 `_internalToken` |
 | `listUsageRecords` | 登录用户 | 分页查询当前用户的使用记录 |
 
 **关键函数**：

@@ -22,14 +22,25 @@
     <text class="char-count">{{prompt.length}}/500</text>
   </view>
 
-  <button
-    type="primary"
-    loading="{{loading || polling}}"
-    disabled="{{loading || polling || !prompt}}"
-    bindtap="onGenerate"
-  >
-    {{loading ? '生成中...' : (polling ? '生成中(' + pollCount + ')...' : '生成图片')}}
-  </button>
+  <view class="btn-group">
+    <button
+      type="primary"
+      loading="{{loading || polling}}"
+      disabled="{{loading || polling || !prompt}}"
+      bindtap="onGenerate"
+    >
+      {{loading ? '生成中...' : (polling ? '生成中(' + pollCount + ')...' : '生成图片')}}
+    </button>
+    <button
+      wx:if="{{polling}}"
+      class="cancel-btn"
+      type="warn"
+      size="mini"
+      bindtap="onCancel"
+    >
+      取消
+    </button>
+  </view>
 
   <view wx:if="{{imageUrl}}" class="card image-card">
     <text class="label">生成结果</text>
