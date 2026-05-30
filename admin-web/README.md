@@ -17,9 +17,12 @@ npm run dev
 ```bash
 VITE_CLOUDBASE_ENV_ID=cloudbase-3gphz7fk0fe1b760
 VITE_CLOUDBASE_ADMIN_FUNCTION=adminCore
+VITE_WECHAT_LOGIN_ENABLED=false
+VITE_WECHAT_PROVIDER_ID=wx_open
+# VITE_WECHAT_REDIRECT_URI=https://your-admin-domain.com/
 ```
 
-Web 管理员白名单在 `adminCore` 云函数环境变量 `ADMIN_WEB_UIDS` 中配置，不写入前端环境变量。
+Web 管理员白名单在 `adminCore` 云函数环境变量 `ADMIN_WEB_UIDS` 中配置；首次扫码自动准入会写入 `system_configs/admin_web_auto_admins`。这些管理员 uid 不写入前端环境变量。
 
 ## 检查与构建
 

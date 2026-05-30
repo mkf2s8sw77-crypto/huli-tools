@@ -93,6 +93,21 @@ npm run dev             # 默认 http://localhost:60530
 |---|---|
 | `VITE_CLOUDBASE_ENV_ID` | CloudBase 环境 ID，默认 `cloudbase-3gphz7fk0fe1b760` |
 | `VITE_CLOUDBASE_ADMIN_FUNCTION` | 管理云函数名，默认 `adminCore` |
+| `VITE_WECHAT_LOGIN_ENABLED` | 是否启用微信扫码登录，默认 `false` |
+| `VITE_WECHAT_PROVIDER_ID` | CloudBase 微信开放平台 provider ID，默认 `wx_open` |
+| `VITE_WECHAT_REDIRECT_URI` | 可选，OAuth 回调地址，默认 `window.location.origin + window.location.pathname` |
+
+### 微信扫码登录配置
+
+启用微信扫码登录需完成以下步骤：
+
+1. **微信开放平台**：注册网站应用，获取 AppID 和 AppSecret，配置授权回调域名。
+2. **CloudBase 控制台**：环境 → 身份认证 → 登录方式 → 启用"微信开放平台登录"，填入 AppID/AppSecret。
+3. **CloudBase 安全来源**：添加管理端域名（含回调域名）。
+4. **admin-web 环境变量**：设置 `VITE_WECHAT_LOGIN_ENABLED=true`。
+5. **首次登录**：当 `ADMIN_OPENIDS`、`ADMIN_WEB_UIDS` 均为空且无任何持久化 Web 管理员时，第一个成功扫码的用户自动成为管理员。
+
+> 注意：`localhost` 通常无法完成微信开放平台扫码回调，本地开发建议保持账号密码登录，扫码功能在已备案域名上验证。
 
 ### 构建
 

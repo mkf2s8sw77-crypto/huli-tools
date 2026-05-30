@@ -48,6 +48,7 @@ export class AdminApiError extends Error {
 export const adminApi = {
   getAdminMe: () => callAdmin("getAdminMe"),
   dashboardSummary: () => callAdmin("dashboardSummary"),
+  bootstrapFirstWebAdmin: () => callAdmin("bootstrapFirstWebAdmin"),
 
   listUsers: (params: { page?: number; pageSize?: number; keyword?: string } = {}) =>
     callAdmin<PaginatedData<Record<string, unknown>>>("listUsers", params),

@@ -4,6 +4,7 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const _ = db.command;
 let cachedCloudBaseAuth;
+const WEB_ADMIN_CONFIG_KEY = "admin_web_auto_admins";
 
 function makeResponse(ok, dataOrError, requestId) {
   if (ok) {
@@ -22,6 +23,31 @@ function getAdminWebUids() {
   const raw = process.env.ADMIN_WEB_UIDS || "";
   if (!raw) return [];
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+async function getPersistedWebAdmins() {
+  try {
+    const res = await db.collection("system_configs")
+      .where({ key: WEB_ADMIN_CONFIG_KEY })
+      .get();
+    const admins = [];
+    for (const item of res.data || []) {
+      if (Array.isArray(item.value)) {
+        admins.push(...item.value.filter((s) => typeof s === "string" && s.trim()));
+      }
+    }
+    return [...new Set(admins)];
+  } catch (err) {
+    console.warn("读取持久化 Web 管理员失败:", err.message);
+  }
+  return [];
+}
+
+async function getAllWebAdminUids() {
+  const envUids = getAdminWebUids();
+  const persistedUids = await getPersistedWebAdmins();
+  const combined = new Set([...envUids, ...persistedUids]);
+  return [...combined];
 }
 
 function getInternalToken() {
@@ -76,7 +102,7 @@ function getContextUid(wxContext) {
  * 统一管理员身份解析，同时兼容小程序和 Web SDK 调用。
  * 返回 { ok, adminUserId, source, response }
  */
-function resolveAdminIdentity(wxContext, requestId) {
+async function resolveAdminIdentity(wxContext, requestId) {
   const openid = normalizeString(wxContext.OPENID);
   const uid = getCloudBaseAuthUid() || getContextUid(wxContext);
 
@@ -88,7 +114,7 @@ function resolveAdminIdentity(wxContext, requestId) {
   }
 
   const adminOpenids = getAdminOpenids();
-  const adminWebUids = getAdminWebUids();
+  const adminWebUids = await getAllWebAdminUids();
 
   if (adminOpenids.length === 0 && adminWebUids.length === 0) {
     return {
@@ -112,8 +138,8 @@ function resolveAdminIdentity(wxContext, requestId) {
 }
 
 // 兼容旧的 validateAdmin 签名，内部调用 resolveAdminIdentity
-function validateAdmin(wxContext, requestId) {
-  const result = resolveAdminIdentity(wxContext, requestId);
+async function validateAdmin(wxContext, requestId) {
+  const result = await resolveAdminIdentity(wxContext, requestId);
   if (!result.ok) {
     return { ok: false, response: result.response };
   }
@@ -194,7 +220,7 @@ const AUDIT_SAFE_FIELDS = ["_id", "adminUserId", "action", "targetCollection", "
 async function getAdminMe(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const identity = resolveAdminIdentity(wxContext, requestId);
+  const identity = await resolveAdminIdentity(wxContext, requestId);
   if (!identity.ok) return identity.response;
 
   return makeResponse(true, {
@@ -207,7 +233,7 @@ async function getAdminMe(event, context) {
 async function dashboardSummary(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const summary = {};
@@ -275,7 +301,7 @@ async function dashboardSummary(event, context) {
 async function listUsers(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -316,7 +342,7 @@ async function listUsers(event, context) {
 async function getUserDetail(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { userId } = event;
@@ -394,7 +420,7 @@ async function getUserDetail(event, context) {
 async function listPointTransactions(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -437,7 +463,7 @@ async function listPointTransactions(event, context) {
 async function listOrders(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -481,7 +507,7 @@ async function listOrders(event, context) {
 async function listUsageRecords(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -525,7 +551,7 @@ async function listUsageRecords(event, context) {
 async function listApps(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -556,7 +582,7 @@ async function listApps(event, context) {
 async function listPackages(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -587,7 +613,7 @@ async function listPackages(event, context) {
 async function listAuditLogs(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
 
   const { page, pageSize, skip } = parsePagination(event);
@@ -660,7 +686,7 @@ async function adjustPoints(event, context) {
   const requestId = context.requestId || Date.now().toString();
   const { targetUserId, deltaPoints, note, idempotencyKey } = event;
 
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
   const adminUserId = adminCheck.adminUserId;
 
@@ -735,7 +761,7 @@ async function upsertApp(event, context) {
   const requestId = context.requestId || Date.now().toString();
   const { appKey, name, description, entryPage, cloudFunctionName, status, pricing, sortOrder } = event;
 
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
   const adminUserId = adminCheck.adminUserId;
 
@@ -800,7 +826,7 @@ async function upsertPackage(event, context) {
   const requestId = context.requestId || Date.now().toString();
   const { packageKey, name, amountFen, basePoints, bonusPoints, status, sortOrder } = event;
 
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
   const adminUserId = adminCheck.adminUserId;
 
@@ -866,7 +892,7 @@ async function initSchema(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
 
-  const adminCheck = validateAdmin(wxContext, requestId);
+  const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
   const adminUserId = adminCheck.adminUserId;
 
@@ -989,6 +1015,47 @@ async function initSchema(event, context) {
   }, requestId);
 }
 
+async function bootstrapFirstWebAdmin(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+
+  const uid = getCloudBaseAuthUid() || getContextUid(wxContext);
+  if (!uid) {
+    return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
+  }
+
+  const adminOpenids = getAdminOpenids();
+  const envWebUids = getAdminWebUids();
+  const persistedAdmins = await getPersistedWebAdmins();
+
+  if (adminOpenids.length > 0 || envWebUids.length > 0 || persistedAdmins.length > 0) {
+    return makeResponse(false, { code: "WEB_ADMIN_ALREADY_CONFIGURED", message: "已有管理员存在，无法自动准入" }, requestId);
+  }
+
+  try {
+    await db.collection("system_configs").add({
+      data: {
+        _id: WEB_ADMIN_CONFIG_KEY,
+        key: WEB_ADMIN_CONFIG_KEY,
+        value: [uid],
+        description: "首次扫码自动准入的 Web 管理员 uid 列表",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    await writeAuditLog("web:" + uid, "bootstrapFirstWebAdmin", "system_configs", WEB_ADMIN_CONFIG_KEY, {}, { uid, autoAdmitted: true }, requestId);
+
+    return makeResponse(true, { uid, message: "已成为首位 Web 管理员" }, requestId);
+  } catch (err) {
+    const currentAdmins = await getPersistedWebAdmins();
+    if (currentAdmins.length > 0) {
+      return makeResponse(false, { code: "WEB_ADMIN_ALREADY_CONFIGURED", message: "已有管理员存在，无法自动准入" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "自动准入失败: " + err.message }, requestId);
+  }
+}
+
 // ─── 主入口 ───────────────────────────────────────────────
 
 exports.main = async (event, context) => {
@@ -1000,6 +1067,7 @@ exports.main = async (event, context) => {
     adjustPoints,
     upsertApp,
     upsertPackage,
+    bootstrapFirstWebAdmin,
     listAuditLogs,
     getAdminMe,
     dashboardSummary,

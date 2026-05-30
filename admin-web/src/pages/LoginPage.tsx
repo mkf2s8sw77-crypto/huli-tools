@@ -1,7 +1,22 @@
 import { useState } from "react";
-import { Card, Form, Input, Button, message, Typography } from "antd";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { Card, Form, Input, Button, message, Typography, Divider } from "antd";
+import { LockOutlined, UserOutlined, WechatOutlined } from "@ant-design/icons";
 import { auth } from "../services/cloudbase";
+
+const WECHAT_LOGIN_ENABLED = import.meta.env.VITE_WECHAT_LOGIN_ENABLED === "true";
+const WECHAT_PROVIDER_ID = import.meta.env.VITE_WECHAT_PROVIDER_ID || "wx_open";
+const WECHAT_REDIRECT_URI = import.meta.env.VITE_WECHAT_REDIRECT_URI || "";
+
+function createOAuthState() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function getWechatRedirectUri() {
+  return WECHAT_REDIRECT_URI || window.location.origin + window.location.pathname;
+}
 
 interface Props {
   onLoginSuccess: () => void;
@@ -9,17 +24,16 @@ interface Props {
 
 export default function LoginPage({ onLoginSuccess }: Props) {
   const [loading, setLoading] = useState(false);
+  const [wechatLoading, setWechatLoading] = useState(false);
 
   const handleLogin = async (values: { account: string; password: string }) => {
     setLoading(true);
     try {
-      // 尝试用户名密码登录
       await auth.signInWithUsernameAndPassword(values.account, values.password);
       message.success("登录成功");
       onLoginSuccess();
     } catch (err: unknown) {
       const e = err as { message?: string; code?: string };
-      // 如果用户名登录失败，尝试邮箱登录
       try {
         await auth.signInWithEmailAndPassword(values.account, values.password);
         message.success("登录成功");
@@ -30,6 +44,35 @@ export default function LoginPage({ onLoginSuccess }: Props) {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWechatLogin = async () => {
+    setWechatLoading(true);
+    try {
+      const state = createOAuthState();
+      sessionStorage.setItem("wx_oauth_state", state);
+
+      const redirectUri = getWechatRedirectUri();
+
+      const result = await (auth as unknown as {
+        genProviderRedirectUri: (opts: { provider_id: string; redirect_uri: string; state: string }) => Promise<{ uri: string }>;
+      }).genProviderRedirectUri({
+        provider_id: WECHAT_PROVIDER_ID,
+        redirect_uri: redirectUri,
+        state,
+      });
+
+      if (result?.uri) {
+        window.location.href = result.uri;
+      } else {
+        message.error("获取微信授权地址失败，请检查 CloudBase 微信开放平台登录配置");
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      message.error("微信登录发起失败: " + (e.message || "请检查 CloudBase 微信开放平台登录配置"));
+    } finally {
+      setWechatLoading(false);
     }
   };
 
@@ -55,6 +98,22 @@ export default function LoginPage({ onLoginSuccess }: Props) {
             </Button>
           </Form.Item>
         </Form>
+
+        {WECHAT_LOGIN_ENABLED && (
+          <>
+            <Divider plain>或</Divider>
+            <Button
+              block
+              size="large"
+              icon={<WechatOutlined />}
+              loading={wechatLoading}
+              onClick={handleWechatLogin}
+              style={{ background: "#07c160", borderColor: "#07c160", color: "#fff" }}
+            >
+              微信扫码登录
+            </Button>
+          </>
+        )}
       </Card>
     </div>
   );

@@ -43,8 +43,9 @@
 - `admin-web/src` 中不得出现对业务集合的 `collection(...)` 直连。
 - `admin-web/src` 中不得出现 `INTERNAL_API_SECRET`、支付私钥等敏感标识。
 - Web 管理端通过 `@cloudbase/js-sdk` 调用 `adminCore` 云函数，不得绕过云函数直接读写集合。
-- Web 管理员使用 `ADMIN_WEB_UIDS`（CloudBase Auth uid），与小程序管理员 `ADMIN_OPENIDS` 独立管理。
+- Web 管理员来源：环境变量 `ADMIN_WEB_UIDS` + 首次扫码自动准入持久化于 `system_configs/admin_web_auto_admins`；两者合并校验。
 - `adminCore` 校验 Web 管理员时必须从服务端 CloudBase Auth 上下文读取 uid，不能信任前端传入 uid。
+- 微信扫码登录走 CloudBase Web Auth 的微信开放平台 OAuth（`genProviderRedirectUri` → `grantProviderToken` → `signInWithProvider`），AppSecret 仅存于 CloudBase 控制台，前端不保存。
 - 提交前运行 `bash scripts/check-admin-web-boundaries.sh`。
 
 ## 7. 幂等与状态机

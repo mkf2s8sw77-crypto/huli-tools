@@ -295,6 +295,19 @@
 ]
 ```
 
+### 运行时配置数据
+
+```json
+[
+  {
+    "_id": "admin_web_auto_admins",
+    "key": "admin_web_auto_admins",
+    "value": ["cloudbase-auth-uid"],
+    "description": "首次扫码自动准入的 Web 管理员 uid 列表"
+  }
+]
+```
+
 ## 10. app_ai_draw_tasks
 
 AI 绘图应用私有集合，用于把外部图片生成任务 `jobId` 绑定到当前用户的 `usageId`，防止跨应用 usage 复用、跨任务查询和重复结算。

@@ -319,8 +319,9 @@ huli-tools/
 | `adjustPoints` | 管理员 | 手动调整用户积分 |
 | `upsertApp` | 管理员 | 新增或更新应用 |
 | `upsertPackage` | 管理员 | 新增或更新充值包 |
+| `bootstrapFirstWebAdmin` | 已登录 Web 用户 | 无任何管理员时，将当前 CloudBase Auth uid 自动准入为首位 Web 管理员 |
 
-支持小程序 openid（`ADMIN_OPENIDS`）和 Web uid（`ADMIN_WEB_UIDS`）双通道鉴权。Web uid 由 `@cloudbase/node-sdk` 在云函数服务端通过 `auth.getUserInfo().uid` 读取，不能由前端传入。
+支持小程序 openid（`ADMIN_OPENIDS`）和 Web uid（`ADMIN_WEB_UIDS` + `system_configs/admin_web_auto_admins`）双通道鉴权。Web uid 由 `@cloudbase/node-sdk` 在云函数服务端通过 `auth.getUserInfo().uid` 读取，不能由前端传入。
 
 **关键函数**：
 

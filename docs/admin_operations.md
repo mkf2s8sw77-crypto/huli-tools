@@ -12,11 +12,17 @@
 ### Web 管理员
 
 1. 在 CloudBase 控制台启用 Web Auth 登录方式（用户名/密码或邮箱/密码）。
-2. 创建或登录首个管理员账号，获取 CloudBase Auth `uid`。
-3. 将 `uid` 配置到 `adminCore` 环境变量 `ADMIN_WEB_UIDS`（逗号分隔）。
-4. 重新部署 `adminCore` 云函数。
+2. **方式 A：环境变量手动配置**
+   - 创建或登录首个管理员账号，获取 CloudBase Auth `uid`。
+   - 将 `uid` 配置到 `adminCore` 环境变量 `ADMIN_WEB_UIDS`（逗号分隔）。
+   - 重新部署 `adminCore` 云函数。
+3. **方式 B：微信扫码首次自动准入**
+   - 在 CloudBase 控制台启用"微信开放平台登录"，填入网站应用 AppID/AppSecret。
+   - 配置 `admin-web` 环境变量 `VITE_WECHAT_LOGIN_ENABLED=true`。
+   - 当 `ADMIN_OPENIDS`、`ADMIN_WEB_UIDS` 均为空且无任何持久化 Web 管理员时，第一个成功扫码的用户 uid 自动写入 `system_configs/admin_web_auto_admins` 成为管理员。
+   - 之后的微信扫码用户需已在管理员列表中才能进入。
 
-> 未配置 `ADMIN_OPENIDS` 且未配置 `ADMIN_WEB_UIDS` 时，所有管理操作返回 `ADMIN_NOT_CONFIGURED`。
+> 未配置 `ADMIN_OPENIDS` 且未配置 `ADMIN_WEB_UIDS` 且无持久化管理员时，所有管理操作返回 `ADMIN_NOT_CONFIGURED`。
 > Web uid 必须由 `adminCore` 在服务端从 CloudBase Auth 上下文读取，前端不得传入 uid 作为鉴权依据。
 
 ## 环境变量
@@ -54,6 +60,7 @@
 | `adjustPoints` | 管理员手动增减用户积分，自动写审计日志 |
 | `upsertApp` | 新增或更新应用目录 |
 | `upsertPackage` | 新增或更新充值包 |
+| `bootstrapFirstWebAdmin` | 首次自动准入：当无任何管理员时，将当前用户 uid 写入持久化管理员列表 |
 
 ### 统一分页与筛选
 
@@ -152,9 +159,10 @@ const res = await app.callFunction({ name: "adminCore", data: { action: "getAdmi
 
 | 错误码 | 说明 |
 |---|---|
-| `ADMIN_NOT_CONFIGURED` | `ADMIN_OPENIDS` 和 `ADMIN_WEB_UIDS` 均未配置 |
+| `ADMIN_NOT_CONFIGURED` | `ADMIN_OPENIDS` 和 `ADMIN_WEB_UIDS` 均未配置且无持久化管理员 |
 | `FORBIDDEN` | 当前用户不在管理员白名单中 |
 | `UNAUTHORIZED` | 无法获取调用者身份 |
+| `WEB_ADMIN_ALREADY_CONFIGURED` | 已有管理员存在，无法自动准入 |
 | `INVALID_PARAM` | 参数校验失败 |
 | `NOT_FOUND` | 目标资源不存在 |
 | `DB_ERROR` | 数据库操作失败 |

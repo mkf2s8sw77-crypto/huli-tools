@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { Layout, Menu, Dropdown, Button, Spin, Result, message } from "antd";
 import {
@@ -43,6 +43,13 @@ const menuItems = [
   { key: "/audit-logs", icon: <AuditOutlined />, label: "审计日志" },
 ];
 
+const WECHAT_PROVIDER_ID = import.meta.env.VITE_WECHAT_PROVIDER_ID || "wx_open";
+const WECHAT_REDIRECT_URI = import.meta.env.VITE_WECHAT_REDIRECT_URI || "";
+
+function getWechatRedirectUri() {
+  return WECHAT_REDIRECT_URI || window.location.origin + window.location.pathname;
+}
+
 function App() {
   const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +57,58 @@ function App() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const oauthHandled = useRef(false);
+
+  const handleOAuthCallback = useCallback(async (): Promise<boolean> => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+    const oauthError = params.get("error") || params.get("error_description");
+
+    if (oauthError) {
+      message.error("微信登录失败: " + oauthError);
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+      return false;
+    }
+
+    if (!code || !state) return false;
+
+    const savedState = sessionStorage.getItem("wx_oauth_state");
+    sessionStorage.removeItem("wx_oauth_state");
+
+    if (state !== savedState) {
+      message.error("微信登录失败：state 校验不通过，请重试");
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+      return false;
+    }
+
+    try {
+      const typedAuth = auth as unknown as {
+        grantProviderToken: (opts: { provider_id: string; provider_redirect_uri: string; provider_code: string }) => Promise<{ provider_token: string }>;
+        signInWithProvider: (opts: { provider_id: string; provider_token: string }) => Promise<unknown>;
+      };
+
+      const tokenResult = await typedAuth.grantProviderToken({
+        provider_id: WECHAT_PROVIDER_ID,
+        provider_redirect_uri: getWechatRedirectUri(),
+        provider_code: code,
+      });
+
+      await typedAuth.signInWithProvider({
+        provider_id: WECHAT_PROVIDER_ID,
+        provider_token: tokenResult.provider_token,
+      });
+
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+      message.success("微信登录成功");
+      return true;
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      message.error("微信登录失败: " + (e.message || "换取凭证失败，请重试"));
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+      return false;
+    }
+  }, []);
 
   const checkAuth = useCallback(async () => {
     setLoading(true);
@@ -65,7 +124,17 @@ function App() {
       setAdminInfo(res.data as unknown as AdminInfo);
     } catch (err: unknown) {
       const error = err as { code?: string };
-      if (error.code === "FORBIDDEN" || error.code === "UNAUTHORIZED") {
+      if (error.code === "ADMIN_NOT_CONFIGURED") {
+        try {
+          await adminApi.bootstrapFirstWebAdmin();
+          const res = await adminApi.getAdminMe();
+          setAdminInfo(res.data as unknown as AdminInfo);
+          message.success("已自动成为首位 Web 管理员");
+          return;
+        } catch {
+          setForbidden(true);
+        }
+      } else if (error.code === "FORBIDDEN" || error.code === "UNAUTHORIZED") {
         setForbidden(true);
       }
       setAdminInfo(null);
@@ -75,8 +144,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    const init = async () => {
+      if (!oauthHandled.current) {
+        oauthHandled.current = true;
+        await handleOAuthCallback();
+      }
+      await checkAuth();
+    };
+    init();
+  }, [checkAuth, handleOAuthCallback]);
 
   useEffect(() => {
     const handler = () => {
