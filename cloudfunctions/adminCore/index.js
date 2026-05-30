@@ -2,6 +2,8 @@ const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
+const _ = db.command;
+let cachedCloudBaseAuth;
 
 function makeResponse(ok, dataOrError, requestId) {
   if (ok) {
@@ -16,29 +18,623 @@ function getAdminOpenids() {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-function isAdmin(openid) {
-  const admins = getAdminOpenids();
-  return admins.includes(openid);
+function getAdminWebUids() {
+  const raw = process.env.ADMIN_WEB_UIDS || "";
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
 function getInternalToken() {
   return process.env.INTERNAL_API_SECRET || "";
 }
 
+function getCurrentEnvId() {
+  return process.env.TCB_ENV || process.env.SCF_NAMESPACE || cloud.DYNAMIC_CURRENT_ENV || "";
+}
+
+function normalizeString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getCloudBaseAuth() {
+  if (cachedCloudBaseAuth !== undefined) return cachedCloudBaseAuth;
+
+  try {
+    const tcb = require("@cloudbase/node-sdk");
+    const app = tcb.init({
+      env: tcb.SYMBOL_DEFAULT_ENV || getCurrentEnvId(),
+    });
+    cachedCloudBaseAuth = app.auth();
+  } catch (err) {
+    console.warn("初始化 CloudBase Node SDK 失败:", err.message);
+    cachedCloudBaseAuth = null;
+  }
+
+  return cachedCloudBaseAuth;
+}
+
+function getCloudBaseAuthUid() {
+  const auth = getCloudBaseAuth();
+  if (!auth || typeof auth.getUserInfo !== "function") return "";
+
+  try {
+    const userInfo = auth.getUserInfo() || {};
+    return normalizeString(userInfo.uid);
+  } catch (err) {
+    console.warn("获取 CloudBase Auth 用户信息失败:", err.message);
+    return "";
+  }
+}
+
+function getContextUid(wxContext) {
+  return normalizeString(wxContext.UID)
+    || normalizeString(wxContext.UIN)
+    || normalizeString(wxContext.TCB_UUID);
+}
+
+/**
+ * 统一管理员身份解析，同时兼容小程序和 Web SDK 调用。
+ * 返回 { ok, adminUserId, source, response }
+ */
+function resolveAdminIdentity(wxContext, requestId) {
+  const openid = normalizeString(wxContext.OPENID);
+  const uid = getCloudBaseAuthUid() || getContextUid(wxContext);
+
+  if (!openid && !uid) {
+    return {
+      ok: false,
+      response: makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId),
+    };
+  }
+
+  const adminOpenids = getAdminOpenids();
+  const adminWebUids = getAdminWebUids();
+
+  if (adminOpenids.length === 0 && adminWebUids.length === 0) {
+    return {
+      ok: false,
+      response: makeResponse(false, { code: "ADMIN_NOT_CONFIGURED", message: "管理员未配置，请在云函数环境变量中设置 ADMIN_OPENIDS 或 ADMIN_WEB_UIDS" }, requestId),
+    };
+  }
+
+  if (openid && adminOpenids.includes(openid)) {
+    return { ok: true, adminUserId: openid, source: "miniProgram" };
+  }
+
+  if (uid && adminWebUids.includes(uid)) {
+    return { ok: true, adminUserId: "web:" + uid, source: "web" };
+  }
+
+  return {
+    ok: false,
+    response: makeResponse(false, { code: "FORBIDDEN", message: "无权访问管理接口" }, requestId),
+  };
+}
+
+// 兼容旧的 validateAdmin 签名，内部调用 resolveAdminIdentity
+function validateAdmin(wxContext, requestId) {
+  const result = resolveAdminIdentity(wxContext, requestId);
+  if (!result.ok) {
+    return { ok: false, response: result.response };
+  }
+  return { ok: true, openid: result.adminUserId, adminUserId: result.adminUserId, source: result.source };
+}
+
+async function writeAuditLog(adminUserId, action, targetCollection, targetId, beforeSummary, afterSummary, requestId) {
+  try {
+    await db.collection("admin_audit_logs").add({
+      data: {
+        adminUserId,
+        action,
+        targetCollection,
+        targetId,
+        beforeSummary: typeof beforeSummary === "string" ? beforeSummary : JSON.stringify(beforeSummary),
+        afterSummary: typeof afterSummary === "string" ? afterSummary : JSON.stringify(afterSummary),
+        requestId,
+        createdAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.error("写审计日志失败:", err.message);
+  }
+}
+
+function parsePagination(event) {
+  const page = Math.max(parseInt(event.page) || 1, 1);
+  const pageSize = Math.min(Math.max(parseInt(event.pageSize) || 20, 1), 100);
+  const skip = (page - 1) * pageSize;
+  return { page, pageSize, skip };
+}
+
+function parseTimeRange(event) {
+  const result = {};
+  if (event.startAt) {
+    const d = new Date(event.startAt);
+    if (isNaN(d.getTime())) return { error: "startAt 格式无效" };
+    result.startAt = d;
+  }
+  if (event.endAt) {
+    const d = new Date(event.endAt);
+    if (isNaN(d.getTime())) return { error: "endAt 格式无效" };
+    result.endAt = d;
+  }
+  return result;
+}
+
+function buildTimeCondition(timeRange) {
+  if (timeRange.startAt && timeRange.endAt) {
+    return _.gte(timeRange.startAt).and(_.lte(timeRange.endAt));
+  }
+  if (timeRange.startAt) return _.gte(timeRange.startAt);
+  if (timeRange.endAt) return _.lte(timeRange.endAt);
+  return null;
+}
+
+// 字段白名单过滤
+function pickFields(obj, fields) {
+  if (!obj) return obj;
+  const result = {};
+  for (const f of fields) {
+    if (obj[f] !== undefined) result[f] = obj[f];
+  }
+  return result;
+}
+
+const USER_SAFE_FIELDS = ["_id", "openid", "unionid", "phoneNumber", "nickname", "avatarUrl", "roles", "status", "lastLoginAt", "createdAt", "updatedAt"];
+const POINT_ACCOUNT_SAFE_FIELDS = ["_id", "userId", "availablePoints", "frozenPoints", "totalRechargedPoints", "totalConsumedPoints", "createdAt", "updatedAt"];
+const POINT_TX_SAFE_FIELDS = ["_id", "userId", "type", "deltaAvailable", "deltaFrozen", "availableAfter", "frozenAfter", "relatedAppKey", "relatedOrderId", "relatedUsageId", "idempotencyKey", "note", "createdAt"];
+const ORDER_SAFE_FIELDS = ["_id", "orderNo", "userId", "packageKey", "amountFen", "pointsTotal", "status", "provider", "providerTradeNo", "paidAt", "closedAt", "createdAt", "updatedAt"];
+const USAGE_SAFE_FIELDS = ["_id", "userId", "appKey", "status", "costPoints", "freezeTransactionId", "settleTransactionId", "releaseTransactionId", "inputSummary", "resultRef", "errorCode", "errorMessage", "startedAt", "finishedAt"];
+const APP_SAFE_FIELDS = ["_id", "appKey", "name", "description", "entryPage", "cloudFunctionName", "status", "pricing", "sortOrder", "icon", "createdAt", "updatedAt"];
+const PACKAGE_SAFE_FIELDS = ["_id", "packageKey", "name", "amountFen", "basePoints", "bonusPoints", "status", "sortOrder", "createdAt", "updatedAt"];
+const AUDIT_SAFE_FIELDS = ["_id", "adminUserId", "action", "targetCollection", "targetId", "beforeSummary", "afterSummary", "requestId", "createdAt"];
+
+// ─── 只读 Action ──────────────────────────────────────────
+
+async function getAdminMe(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const identity = resolveAdminIdentity(wxContext, requestId);
+  if (!identity.ok) return identity.response;
+
+  return makeResponse(true, {
+    adminUserId: identity.adminUserId,
+    source: identity.source,
+    envId: getCurrentEnvId(),
+  }, requestId);
+}
+
+async function dashboardSummary(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const summary = {};
+  try {
+    const usersCount = await db.collection("users").count();
+    summary.totalUsers = usersCount.total || 0;
+  } catch (err) {
+    summary.totalUsers = 0;
+  }
+
+  try {
+    const ordersCount = await db.collection("payment_orders").count();
+    summary.totalOrders = ordersCount.total || 0;
+  } catch (err) {
+    summary.totalOrders = 0;
+  }
+
+  try {
+    const accountsCount = await db.collection("point_accounts").count();
+    summary.totalPointAccounts = accountsCount.total || 0;
+  } catch (err) {
+    summary.totalPointAccounts = 0;
+  }
+
+  try {
+    const usageCount = await db.collection("app_usage_records").count();
+    summary.totalUsageRecords = usageCount.total || 0;
+  } catch (err) {
+    summary.totalUsageRecords = 0;
+  }
+
+  try {
+    const recentOrders = await db.collection("payment_orders")
+      .orderBy("createdAt", "desc")
+      .limit(5)
+      .get();
+    summary.recentOrders = (recentOrders.data || []).map((o) => pickFields(o, ORDER_SAFE_FIELDS));
+  } catch (err) {
+    summary.recentOrders = [];
+  }
+
+  try {
+    const recentUsage = await db.collection("app_usage_records")
+      .orderBy("startedAt", "desc")
+      .limit(5)
+      .get();
+    summary.recentUsageRecords = (recentUsage.data || []).map((u) => pickFields(u, USAGE_SAFE_FIELDS));
+  } catch (err) {
+    summary.recentUsageRecords = [];
+  }
+
+  try {
+    const recentAudit = await db.collection("admin_audit_logs")
+      .orderBy("createdAt", "desc")
+      .limit(5)
+      .get();
+    summary.recentAuditLogs = (recentAudit.data || []).map((a) => pickFields(a, AUDIT_SAFE_FIELDS));
+  } catch (err) {
+    summary.recentAuditLogs = [];
+  }
+
+  return makeResponse(true, summary, requestId);
+}
+
+async function listUsers(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+  const { keyword } = event;
+
+  try {
+    let query = db.collection("users");
+    if (keyword && typeof keyword === "string" && keyword.trim()) {
+      const kw = keyword.trim();
+      query = query.where(_.or([
+        { openid: kw },
+        { _id: kw },
+        { nickname: db.RegExp({ regexp: kw, options: "i" }) },
+      ]));
+    }
+
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("createdAt", "desc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((u) => pickFields(u, USER_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "users 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询用户失败: " + err.message }, requestId);
+  }
+}
+
+async function getUserDetail(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { userId } = event;
+  if (!userId || typeof userId !== "string") {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 userId" }, requestId);
+  }
+
+  const detail = {};
+
+  try {
+    const userRes = await db.collection("users").where({ _id: userId }).get();
+    detail.user = userRes.data[0] ? pickFields(userRes.data[0], USER_SAFE_FIELDS) : null;
+  } catch (err) {
+    detail.user = null;
+  }
+
+  if (!detail.user) {
+    try {
+      const userRes = await db.collection("users").where({ openid: userId }).get();
+      detail.user = userRes.data[0] ? pickFields(userRes.data[0], USER_SAFE_FIELDS) : null;
+    } catch (err) {
+      detail.user = null;
+    }
+  }
+
+  if (!detail.user) {
+    return makeResponse(false, { code: "NOT_FOUND", message: "用户不存在" }, requestId);
+  }
+
+  const actualUserId = detail.user._id || detail.user.openid;
+
+  try {
+    const accRes = await db.collection("point_accounts").where({ userId: actualUserId }).get();
+    detail.pointAccount = accRes.data[0] ? pickFields(accRes.data[0], POINT_ACCOUNT_SAFE_FIELDS) : null;
+  } catch (err) {
+    detail.pointAccount = null;
+  }
+
+  try {
+    const txRes = await db.collection("point_transactions")
+      .where({ userId: actualUserId })
+      .orderBy("createdAt", "desc")
+      .limit(10)
+      .get();
+    detail.recentTransactions = (txRes.data || []).map((t) => pickFields(t, POINT_TX_SAFE_FIELDS));
+  } catch (err) {
+    detail.recentTransactions = [];
+  }
+
+  try {
+    const orderRes = await db.collection("payment_orders")
+      .where({ userId: actualUserId })
+      .orderBy("createdAt", "desc")
+      .limit(10)
+      .get();
+    detail.recentOrders = (orderRes.data || []).map((o) => pickFields(o, ORDER_SAFE_FIELDS));
+  } catch (err) {
+    detail.recentOrders = [];
+  }
+
+  try {
+    const usageRes = await db.collection("app_usage_records")
+      .where({ userId: actualUserId })
+      .orderBy("startedAt", "desc")
+      .limit(10)
+      .get();
+    detail.recentUsageRecords = (usageRes.data || []).map((u) => pickFields(u, USAGE_SAFE_FIELDS));
+  } catch (err) {
+    detail.recentUsageRecords = [];
+  }
+
+  return makeResponse(true, detail, requestId);
+}
+
+async function listPointTransactions(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+  const timeRange = parseTimeRange(event);
+  if (timeRange.error) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: timeRange.error }, requestId);
+  }
+
+  try {
+    const where = {};
+    if (event.userId) where.userId = event.userId;
+    if (event.type) where.type = event.type;
+    const timeCond = buildTimeCondition(timeRange);
+    if (timeCond) where.createdAt = timeCond;
+
+    let query = db.collection("point_transactions");
+    if (Object.keys(where).length > 0) query = query.where(where);
+
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("createdAt", "desc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((t) => pickFields(t, POINT_TX_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "point_transactions 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询积分流水失败: " + err.message }, requestId);
+  }
+}
+
+async function listOrders(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+  const timeRange = parseTimeRange(event);
+  if (timeRange.error) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: timeRange.error }, requestId);
+  }
+
+  try {
+    const where = {};
+    if (event.userId) where.userId = event.userId;
+    if (event.orderNo) where.orderNo = event.orderNo;
+    if (event.status) where.status = event.status;
+    const timeCond2 = buildTimeCondition(timeRange);
+    if (timeCond2) where.createdAt = timeCond2;
+
+    let query = db.collection("payment_orders");
+    if (Object.keys(where).length > 0) query = query.where(where);
+
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("createdAt", "desc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((o) => pickFields(o, ORDER_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "payment_orders 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询订单失败: " + err.message }, requestId);
+  }
+}
+
+async function listUsageRecords(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+  const timeRange = parseTimeRange(event);
+  if (timeRange.error) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: timeRange.error }, requestId);
+  }
+
+  try {
+    const where = {};
+    if (event.userId) where.userId = event.userId;
+    if (event.appKey) where.appKey = event.appKey;
+    if (event.status) where.status = event.status;
+    const timeCond3 = buildTimeCondition(timeRange);
+    if (timeCond3) where.startedAt = timeCond3;
+
+    let query = db.collection("app_usage_records");
+    if (Object.keys(where).length > 0) query = query.where(where);
+
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("startedAt", "desc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((u) => pickFields(u, USAGE_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "app_usage_records 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询使用记录失败: " + err.message }, requestId);
+  }
+}
+
+async function listApps(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+
+  try {
+    let query = db.collection("apps");
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("sortOrder", "asc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((a) => pickFields(a, APP_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "apps 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询应用失败: " + err.message }, requestId);
+  }
+}
+
+async function listPackages(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+
+  try {
+    let query = db.collection("recharge_packages");
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("sortOrder", "asc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((p) => pickFields(p, PACKAGE_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "recharge_packages 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询充值包失败: " + err.message }, requestId);
+  }
+}
+
+async function listAuditLogs(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+  const timeRange = parseTimeRange(event);
+  if (timeRange.error) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: timeRange.error }, requestId);
+  }
+
+  try {
+    const where = {};
+    if (event.adminUserId) where.adminUserId = event.adminUserId;
+    if (event.actionFilter) where.action = event.actionFilter;
+    const timeCond4 = buildTimeCondition(timeRange);
+    if (timeCond4) where.createdAt = timeCond4;
+
+    let query = db.collection("admin_audit_logs");
+    if (Object.keys(where).length > 0) query = query.where(where);
+
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("createdAt", "desc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((a) => pickFields(a, AUDIT_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "admin_audit_logs 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询审计日志失败: " + err.message }, requestId);
+  }
+}
+
+// ─── 写操作 Action ────────────────────────────────────────
+
 async function checkCollectionsExist() {
   const required = [
-    "users",
-    "point_accounts",
-    "point_transactions",
-    "apps",
-    "app_usage_records",
-    "recharge_packages",
-    "payment_orders",
-    "admin_audit_logs",
-    "system_configs",
-    "app_ai_draw_tasks",
+    "users", "point_accounts", "point_transactions", "apps",
+    "app_usage_records", "recharge_packages", "payment_orders",
+    "admin_audit_logs", "system_configs", "app_ai_draw_tasks",
   ];
-
   const missing = [];
   for (const name of required) {
     try {
@@ -53,47 +649,10 @@ async function checkCollectionsExist() {
       }
     }
   }
-
   if (missing.length > 0) {
     return { ok: false, code: "MISSING_COLLECTION", missing, all: required };
   }
-
   return { ok: true };
-}
-
-function validateAdmin(wxContext, requestId) {
-  const openid = wxContext.OPENID;
-  if (!openid) {
-    return { ok: false, response: makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId) };
-  }
-  const adminOpenids = getAdminOpenids();
-  if (adminOpenids.length === 0) {
-    return { ok: false, response: makeResponse(false, { code: "ADMIN_NOT_CONFIGURED", message: "管理员未配置，请在云函数环境变量中设置 ADMIN_OPENIDS" }, requestId) };
-  }
-  if (!isAdmin(openid)) {
-    return { ok: false, response: makeResponse(false, { code: "FORBIDDEN", message: "无权访问管理接口" }, requestId) };
-  }
-  return { ok: true, openid };
-}
-
-async function writeAuditLog(openid, action, targetCollection, targetId, beforeSummary, afterSummary, requestId) {
-  try {
-    await db.collection("admin_audit_logs").add({
-      data: {
-        adminUserId: openid,
-        action,
-        targetCollection,
-        targetId,
-        beforeSummary: typeof beforeSummary === "string" ? beforeSummary : JSON.stringify(beforeSummary),
-        afterSummary: typeof afterSummary === "string" ? afterSummary : JSON.stringify(afterSummary),
-        requestId,
-        createdAt: new Date(),
-      },
-    });
-  } catch (err) {
-    // 审计日志非致命，但记录到控制台
-    console.error("写审计日志失败:", err.message);
-  }
 }
 
 async function adjustPoints(event, context) {
@@ -103,7 +662,7 @@ async function adjustPoints(event, context) {
 
   const adminCheck = validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
-  const openid = adminCheck.openid;
+  const adminUserId = adminCheck.adminUserId;
 
   if (!targetUserId) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "缺少目标用户" }, requestId);
@@ -115,7 +674,6 @@ async function adjustPoints(event, context) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "idempotencyKey 必须为字符串" }, requestId);
   }
 
-  // 读取调整前余额用于审计
   let beforeAccount = null;
   try {
     const res = await db.collection("point_accounts").where({ userId: targetUserId }).get();
@@ -124,24 +682,23 @@ async function adjustPoints(event, context) {
     // ignore
   }
 
-  // 调用 corePoints 调整积分
-  let adjustResult;
   const token = getInternalToken();
   if (!token) {
     return makeResponse(false, { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" }, requestId);
   }
 
+  let adjustResult;
   try {
     const res = await cloud.callFunction({
       name: "corePoints",
       data: {
         action: "adminAdjustPoints",
         _internalToken: token,
-        operatorOpenid: openid,
+        operatorOpenid: adminUserId,
         targetUserId,
         deltaPoints,
-        note: note || "管理员调试调整",
-        idempotencyKey: idempotencyKey || `admin_adjust_${requestId}`,
+        note: note || "管理员调整",
+        idempotencyKey: idempotencyKey || "admin_adjust_" + requestId,
       },
     });
     adjustResult = res.result;
@@ -154,7 +711,7 @@ async function adjustPoints(event, context) {
     return makeResponse(false, { code: "ADJUST_FAILED", message: "调整积分调用失败: " + err.message }, requestId);
   }
 
-  await writeAuditLog(openid, "adjustPoints", "point_accounts", targetUserId, {
+  await writeAuditLog(adminUserId, "adjustPoints", "point_accounts", targetUserId, {
     availablePointsBefore: beforeAccount ? beforeAccount.availablePoints : 0,
     frozenPointsBefore: beforeAccount ? beforeAccount.frozenPoints : 0,
     deltaPoints,
@@ -169,6 +726,7 @@ async function adjustPoints(event, context) {
     deltaPoints,
     transactionId: adjustResult.data.transactionId,
     availableAfter: adjustResult.data.availableAfter,
+    frozenAfter: adjustResult.data.frozenAfter,
   }, requestId);
 }
 
@@ -179,7 +737,7 @@ async function upsertApp(event, context) {
 
   const adminCheck = validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
-  const openid = adminCheck.openid;
+  const adminUserId = adminCheck.adminUserId;
 
   if (!appKey || typeof appKey !== "string" || appKey.trim().length === 0) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "appKey 不能为空" }, requestId);
@@ -224,7 +782,7 @@ async function upsertApp(event, context) {
     } catch (err) {
       return makeResponse(false, { code: "DB_ERROR", message: "更新应用失败: " + err.message }, requestId);
     }
-    await writeAuditLog(openid, "upsertApp", "apps", trimmedAppKey, { existing: existing }, { updated: appData }, requestId);
+    await writeAuditLog(adminUserId, "upsertApp", "apps", trimmedAppKey, { existing: existing }, { updated: appData }, requestId);
     return makeResponse(true, { appKey: trimmedAppKey, operation: "update" }, requestId);
   }
 
@@ -233,7 +791,7 @@ async function upsertApp(event, context) {
   } catch (err) {
     return makeResponse(false, { code: "DB_ERROR", message: "创建应用失败: " + err.message }, requestId);
   }
-  await writeAuditLog(openid, "upsertApp", "apps", trimmedAppKey, {}, { created: appData }, requestId);
+  await writeAuditLog(adminUserId, "upsertApp", "apps", trimmedAppKey, {}, { created: appData }, requestId);
   return makeResponse(true, { appKey: trimmedAppKey, operation: "create" }, requestId);
 }
 
@@ -244,7 +802,7 @@ async function upsertPackage(event, context) {
 
   const adminCheck = validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
-  const openid = adminCheck.openid;
+  const adminUserId = adminCheck.adminUserId;
 
   if (!packageKey || typeof packageKey !== "string" || packageKey.trim().length === 0) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "packageKey 不能为空" }, requestId);
@@ -291,7 +849,7 @@ async function upsertPackage(event, context) {
     } catch (err) {
       return makeResponse(false, { code: "DB_ERROR", message: "更新充值包失败: " + err.message }, requestId);
     }
-    await writeAuditLog(openid, "upsertPackage", "recharge_packages", trimmedKey, { existing: existing }, { updated: pkgData }, requestId);
+    await writeAuditLog(adminUserId, "upsertPackage", "recharge_packages", trimmedKey, { existing: existing }, { updated: pkgData }, requestId);
     return makeResponse(true, { packageKey: trimmedKey, operation: "update" }, requestId);
   }
 
@@ -300,42 +858,8 @@ async function upsertPackage(event, context) {
   } catch (err) {
     return makeResponse(false, { code: "DB_ERROR", message: "创建充值包失败: " + err.message }, requestId);
   }
-  await writeAuditLog(openid, "upsertPackage", "recharge_packages", trimmedKey, {}, { created: pkgData }, requestId);
+  await writeAuditLog(adminUserId, "upsertPackage", "recharge_packages", trimmedKey, {}, { created: pkgData }, requestId);
   return makeResponse(true, { packageKey: trimmedKey, operation: "create" }, requestId);
-}
-
-async function listAuditLogs(event, context) {
-  const wxContext = cloud.getWXContext();
-  const requestId = context.requestId || Date.now().toString();
-  const { page = 1, pageSize = 20 } = event;
-
-  const adminCheck = validateAdmin(wxContext, requestId);
-  if (!adminCheck.ok) return adminCheck.response;
-
-  const limit = Math.min(Math.max(pageSize, 1), 100);
-  const skip = Math.max((page - 1) * limit, 0);
-
-  try {
-    const res = await db.collection("admin_audit_logs")
-      .orderBy("createdAt", "desc")
-      .skip(skip)
-      .limit(limit)
-      .get();
-
-    const totalRes = await db.collection("admin_audit_logs").count();
-
-    return makeResponse(true, {
-      list: res.data || [],
-      total: totalRes.total || 0,
-      page,
-      pageSize: limit,
-    }, requestId);
-  } catch (err) {
-    if (err.message && err.message.includes("collection not exists")) {
-      return makeResponse(false, { code: "MISSING_COLLECTION", message: "admin_audit_logs 集合不存在" }, requestId);
-    }
-    return makeResponse(false, { code: "DB_ERROR", message: "查询审计日志失败: " + err.message }, requestId);
-  }
 }
 
 async function initSchema(event, context) {
@@ -344,9 +868,8 @@ async function initSchema(event, context) {
 
   const adminCheck = validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
-  const openid = adminCheck.openid;
+  const adminUserId = adminCheck.adminUserId;
 
-  // 检查集合是否存在
   const collCheck = await checkCollectionsExist();
   if (!collCheck.ok) {
     return makeResponse(false, {
@@ -362,7 +885,6 @@ async function initSchema(event, context) {
   const now = new Date();
   const results = { systemConfigs: 0, apps: 0, rechargePackages: 0, errors: [] };
 
-  // seed system_configs
   const systemConfigSeeds = [
     { key: "payment_provider", value: "mock", description: "支付提供商: mock 或 wechat", updatedAt: now },
     { key: "mock_payment_enabled", value: true, description: "是否启用模拟支付（仅开发测试环境）", updatedAt: now },
@@ -384,31 +906,20 @@ async function initSchema(event, context) {
     }
   }
 
-  // seed apps
   const appSeeds = [
     {
-      appKey: "demo_sum",
-      name: "积分示例工具",
+      appKey: "demo_sum", name: "积分示例工具",
       description: "输入两个数字求和，演示积分扣费链路",
-      entryPage: "/pages/tools/demo-sum/index",
-      cloudFunctionName: "demoSum",
-      status: "active",
-      pricing: { mode: "fixed", costPoints: 1 },
-      sortOrder: 1,
-      createdAt: now,
-      updatedAt: now,
+      entryPage: "/pages/tools/demo-sum/index", cloudFunctionName: "demoSum",
+      status: "active", pricing: { mode: "fixed", costPoints: 1 },
+      sortOrder: 1, createdAt: now, updatedAt: now,
     },
     {
-      appKey: "ai_draw",
-      name: "AI 绘图",
+      appKey: "ai_draw", name: "AI 绘图",
       description: "输入描述生成图片，演示异步任务与积分结算链路",
-      entryPage: "/pages/apps/ai_draw/index",
-      cloudFunctionName: "app_ai_draw",
-      status: "active",
-      pricing: { mode: "fixed", costPoints: 1 },
-      sortOrder: 2,
-      createdAt: now,
-      updatedAt: now,
+      entryPage: "/pages/apps/ai_draw/index", cloudFunctionName: "app_ai_draw",
+      status: "active", pricing: { mode: "fixed", costPoints: 1 },
+      sortOrder: 2, createdAt: now, updatedAt: now,
     },
   ];
 
@@ -421,14 +932,10 @@ async function initSchema(event, context) {
       } else {
         await db.collection("apps").doc(exist.data[0]._id).update({
           data: {
-            name: item.name,
-            description: item.description,
-            entryPage: item.entryPage,
-            cloudFunctionName: item.cloudFunctionName,
-            status: item.status,
-            pricing: item.pricing,
-            sortOrder: item.sortOrder,
-            updatedAt: now,
+            name: item.name, description: item.description,
+            entryPage: item.entryPage, cloudFunctionName: item.cloudFunctionName,
+            status: item.status, pricing: item.pricing,
+            sortOrder: item.sortOrder, updatedAt: now,
           },
         });
       }
@@ -437,30 +944,9 @@ async function initSchema(event, context) {
     }
   }
 
-  // seed recharge_packages
   const packageSeeds = [
-    {
-      packageKey: "pkg_6yuan",
-      name: "6元充值包",
-      amountFen: 600,
-      basePoints: 60,
-      bonusPoints: 0,
-      status: "active",
-      sortOrder: 1,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      packageKey: "pkg_30yuan",
-      name: "30元充值包",
-      amountFen: 3000,
-      basePoints: 300,
-      bonusPoints: 30,
-      status: "active",
-      sortOrder: 2,
-      createdAt: now,
-      updatedAt: now,
-    },
+    { packageKey: "pkg_6yuan", name: "6元充值包", amountFen: 600, basePoints: 60, bonusPoints: 0, status: "active", sortOrder: 1, createdAt: now, updatedAt: now },
+    { packageKey: "pkg_30yuan", name: "30元充值包", amountFen: 3000, basePoints: 300, bonusPoints: 30, status: "active", sortOrder: 2, createdAt: now, updatedAt: now },
   ];
 
   for (const item of packageSeeds) {
@@ -472,13 +958,9 @@ async function initSchema(event, context) {
       } else {
         await db.collection("recharge_packages").doc(exist.data[0]._id).update({
           data: {
-            name: item.name,
-            amountFen: item.amountFen,
-            basePoints: item.basePoints,
-            bonusPoints: item.bonusPoints,
-            status: item.status,
-            sortOrder: item.sortOrder,
-            updatedAt: now,
+            name: item.name, amountFen: item.amountFen,
+            basePoints: item.basePoints, bonusPoints: item.bonusPoints,
+            status: item.status, sortOrder: item.sortOrder, updatedAt: now,
           },
         });
       }
@@ -487,7 +969,7 @@ async function initSchema(event, context) {
     }
   }
 
-  await writeAuditLog(openid, "initSchema", "system_configs", "seed", {}, {
+  await writeAuditLog(adminUserId, "initSchema", "system_configs", "seed", {}, {
     seeded: {
       systemConfigs: results.systemConfigs,
       apps: results.apps,
@@ -507,24 +989,32 @@ async function initSchema(event, context) {
   }, requestId);
 }
 
+// ─── 主入口 ───────────────────────────────────────────────
+
 exports.main = async (event, context) => {
   const { action } = event;
   const requestId = context.requestId || Date.now().toString();
 
-  if (action === "initSchema") {
-    return initSchema(event, context);
-  }
-  if (action === "adjustPoints") {
-    return adjustPoints(event, context);
-  }
-  if (action === "upsertApp") {
-    return upsertApp(event, context);
-  }
-  if (action === "upsertPackage") {
-    return upsertPackage(event, context);
-  }
-  if (action === "listAuditLogs") {
-    return listAuditLogs(event, context);
+  const actionMap = {
+    initSchema,
+    adjustPoints,
+    upsertApp,
+    upsertPackage,
+    listAuditLogs,
+    getAdminMe,
+    dashboardSummary,
+    listUsers,
+    getUserDetail,
+    listPointTransactions,
+    listOrders,
+    listUsageRecords,
+    listApps,
+    listPackages,
+  };
+
+  const handler = actionMap[action];
+  if (handler) {
+    return handler(event, context);
   }
 
   return makeResponse(false, { code: "UNKNOWN_ACTION", message: "未知 action: " + action }, requestId);

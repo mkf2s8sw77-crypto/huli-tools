@@ -36,6 +36,10 @@ huli-tools/
 │   ├── payment_setup.md          # 支付配置说明
 │   ├── admin_operations.md       # 管理员操作说明
 │   └── CODE_WIKI.md              # 本文档
+├── admin-web/                    # Web 管理端（Vite + React + TS + Ant Design）
+│   ├── src/services/cloudbase.ts  # CloudBase 初始化
+│   ├── src/services/adminApi.ts   # 管理 API 统一封装
+│   └── src/pages/                 # 页面组件
 ├── promptDocs/
 │   └── prompt-pack-huli-tools-0526/    # LLM 提示词包
 ├── miniprogram/                  # 小程序前端代码
@@ -301,18 +305,29 @@ huli-tools/
 
 | Action | 权限 | 说明 |
 |--------|------|------|
-| `initSchema` | 管理员 | 初始化系统配置、默认应用、默认充值包的 seed 数据 |
-| `adjustPoints` | 管理员 | 手动调整用户积分，自动写审计日志 |
-| `upsertApp` | 管理员 | 新增或更新应用目录 |
+| `getAdminMe` | 管理员 | 返回管理员身份、来源、环境 ID |
+| `dashboardSummary` | 管理员 | 运营概览 |
+| `listUsers` | 管理员 | 分页查询用户 |
+| `getUserDetail` | 管理员 | 用户详情 |
+| `listPointTransactions` | 管理员 | 积分流水 |
+| `listOrders` | 管理员 | 订单查询 |
+| `listUsageRecords` | 管理员 | 使用记录 |
+| `listApps` | 管理员 | 应用列表（含 disabled） |
+| `listPackages` | 管理员 | 充值包列表 |
+| `listAuditLogs` | 管理员 | 审计日志 |
+| `initSchema` | 管理员 | 初始化 seed 数据 |
+| `adjustPoints` | 管理员 | 手动调整用户积分 |
+| `upsertApp` | 管理员 | 新增或更新应用 |
 | `upsertPackage` | 管理员 | 新增或更新充值包 |
-| `listAuditLogs` | 管理员 | 分页查看审计日志 |
+
+支持小程序 openid（`ADMIN_OPENIDS`）和 Web uid（`ADMIN_WEB_UIDS`）双通道鉴权。Web uid 由 `@cloudbase/node-sdk` 在云函数服务端通过 `auth.getUserInfo().uid` 读取，不能由前端传入。
 
 **关键函数**：
 
-- `validateAdmin(wxContext, requestId)`：校验调用者是否在 `ADMIN_OPENIDS` 白名单中。
-- `checkCollectionsExist()`：检查公共集合和已启用应用私有集合是否存在。
-- `writeAuditLog(...)`：所有管理操作自动写入 `admin_audit_logs`。
-- `initSchema`：幂等 seed，重复执行会更新已有数据，不会删除用户数据。
+- `resolveAdminIdentity(wxContext, requestId)`：统一身份解析，兼容小程序 openid 和 CloudBase Web Auth uid。
+- `validateAdmin(wxContext, requestId)`：兼容层，内部调用 `resolveAdminIdentity`。
+- `writeAuditLog(...)`：写审计日志，Web 管理员使用 `web:<uid>` 格式。
+- `pickFields(obj, fields)`：字段白名单过滤。
 
 ### 4.3 业务示例云函数
 

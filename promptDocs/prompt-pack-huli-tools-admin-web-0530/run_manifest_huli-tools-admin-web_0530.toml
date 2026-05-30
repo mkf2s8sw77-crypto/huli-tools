@@ -1,0 +1,91 @@
+version = 1
+project_name = "huli-tools-admin-web"
+repo_path = "/Users/huli-dev/Documents/huli-tools"
+workspace_mode = "worktree"
+workspace_ref = "main"
+cleanup_on_success = true
+cleanup_on_failure = false
+claude_command = "claude"
+default_max_turns = 120
+default_effort = "high"
+
+[docs]
+master_spec = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-admin-web-0530/master_spec_huli-tools-admin-web_0530.md"
+test_case = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-admin-web-0530/test_case_huli-tools-admin-web_0530.md"
+
+[bootstrap]
+init_git_if_missing = false
+commands = [
+  "git status --short --branch",
+  "test -f AGENTS.md",
+  "test -f cloudfunctions/adminCore/index.js",
+  "test -f docs/cloud_collections.md"
+]
+
+[gates]
+preflight = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh"
+]
+post_phase = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "git diff --check"
+]
+
+[review]
+max_rounds = 3
+
+[smoke]
+max_rounds = 3
+
+[deploy]
+enabled = false
+start_command = "npm --prefix admin-web run dev -- --host 127.0.0.1"
+healthcheck_url = "http://127.0.0.1:60530"
+
+[[phases]]
+id = "p1"
+name = "Web 管理身份与只读管理 API MVP"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-admin-web-0530/LLM_prompt_huli-tools-admin-web-p1_0530.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p2"
+name = "运营写操作与管理 API 完整化"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-admin-web-0530/LLM_prompt_huli-tools-admin-web-p2_0530.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p3"
+name = "Web 管理端前端 MVP"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-admin-web-0530/LLM_prompt_huli-tools-admin-web-p3_0530.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "npm --prefix admin-web install",
+  "npm --prefix admin-web run lint",
+  "npm --prefix admin-web run build",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p4"
+name = "部署、边界检查、文档与端到端验收"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-admin-web-0530/LLM_prompt_huli-tools-admin-web-p4_0530.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
+  "npm --prefix admin-web run lint",
+  "npm --prefix admin-web run build",
+  "git diff --check"
+]

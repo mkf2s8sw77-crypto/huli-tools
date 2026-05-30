@@ -74,14 +74,64 @@ npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_ai_draw --force --deployM
 
 集合创建完成后，调用 `adminCore.initSchema` 初始化 seed 数据。
 
+## Web 管理端（admin-web）
+
+### 本地启动
+
+```bash
+cd admin-web
+cp .env.example .env    # 首次复制环境变量
+npm install
+npm run dev             # 默认 http://localhost:60530
+```
+
+管理端使用 hash 路由，直接访问 `http://localhost:60530/#/dashboard` 可进入登录态检查后的 Dashboard。
+
+### 环境变量
+
+| 变量 | 说明 |
+|---|---|
+| `VITE_CLOUDBASE_ENV_ID` | CloudBase 环境 ID，默认 `cloudbase-3gphz7fk0fe1b760` |
+| `VITE_CLOUDBASE_ADMIN_FUNCTION` | 管理云函数名，默认 `adminCore` |
+
+### 构建
+
+```bash
+npm --prefix admin-web run build    # 产物输出到 admin-web/dist
+```
+
+### CloudBase 安全来源
+
+使用 Web SDK 调用云函数时，需要在 CloudBase 控制台配置「安全来源」：
+
+- 本地开发：`localhost`
+- 生产部署：管理端域名
+
+配置路径：CloudBase 控制台 → 环境 → 安全配置 → Web 安全域名
+
+### 部署
+
+推荐 CloudBase 静态托管：
+
+1. 构建 `npm --prefix admin-web run build`
+2. 将 `admin-web/dist` 部署到 CloudBase 静态托管
+3. 在 CloudBase 安全来源中添加托管域名
+4. 在 `adminCore` 配置 `ADMIN_WEB_UIDS`
+
+也可部署到任意静态站点（Nginx、CDN），需确保：
+- CloudBase 安全来源包含该域名
+- 不在构建产物或 HTML 中暴露 `INTERNAL_API_SECRET` 等密钥
+
 ## 本地静态检查
 
 ```bash
 bash scripts/check-js.sh
 bash scripts/check-boundaries.sh
+bash scripts/check-admin-web-boundaries.sh    # admin-web 边界检查
 ```
 
 - `check-js.sh`：检查 `miniprogram/**/*.js`、`cloudfunctions/**/*.js` 和 `templates/**/*.js.template` 的语法。
 - `check-boundaries.sh`：启发式检查应用边界违规（客户端越权写公共集合、调用内部 action 等）。
+- `check-admin-web-boundaries.sh`：检查 `admin-web/src` 不直连集合、不泄露密钥、不调用内部 action。
 
-两个脚本在每次提交前都应运行。
+三个脚本在每次提交前都应运行。

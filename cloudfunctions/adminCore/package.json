@@ -4,6 +4,7 @@
   "description": "管理接口与数据 seed",
   "main": "index.js",
   "dependencies": {
+    "@cloudbase/node-sdk": "latest",
     "wx-server-sdk": "latest"
   }
 }
