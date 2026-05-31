@@ -1,0 +1,10 @@
+<button
+  type="{{btnType}}"
+  size="{{size}}"
+  loading="{{loading}}"
+  disabled="{{disabled || loading}}"
+  bindtap="onTap"
+  class="ui-action-btn"
+>
+  {{text}}
+</button>

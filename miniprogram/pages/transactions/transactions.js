@@ -8,12 +8,12 @@ const TYPE_MAP = {
   admin_adjust: "管理员调整",
 };
 
-const TYPE_COLOR = {
-  freeze: "#ff9900",
-  settle: "#fa5151",
-  release: "#07c160",
-  recharge: "#07c160",
-  admin_adjust: "#576b95",
+const TYPE_STATUS = {
+  freeze: "warning",
+  settle: "danger",
+  release: "success",
+  recharge: "success",
+  admin_adjust: "default",
 };
 
 function formatDate(d) {
@@ -49,7 +49,7 @@ Page({
       const list = (data.list || []).map((item) => ({
         ...item,
         typeText: TYPE_MAP[item.type] || item.type,
-        typeColor: TYPE_COLOR[item.type] || "#666",
+        typeStatus: TYPE_STATUS[item.type] || "default",
         deltaAvailableText: item.deltaAvailable > 0 ? `+${item.deltaAvailable}` : String(item.deltaAvailable),
         deltaFrozenText: item.deltaFrozen > 0 ? `+${item.deltaFrozen}` : String(item.deltaFrozen),
         createdAtText: formatDate(item.createdAt),

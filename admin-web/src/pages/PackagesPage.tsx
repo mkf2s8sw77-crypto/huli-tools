@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Button, Tag, Modal, Form, Input, InputNumber, Select, Typography, Space, message } from "antd";
+import { Table, Button, Modal, Form, Input, InputNumber, Select, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { adminApi } from "../services/adminApi";
+import { PageHeader, StatusTag } from "../components";
 
 const fenToYuan = (fen: number) => (fen / 100).toFixed(2);
 const yuanToFen = (yuan: number) => Math.round(yuan * 100);
@@ -77,10 +78,7 @@ export default function PackagesPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, justifyContent: "space-between", width: "100%", display: "flex" }}>
-        <Typography.Title level={4} style={{ margin: 0 }}>充值包管理</Typography.Title>
-        <Button icon={<PlusOutlined />} type="primary" onClick={() => openEdit(null)}>新增充值包</Button>
-      </Space>
+      <PageHeader title="充值包管理" extra={<Button icon={<PlusOutlined />} type="primary" onClick={() => openEdit(null)}>新增充值包</Button>} />
       <Table
         dataSource={list}
         rowKey="_id"
@@ -92,9 +90,7 @@ export default function PackagesPage() {
           { title: "金额(元)", dataIndex: "amountFen", width: 80, render: (v: number) => "¥" + fenToYuan(v) },
           { title: "基础积分", dataIndex: "basePoints", width: 80 },
           { title: "赠送积分", dataIndex: "bonusPoints", width: 80 },
-          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => (
-            <Tag color={s === "active" ? "green" : "default"}>{s === "active" ? "启用" : "停用"}</Tag>
-          )},
+          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="package" status={s} /> },
           { title: "操作", width: 80, render: (_: unknown, record: Record<string, unknown>) => (
             <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>
           )},

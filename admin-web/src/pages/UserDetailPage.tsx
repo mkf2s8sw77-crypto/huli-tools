@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Descriptions, Card, Table, Tag, Button, Modal, Form, InputNumber, Input, Spin, Alert, Space, Typography, message } from "antd";
+import { Descriptions, Card, Table, Tag, Button, Modal, Form, InputNumber, Input, Space, Typography, message } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { adminApi } from "../services/adminApi";
+import { StatusTag, LoadingState, ErrorState } from "../components";
 
 const txTypeMap: Record<string, { text: string; color: string }> = {
   freeze: { text: "冻结", color: "orange" },
@@ -56,8 +57,8 @@ export default function UserDetailPage() {
     }
   };
 
-  if (loading) return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
-  if (error) return <Alert message="加载失败" description={error} type="error" />;
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState description={error} />;
   if (!detail) return null;
 
   const d = detail as Record<string, unknown>;
@@ -80,7 +81,7 @@ export default function UserDetailPage() {
           <Descriptions.Item label="OpenID">{user.openid as string}</Descriptions.Item>
           <Descriptions.Item label="昵称">{(user.nickname as string) || "-"}</Descriptions.Item>
           <Descriptions.Item label="状态">
-            <Tag color={user.status === "active" ? "green" : "red"}>{user.status === "active" ? "正常" : "禁用"}</Tag>
+            <StatusTag domain="user" status={user.status as string} />
           </Descriptions.Item>
           <Descriptions.Item label="创建时间">{user.createdAt ? new Date(user.createdAt as string).toLocaleString() : "-"}</Descriptions.Item>
           <Descriptions.Item label="最后登录">{user.lastLoginAt ? new Date(user.lastLoginAt as string).toLocaleString() : "-"}</Descriptions.Item>
@@ -134,7 +135,7 @@ export default function UserDetailPage() {
             { title: "订单号", dataIndex: "orderNo", width: 200 },
             { title: "金额", dataIndex: "amountFen", width: 80, render: (v: number) => "¥" + (v / 100).toFixed(2) },
             { title: "积分", dataIndex: "pointsTotal", width: 60 },
-            { title: "状态", dataIndex: "status", width: 80 },
+            { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="order" status={s} /> },
             { title: "时间", dataIndex: "createdAt", width: 160, render: (v: string) => v ? new Date(v).toLocaleString() : "-" },
           ]}
         />
@@ -149,7 +150,7 @@ export default function UserDetailPage() {
           columns={[
             { title: "应用", dataIndex: "appKey", width: 100 },
             { title: "积分", dataIndex: "costPoints", width: 60 },
-            { title: "状态", dataIndex: "status", width: 80 },
+            { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="usage" status={s} /> },
             { title: "时间", dataIndex: "startedAt", width: 160, render: (v: string) => v ? new Date(v).toLocaleString() : "-" },
           ]}
         />

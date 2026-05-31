@@ -1,0 +1,198 @@
+/* 平台通用样式 —— 页面级可复用 class */
+@import "./tokens.wxss";
+
+.container {
+  padding: 32rpx;
+}
+
+.page-header {
+  margin-bottom: 32rpx;
+}
+
+.page-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.page-subtitle {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+  margin-top: 8rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 24rpx;
+  padding-left: 8rpx;
+}
+
+/* 卡片 */
+.card {
+  background: var(--color-bg-card);
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 表单字段 */
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+  margin-bottom: 16rpx;
+}
+
+.form-input {
+  border: 1rpx solid var(--color-border);
+  border-radius: 8rpx;
+  padding: 16rpx;
+  font-size: 30rpx;
+}
+
+/* 价格/积分 */
+.text-price {
+  color: var(--color-price);
+  font-weight: 600;
+}
+
+.text-points {
+  color: var(--color-points);
+  font-weight: 600;
+}
+
+/* 状态标签 */
+.status-tag {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.status-tag--success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.status-tag--warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.status-tag--danger {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.status-tag--default {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+/* 状态文字 */
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+.text-muted { color: var(--color-text-muted); }
+.text-secondary { color: var(--color-text-secondary); }
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64rpx 32rpx;
+}
+
+.empty-state__text {
+  font-size: 28rpx;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* 加载中 */
+.loading-state {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 32rpx;
+}
+
+/* 错误状态 */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx;
+}
+
+.error-state__text {
+  font-size: 28rpx;
+  color: var(--color-danger);
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+/* 列表行 */
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.list-row:last-child {
+  margin-bottom: 0;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 24rpx;
+}
+
+.load-more__text {
+  font-size: 26rpx;
+  color: var(--color-text-muted);
+}
+
+/* 菜单列表 */
+.menu-list {
+  background: var(--color-bg-card);
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item__text {
+  font-size: 30rpx;
+  color: var(--color-text);
+}
+
+.menu-item__arrow {
+  font-size: 28rpx;
+  color: var(--color-text-muted);
+}
+
+/* 主操作按钮覆盖 */
+button[type="primary"] {
+  background-color: var(--color-primary) !important;
+}

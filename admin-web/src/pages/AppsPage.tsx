@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Button, Tag, Modal, Form, Input, InputNumber, Select, Typography, Space, message } from "antd";
+import { Table, Button, Modal, Form, Input, InputNumber, Select, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { adminApi } from "../services/adminApi";
+import { PageHeader, StatusTag } from "../components";
 
 const statusOptions = [
   { value: "active", label: "启用" },
@@ -77,10 +78,7 @@ export default function AppsPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, justifyContent: "space-between", width: "100%", display: "flex" }}>
-        <Typography.Title level={4} style={{ margin: 0 }}>应用管理</Typography.Title>
-        <Button icon={<PlusOutlined />} type="primary" onClick={() => openEdit(null)}>新增应用</Button>
-      </Space>
+      <PageHeader title="应用管理" extra={<Button icon={<PlusOutlined />} type="primary" onClick={() => openEdit(null)}>新增应用</Button>} />
       <Table
         dataSource={list}
         rowKey="_id"
@@ -91,11 +89,7 @@ export default function AppsPage() {
           { title: "名称", dataIndex: "name", width: 140 },
           { title: "入口页", dataIndex: "entryPage", width: 200, ellipsis: true },
           { title: "积分/次", width: 80, render: (_: unknown, r: Record<string, unknown>) => ((r.pricing as Record<string, unknown>)?.costPoints ?? "-") },
-          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => (
-            <Tag color={s === "active" ? "green" : s === "coming_soon" ? "blue" : "default"}>
-              {s === "active" ? "启用" : s === "coming_soon" ? "即将" : "停用"}
-            </Tag>
-          )},
+          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="app" status={s} /> },
           { title: "排序", dataIndex: "sortOrder", width: 60 },
           { title: "操作", width: 80, render: (_: unknown, record: Record<string, unknown>) => (
             <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>

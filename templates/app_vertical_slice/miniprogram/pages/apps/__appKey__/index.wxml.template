@@ -1,15 +1,11 @@
-<view class="container">
-  <view class="header">
-    <text class="title">__appName__</text>
-  </view>
-
+<ui-page title="__appName__">
   <!-- TODO: 添加业务表单 -->
-  <view class="form-section">
-    <text class="hint">请输入参数</text>
-  </view>
+  <ui-form-field label="请输入参数">
+    <input class="form-input" placeholder="参数值" />
+  </ui-form-field>
 
   <button
-    class="btn-primary"
+    type="primary"
     bindtap="onExecute"
     disabled="{{loading}}"
     loading="{{loading}}"
@@ -17,12 +13,12 @@
     执行
   </button>
 
-  <view wx:if="{{result}}" class="result-section">
-    <text class="result-label">结果：</text>
+  <ui-card wx:if="{{result}}" extraClass="result-section">
+    <text class="form-label">结果：</text>
     <text class="result-value">{{result}}</text>
-  </view>
+  </ui-card>
 
   <view wx:if="{{errorMsg}}" class="error-section">
     <text class="error-text">{{errorMsg}}</text>
   </view>
-</view>
+</ui-page>

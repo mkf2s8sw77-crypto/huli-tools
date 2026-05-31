@@ -1,0 +1,4 @@
+<view class="card">
+  <text wx:if="{{label}}" class="form-label">{{label}}</text>
+  <slot></slot>
+</view>

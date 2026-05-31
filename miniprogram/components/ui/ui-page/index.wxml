@@ -1,0 +1,7 @@
+<view class="container">
+  <view wx:if="{{title}}" class="page-header">
+    <text class="page-title">{{title}}</text>
+    <text wx:if="{{subtitle}}" class="page-subtitle">{{subtitle}}</text>
+  </view>
+  <slot></slot>
+</view>

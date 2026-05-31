@@ -1,12 +1,12 @@
 const api = require("../../services/api");
 
 const STATUS_MAP = {
-  created: "已创建",
-  pending_pay: "待支付",
-  paid: "已支付",
-  closed: "已关闭",
-  failed: "失败",
-  refunded: "已退款",
+  created: { text: "已创建", type: "default" },
+  pending_pay: { text: "待支付", type: "warning" },
+  paid: { text: "已支付", type: "success" },
+  closed: { text: "已关闭", type: "default" },
+  failed: { text: "失败", type: "danger" },
+  refunded: { text: "已退款", type: "default" },
 };
 
 function formatDate(d) {
@@ -41,7 +41,8 @@ Page({
       const data = await api.listOrders(page, this.data.pageSize);
       const list = (data.list || []).map((o) => ({
         ...o,
-        statusText: STATUS_MAP[o.status] || o.status,
+        statusText: (STATUS_MAP[o.status] || {}).text || o.status,
+        statusType: (STATUS_MAP[o.status] || {}).type || "default",
         amountYuan: (o.amountFen / 100).toFixed(2),
         createdAtText: formatDate(o.createdAt),
         paidAtText: formatDate(o.paidAt),

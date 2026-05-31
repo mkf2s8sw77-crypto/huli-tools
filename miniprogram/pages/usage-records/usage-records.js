@@ -8,12 +8,12 @@ const STATUS_MAP = {
   released: "已释放",
 };
 
-const STATUS_COLOR = {
-  created: "#999",
-  frozen: "#ff9900",
-  succeeded: "#07c160",
-  failed: "#fa5151",
-  released: "#576b95",
+const STATUS_TYPE = {
+  created: "default",
+  frozen: "warning",
+  succeeded: "success",
+  failed: "danger",
+  released: "default",
 };
 
 function formatDate(d) {
@@ -48,7 +48,7 @@ Page({
       const list = (data.list || []).map((item) => ({
         ...item,
         statusText: STATUS_MAP[item.status] || item.status,
-        statusColor: STATUS_COLOR[item.status] || "#999",
+        statusType: STATUS_TYPE[item.status] || "default",
         startedAtText: formatDate(item.startedAt),
         finishedAtText: formatDate(item.finishedAt),
       }));

@@ -1,12 +1,14 @@
+@import "../styles/tokens.wxss";
+
 .tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   height: 100rpx;
-  background: #fff;
+  background: var(--color-bg-card);
   display: flex;
-  border-top: 1rpx solid #eee;
+  border-top: 1rpx solid var(--color-border);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -20,10 +22,10 @@
 
 .tab-text {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .tab-bar-item.active .tab-text {
-  color: #07c160;
+  color: var(--color-primary);
   font-weight: 600;
 }

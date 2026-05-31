@@ -1,14 +1,12 @@
-<view class="container">
-  <view class="header">
-    <text class="title">我的订单</text>
+<ui-page title="我的订单">
+  <view wx:if="{{loading && orders.length === 0}}">
+    <ui-card>
+      <text class="loading-state">正在加载...</text>
+    </ui-card>
   </view>
 
-  <view wx:if="{{loading && orders.length === 0}}" class="card">
-    <text class="loading">正在加载...</text>
-  </view>
-
-  <view wx:elif="{{orders.length === 0}}" class="card">
-    <text class="empty">暂无订单</text>
+  <view wx:elif="{{orders.length === 0}}">
+    <ui-empty text="暂无订单" />
   </view>
 
   <view wx:else>
@@ -17,28 +15,28 @@
       wx:key="orderNo"
       class="order-card"
     >
-      <view class="order-row">
+      <view class="list-row">
         <text class="order-no">{{item.orderNo}}</text>
-        <text class="order-status {{item.status}}">{{item.statusText}}</text>
+        <ui-status text="{{item.statusText}}" type="{{item.statusType}}" />
       </view>
-      <view class="order-row">
+      <view class="list-row">
         <text class="order-package">{{item.packageKey}}</text>
         <text class="order-amount">{{item.amountYuan}} 元</text>
       </view>
-      <view class="order-row">
+      <view class="list-row">
         <text class="order-points">到账 {{item.pointsTotal}} 积分</text>
       </view>
-      <view class="order-row">
+      <view class="list-row">
         <text class="order-time">{{item.createdAtText}}</text>
         <text wx:if="{{item.paidAtText !== '-'}}" class="order-paid">支付于 {{item.paidAtText}}</text>
       </view>
     </view>
 
     <view wx:if="{{hasMore}}" class="load-more" bindtap="onReachBottom">
-      <text class="load-more-text">加载更多...</text>
+      <text class="load-more__text">加载更多...</text>
     </view>
     <view wx:elif="{{orders.length > 0}}" class="load-more">
-      <text class="load-more-text">没有更多订单了</text>
+      <text class="load-more__text">没有更多订单了</text>
     </view>
   </view>
-</view>
+</ui-page>

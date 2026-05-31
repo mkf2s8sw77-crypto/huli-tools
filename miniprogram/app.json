@@ -22,6 +22,17 @@
       { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
+  "usingComponents": {
+    "ui-page": "/components/ui/ui-page/index",
+    "ui-card": "/components/ui/ui-card/index",
+    "ui-section": "/components/ui/ui-section/index",
+    "ui-price": "/components/ui/ui-price/index",
+    "ui-status": "/components/ui/ui-status/index",
+    "ui-empty": "/components/ui/ui-empty/index",
+    "ui-error": "/components/ui/ui-error/index",
+    "ui-action-button": "/components/ui/ui-action-button/index",
+    "ui-form-field": "/components/ui/ui-form-field/index"
+  },
   "cloud": true,
   "sitemapLocation": "sitemap.json"
 }

@@ -1,0 +1,1 @@
+<text class="ui-price ui-price--{{type}} ui-price--{{size}}">{{value}}{{suffix}}</text>

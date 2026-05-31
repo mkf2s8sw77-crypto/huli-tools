@@ -1,46 +1,41 @@
-<view class="container">
-  <view class="header">
-    <text class="title">{{message}}</text>
+<ui-page title="{{message}}">
+  <view wx:if="{{loading}}">
+    <ui-card>
+      <text class="loading-state">正在加载...</text>
+    </ui-card>
   </view>
 
-  <view wx:if="{{loading}}" class="card">
-    <text class="loading">正在加载...</text>
-  </view>
-
-  <view wx:elif="{{error}}" class="card">
-    <text class="error">{{error}}</text>
-    <button size="mini" bindtap="loadHomeData">重试</button>
+  <view wx:elif="{{error}}">
+    <ui-error text="{{error}}" bind:retry="loadHomeData" />
   </view>
 
   <view wx:else>
-    <view class="card" wx:if="{{userSummary}}">
-      <text class="label">积分余额:</text>
-      <text class="points">{{userSummary.points.availablePoints}}</text>
-    </view>
+    <ui-card wx:if="{{userSummary}}">
+      <text class="form-label">积分余额:</text>
+      <ui-price value="{{userSummary.points.availablePoints}}" type="points" size="lg" />
+    </ui-card>
 
-    <view class="section-title">应用目录</view>
+    <ui-section title="应用目录">
+      <ui-empty wx:if="{{apps.length === 0}}" text="暂无可用应用" />
 
-    <view wx:if="{{apps.length === 0}}" class="card">
-      <text class="empty">暂无可用应用</text>
-    </view>
-
-    <view
-      wx:for="{{apps}}"
-      wx:key="appKey"
-      class="app-card"
-      data-app="{{item}}"
-      bindtap="onTapApp"
-    >
-      <view class="app-header">
-        <text class="app-name">{{item.name}}</text>
-        <text wx:if="{{item.status === 'coming_soon'}}" class="app-badge">即将上线</text>
+      <view
+        wx:for="{{apps}}"
+        wx:key="appKey"
+        class="app-card"
+        data-app="{{item}}"
+        bindtap="onTapApp"
+      >
+        <view class="app-header">
+          <text class="app-name">{{item.name}}</text>
+          <ui-status wx:if="{{item.status === 'coming_soon'}}" text="即将上线" type="warning" />
+        </view>
+        <text class="app-desc">{{item.description || ''}}</text>
+        <view class="app-footer">
+          <text wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-price">
+            消耗 {{item.pricing.costPoints}} 积分
+          </text>
+        </view>
       </view>
-      <text class="app-desc">{{item.description || ''}}</text>
-      <view class="app-footer">
-        <text wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-price">
-          消耗 {{item.pricing.costPoints}} 积分
-        </text>
-      </view>
-    </view>
+    </ui-section>
   </view>
-</view>
+</ui-page>

@@ -1,49 +1,46 @@
-<view class="container">
-  <view class="header">
-    <text class="title">我的</text>
+<ui-page title="我的">
+  <view wx:if="{{loading}}">
+    <ui-card>
+      <text class="loading-state">正在加载...</text>
+    </ui-card>
   </view>
 
-  <view wx:if="{{loading}}" class="card">
-    <text class="loading">正在加载...</text>
-  </view>
-
-  <view wx:elif="{{!user}}" class="card">
-    <text class="empty">未获取到用户信息</text>
-    <button size="mini" bindtap="loadProfile">重试</button>
+  <view wx:elif="{{!user}}">
+    <ui-error text="未获取到用户信息" bind:retry="loadProfile" />
   </view>
 
   <view wx:else>
-    <view class="card">
-      <text class="label">用户身份</text>
+    <ui-card>
+      <text class="form-label">用户身份</text>
       <text class="value">{{maskedOpenid}}</text>
-    </view>
+    </ui-card>
 
-    <view class="card points-card">
-      <text class="label">可用积分</text>
-      <text class="points">{{points.availablePoints}}</text>
+    <ui-card extraClass="points-card">
+      <text class="form-label">可用积分</text>
+      <ui-price value="{{points.availablePoints}}" type="points" size="xl" />
       <view class="points-sub">
         <text wx:if="{{points.frozenPoints > 0}}" class="frozen">冻结中: {{points.frozenPoints}}</text>
         <text class="sub">累计充值: {{points.totalRechargedPoints}} / 累计消费: {{points.totalConsumedPoints}}</text>
       </view>
-    </view>
+    </ui-card>
 
-    <view class="menu">
+    <view class="menu-list">
       <view class="menu-item" bindtap="onGoRecharge">
-        <text class="menu-text">积分充值</text>
-        <text class="menu-arrow">></text>
+        <text class="menu-item__text">积分充值</text>
+        <text class="menu-item__arrow">></text>
       </view>
       <view class="menu-item" bindtap="onGoOrders">
-        <text class="menu-text">我的订单</text>
-        <text class="menu-arrow">></text>
+        <text class="menu-item__text">我的订单</text>
+        <text class="menu-item__arrow">></text>
       </view>
       <view class="menu-item" bindtap="onGoTransactions">
-        <text class="menu-text">积分流水</text>
-        <text class="menu-arrow">></text>
+        <text class="menu-item__text">积分流水</text>
+        <text class="menu-item__arrow">></text>
       </view>
       <view class="menu-item" bindtap="onGoUsageRecords">
-        <text class="menu-text">使用记录</text>
-        <text class="menu-arrow">></text>
+        <text class="menu-item__text">使用记录</text>
+        <text class="menu-item__arrow">></text>
       </view>
     </view>
   </view>
-</view>
+</ui-page>

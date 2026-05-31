@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Input, Select, Tag, Typography, Space } from "antd";
+import { Table, Input, Select, Space } from "antd";
 import { adminApi } from "../services/adminApi";
+import { PageHeader, StatusTag } from "../components";
 
 const statusOptions = [
   { value: "", label: "全部状态" },
@@ -12,10 +13,6 @@ const statusOptions = [
   { value: "refunded", label: "已退款" },
 ];
 
-const statusColorMap: Record<string, string> = {
-  created: "default", pending_pay: "orange", paid: "green",
-  closed: "default", failed: "red", refunded: "purple",
-};
 
 export default function OrdersPage() {
   const [list, setList] = useState<Record<string, unknown>[]>([]);
@@ -54,7 +51,7 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <Typography.Title level={4}>订单查询</Typography.Title>
+      <PageHeader title="订单查询" />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input placeholder="用户ID" style={{ width: 200 }} allowClear onChange={(e) => onFilterChange("userId", e.target.value)} />
         <Input placeholder="订单号" style={{ width: 200 }} allowClear onChange={(e) => onFilterChange("orderNo", e.target.value)} />
@@ -80,9 +77,7 @@ export default function OrdersPage() {
           { title: "套餐", dataIndex: "packageKey", width: 100 },
           { title: "金额", dataIndex: "amountFen", width: 80, render: (v: number) => "¥" + (v / 100).toFixed(2) },
           { title: "积分", dataIndex: "pointsTotal", width: 60 },
-          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => (
-            <Tag color={statusColorMap[s] || "default"}>{statusOptions.find((o) => o.value === s)?.label || s}</Tag>
-          )},
+          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="order" status={s} /> },
           { title: "支付方式", dataIndex: "provider", width: 80 },
           { title: "创建时间", dataIndex: "createdAt", width: 160, render: (v: string) => v ? new Date(v).toLocaleString() : "-" },
         ]}

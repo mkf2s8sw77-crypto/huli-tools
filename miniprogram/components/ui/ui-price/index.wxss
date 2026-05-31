@@ -1,0 +1,29 @@
+@import "../../../styles/common.wxss";
+
+.ui-price {
+  font-weight: 600;
+}
+
+.ui-price--points {
+  color: var(--color-points);
+}
+
+.ui-price--money {
+  color: var(--color-price);
+}
+
+.ui-price--sm {
+  font-size: 26rpx;
+}
+
+.ui-price--md {
+  font-size: 32rpx;
+}
+
+.ui-price--lg {
+  font-size: 40rpx;
+}
+
+.ui-price--xl {
+  font-size: 64rpx;
+}

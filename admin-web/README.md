@@ -2,6 +2,23 @@
 
 `admin-web/` 是面向运营人员的浏览器管理端，使用 Vite + React + TypeScript + Ant Design，通过 CloudBase Web SDK 调用 `adminCore` 云函数。它只负责管理界面，不直接读写云数据库集合。
 
+## 设计系统
+
+管理端通过 `src/theme.ts` 统一 Ant Design 主题 Token（主色 `#2b6cb0`、圆角 6px、状态色），由 `ConfigProvider` 在 `main.tsx` 中注入。
+
+通用组件放在 `src/components/`：
+
+| 组件 | 用途 |
+|---|---|
+| `PageHeader` | 页面标题区 + 可选操作区 |
+| `StatCard` | 数据统计卡片 |
+| `StatusTag` | 状态标签映射（order / user / usage / app 四个 domain） |
+| `FilterBar` | 通用搜索筛选栏 |
+| `LoadingState` | 页面级加载骨架 |
+| `ErrorState` | 页面级错误展示 |
+
+新页面必须使用以上组件，不得自行定义主题色或状态标签映射。详见 `docs/design_system.md`。
+
 ## 本地启动
 
 ```bash

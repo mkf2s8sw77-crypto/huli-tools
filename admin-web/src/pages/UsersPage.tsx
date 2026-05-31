@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Input, Button, Space, Typography, Tag } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Table, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../services/adminApi";
+import { PageHeader, FilterBar, StatusTag } from "../components";
 
 export default function UsersPage() {
   const [list, setList] = useState<Record<string, unknown>[]>([]);
@@ -28,22 +28,17 @@ export default function UsersPage() {
 
   useEffect(() => { load(1, 20, ""); }, [load]);
 
+  const handleSearch = () => { setPage(1); load(1, pageSize, keyword); };
+
   return (
     <div>
-      <Typography.Title level={4}>用户管理</Typography.Title>
-      <Space style={{ marginBottom: 16 }}>
-        <Input
-          placeholder="按 openid / userId / 昵称搜索"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onPressEnter={() => { setPage(1); load(1, pageSize, keyword); }}
-          style={{ width: 300 }}
-          allowClear
-        />
-        <Button icon={<SearchOutlined />} type="primary" onClick={() => { setPage(1); load(1, pageSize, keyword); }}>
-          搜索
-        </Button>
-      </Space>
+      <PageHeader title="用户管理" />
+      <FilterBar
+        keyword={keyword}
+        onChange={setKeyword}
+        onSearch={handleSearch}
+        placeholder="按 openid / userId / 昵称搜索"
+      />
       <Table
         dataSource={list}
         rowKey="_id"
@@ -59,9 +54,7 @@ export default function UsersPage() {
         columns={[
           { title: "用户ID", dataIndex: "_id", width: 200, ellipsis: true },
           { title: "昵称", dataIndex: "nickname", width: 120 },
-          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => (
-            <Tag color={s === "active" ? "green" : "red"}>{s === "active" ? "正常" : "禁用"}</Tag>
-          )},
+          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="user" status={s} /> },
           { title: "创建时间", dataIndex: "createdAt", width: 180, render: (v: string) => v ? new Date(v).toLocaleString() : "-" },
           { title: "操作", width: 80, render: (_: unknown, record: Record<string, unknown>) => (
             <Button type="link" size="small" onClick={() => navigate(`/users/${record._id}`)}>详情</Button>

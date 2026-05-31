@@ -1,6 +1,13 @@
 # 新应用竖切模板
 
-> 本目录包含新应用接入所需的全部模板文件。请按以下步骤将模板复制为真实应用。
+> 本目录包含新应用接入所需的全部模板文件。模板已预配置平台设计系统，新应用默认引用全局 Token 和公共组件。
+
+## 设计系统约束
+
+- 模板页面通过 `app.json` 全局注册的 `ui-page`、`ui-card`、`ui-form-field` 等公共组件构建 UI。
+- 页面样式使用 `var(--color-*)` Token，**不得重新定义平台主色、卡片、按钮、状态标签等公共视觉规则**。
+- 页面 wxss 仅保留该应用的业务私有样式（如业务结果区布局）。
+- 详见 `docs/design_system.md`。
 
 ## 使用方法
 
@@ -57,7 +64,7 @@ for f in *.template; do mv "$f" "${f%.template}"; done
 | `cloudfunctions/app___appKey__/package.json` | 云函数依赖 |
 | `cloudfunctions/app___appKey__/config.json` | 云函数配置 |
 | `miniprogram/pages/apps/__appKey__/index.js.template` | 页面逻辑模板 |
-| `miniprogram/pages/apps/__appKey__/index.wxml.template` | 页面结构模板 |
-| `miniprogram/pages/apps/__appKey__/index.wxss.template` | 页面样式模板 |
+| `miniprogram/pages/apps/__appKey__/index.wxml.template` | 页面结构模板（使用 ui-page 等公共组件） |
+| `miniprogram/pages/apps/__appKey__/index.wxss.template` | 页面样式模板（仅业务私有样式） |
 | `miniprogram/pages/apps/__appKey__/index.json.template` | 页面配置模板 |
 | `docs/app___appKey___handoff.md.template` | 应用交付说明模板 |

@@ -1,14 +1,12 @@
-<view class="container">
-  <view class="header">
-    <text class="title">使用记录</text>
+<ui-page title="使用记录">
+  <view wx:if="{{loading && list.length === 0}}">
+    <ui-card>
+      <text class="loading-state">正在加载...</text>
+    </ui-card>
   </view>
 
-  <view wx:if="{{loading && list.length === 0}}" class="card">
-    <text class="loading">正在加载...</text>
-  </view>
-
-  <view wx:elif="{{list.length === 0}}" class="card">
-    <text class="empty">暂无使用记录</text>
+  <view wx:elif="{{list.length === 0}}">
+    <ui-empty text="暂无使用记录" />
   </view>
 
   <view wx:else>
@@ -17,28 +15,28 @@
       wx:key="_id"
       class="record-card"
     >
-      <view class="record-row">
+      <view class="list-row">
         <text class="record-app">{{item.appKey}}</text>
-        <text class="record-status" style="color: {{item.statusColor}};">{{item.statusText}}</text>
+        <ui-status text="{{item.statusText}}" type="{{item.statusType}}" />
       </view>
-      <view class="record-row">
+      <view class="list-row">
         <text wx:if="{{item.costPoints > 0}}" class="record-cost">消耗 {{item.costPoints}} 积分</text>
         <text wx:else class="record-cost">免费</text>
       </view>
-      <view wx:if="{{item.errorMessage}}" class="record-row">
+      <view wx:if="{{item.errorMessage}}" class="list-row">
         <text class="record-error">{{item.errorMessage}}</text>
       </view>
-      <view class="record-row">
+      <view class="list-row">
         <text class="record-time">{{item.startedAtText}}</text>
         <text wx:if="{{item.finishedAtText !== '-'}}" class="record-time">完成于 {{item.finishedAtText}}</text>
       </view>
     </view>
 
     <view wx:if="{{hasMore}}" class="load-more" bindtap="onReachBottom">
-      <text class="load-more-text">加载更多...</text>
+      <text class="load-more__text">加载更多...</text>
     </view>
     <view wx:elif="{{list.length > 0}}" class="load-more">
-      <text class="load-more-text">没有更多记录了</text>
+      <text class="load-more__text">没有更多记录了</text>
     </view>
   </view>
-</view>
+</ui-page>

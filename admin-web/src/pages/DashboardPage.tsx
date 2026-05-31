@@ -1,17 +1,10 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Spin, Alert, Typography, Tag } from "antd";
+import { Card, Row, Col, Table } from "antd";
 import { UserOutlined, ShoppingCartOutlined, CreditCardOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { adminApi } from "../services/adminApi";
+import { PageHeader, StatCard, StatusTag, LoadingState, ErrorState } from "../components";
 
 const fenToYuan = (fen: number) => (fen / 100).toFixed(2);
-const orderStatusMap: Record<string, { text: string; color: string }> = {
-  created: { text: "已创建", color: "default" },
-  pending_pay: { text: "待支付", color: "orange" },
-  paid: { text: "已支付", color: "green" },
-  closed: { text: "已关闭", color: "default" },
-  failed: { text: "失败", color: "red" },
-  refunded: { text: "已退款", color: "purple" },
-};
 
 export default function DashboardPage() {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
@@ -31,27 +24,27 @@ export default function DashboardPage() {
     })();
   }, []);
 
-  if (loading) return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
-  if (error) return <Alert message="加载失败" description={error} type="error" />;
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState description={error} />;
   if (!data) return null;
 
   const d = data as Record<string, unknown>;
 
   return (
     <div>
-      <Typography.Title level={4}>概览</Typography.Title>
+      <PageHeader title="概览" />
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
-          <Card><Statistic title="注册用户" value={d.totalUsers as number} prefix={<UserOutlined />} /></Card>
+          <StatCard title="注册用户" value={d.totalUsers as number} prefix={<UserOutlined />} />
         </Col>
         <Col span={6}>
-          <Card><Statistic title="支付订单" value={d.totalOrders as number} prefix={<ShoppingCartOutlined />} /></Card>
+          <StatCard title="支付订单" value={d.totalOrders as number} prefix={<ShoppingCartOutlined />} />
         </Col>
         <Col span={6}>
-          <Card><Statistic title="积分账户" value={d.totalPointAccounts as number} prefix={<CreditCardOutlined />} /></Card>
+          <StatCard title="积分账户" value={d.totalPointAccounts as number} prefix={<CreditCardOutlined />} />
         </Col>
         <Col span={6}>
-          <Card><Statistic title="使用记录" value={d.totalUsageRecords as number} prefix={<AppstoreOutlined />} /></Card>
+          <StatCard title="使用记录" value={d.totalUsageRecords as number} prefix={<AppstoreOutlined />} />
         </Col>
       </Row>
 
@@ -66,10 +59,7 @@ export default function DashboardPage() {
               columns={[
                 { title: "订单号", dataIndex: "orderNo", width: 180 },
                 { title: "金额", dataIndex: "amountFen", width: 80, render: (v: number) => "¥" + fenToYuan(v) },
-                { title: "状态", dataIndex: "status", width: 80, render: (s: string) => {
-                  const m = orderStatusMap[s];
-                  return m ? <Tag color={m.color}>{m.text}</Tag> : s;
-                }},
+                { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="order" status={s} /> },
               ]}
             />
           </Card>

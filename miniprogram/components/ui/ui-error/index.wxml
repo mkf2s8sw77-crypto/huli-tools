@@ -1,0 +1,4 @@
+<view class="card error-state">
+  <text class="error-state__text">{{text}}</text>
+  <button wx:if="{{retryable}}" size="mini" bindtap="onRetry">重试</button>
+</view>

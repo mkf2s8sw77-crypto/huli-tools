@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Typography, Modal, Descriptions } from "antd";
+import { Table, Modal, Descriptions } from "antd";
 import { adminApi } from "../services/adminApi";
+import { PageHeader } from "../components";
 
 export default function AuditLogsPage() {
   const [list, setList] = useState<Record<string, unknown>[]>([]);
@@ -33,7 +34,7 @@ export default function AuditLogsPage() {
 
   return (
     <div>
-      <Typography.Title level={4}>审计日志</Typography.Title>
+      <PageHeader title="审计日志" />
       <Table
         dataSource={list}
         rowKey="_id"

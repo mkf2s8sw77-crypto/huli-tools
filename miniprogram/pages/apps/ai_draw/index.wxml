@@ -1,16 +1,10 @@
-<view class="container">
-  <view class="header">
-    <text class="title">{{appInfo ? appInfo.name : 'AI 绘图'}}</text>
-    <text class="subtitle">输入描述，AI 为您生成图片</text>
-  </view>
-
-  <view class="card" wx:if="{{appInfo && appInfo.pricing}}">
-    <text class="label">本次消耗</text>
+<ui-page title="{{appInfo ? appInfo.name : 'AI 绘图'}}" subtitle="输入描述，AI 为您生成图片">
+  <ui-card wx:if="{{appInfo && appInfo.pricing}}">
+    <text class="form-label">本次消耗</text>
     <text class="cost-points">{{appInfo.pricing.costPoints}} 积分</text>
-  </view>
+  </ui-card>
 
-  <view class="card">
-    <text class="label">绘图描述</text>
+  <ui-form-field label="绘图描述">
     <textarea
       class="prompt-input"
       value="{{prompt}}"
@@ -20,7 +14,7 @@
       auto-height
     />
     <text class="char-count">{{prompt.length}}/500</text>
-  </view>
+  </ui-form-field>
 
   <view class="btn-group">
     <button
@@ -42,14 +36,13 @@
     </button>
   </view>
 
-  <view wx:if="{{imageUrl}}" class="card image-card">
-    <text class="label">生成结果</text>
+  <ui-card wx:if="{{imageUrl}}" extraClass="image-card">
+    <text class="form-label">生成结果</text>
     <image class="result-image" mode="aspectFit" src="{{imageUrl}}" show-menu-by-longpress />
     <button class="save-btn" type="default" bindtap="onSaveImage">保存到相册</button>
-  </view>
+  </ui-card>
 
-  <view wx:if="{{errorMsg}}" class="card error">
+  <view wx:if="{{errorMsg}}" class="error-card">
     <text>{{errorMsg}}</text>
   </view>
-
-</view>
+</ui-page>

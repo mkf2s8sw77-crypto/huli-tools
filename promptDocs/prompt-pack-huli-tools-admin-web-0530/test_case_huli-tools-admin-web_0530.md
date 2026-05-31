@@ -201,7 +201,17 @@ npm --prefix admin-web run build
   - 正常源码检查通过。
   - 临时违规能被识别。
 
-## 5. 人工检查项
+## 5. 设计系统视觉一致性验收
+
+- 登录页、Dashboard、用户、应用、充值包、订单、使用记录、审计日志页面风格一致。
+- 所有页面使用 `PageHeader` 组件统一标题区。
+- 所有状态标签使用 `StatusTag` 组件，颜色映射统一。
+- 主题色为蓝青（`#2b6cb0`），非 Ant Design 默认蓝。
+- 微信绿（`#07c160`）仅用于微信扫码登录按钮。
+- 表格筛选栏使用 `FilterBar` 组件。
+- 新增页面必须引用 `src/components` 中的通用组件。
+
+## 6. 人工检查项
 
 - CloudBase 控制台已配置 `ADMIN_WEB_UIDS`，且不把真实 uid 列表写入仓库。
 - CloudBase 安全来源包含本地开发地址和生产管理端域名。
@@ -210,7 +220,7 @@ npm --prefix admin-web run build
 - 生产环境关闭 `MOCK_PAYMENT_ENABLED`，或明确标注仍处于开发测试。
 - 真实调分测试使用小额积分并记录可回滚方式。
 
-## 6. 缺陷记录规则
+## 7. 缺陷记录规则
 
 每个失败用例都记录：
 

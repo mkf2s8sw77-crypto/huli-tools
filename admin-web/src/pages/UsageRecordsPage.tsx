@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Input, Select, Tag, Typography, Space } from "antd";
+import { Table, Input, Select, Space } from "antd";
 import { adminApi } from "../services/adminApi";
+import { PageHeader, StatusTag } from "../components";
 
 const statusOptions = [
   { value: "", label: "全部状态" },
@@ -11,10 +12,6 @@ const statusOptions = [
   { value: "released", label: "已释放" },
 ];
 
-const statusColorMap: Record<string, string> = {
-  created: "default", frozen: "orange", succeeded: "green",
-  failed: "red", released: "blue",
-};
 
 export default function UsageRecordsPage() {
   const [list, setList] = useState<Record<string, unknown>[]>([]);
@@ -51,7 +48,7 @@ export default function UsageRecordsPage() {
 
   return (
     <div>
-      <Typography.Title level={4}>使用记录</Typography.Title>
+      <PageHeader title="使用记录" />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input placeholder="用户ID" style={{ width: 200 }} allowClear onChange={(e) => onFilterChange("userId", e.target.value)} />
         <Input placeholder="AppKey" style={{ width: 140 }} allowClear onChange={(e) => onFilterChange("appKey", e.target.value)} />
@@ -75,9 +72,7 @@ export default function UsageRecordsPage() {
           { title: "用户ID", dataIndex: "userId", width: 160, ellipsis: true },
           { title: "应用", dataIndex: "appKey", width: 100 },
           { title: "积分", dataIndex: "costPoints", width: 60 },
-          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => (
-            <Tag color={statusColorMap[s] || "default"}>{statusOptions.find((o) => o.value === s)?.label || s}</Tag>
-          )},
+          { title: "状态", dataIndex: "status", width: 80, render: (s: string) => <StatusTag domain="usage" status={s} /> },
           { title: "错误码", dataIndex: "errorCode", width: 100, render: (v: string) => v || "-" },
           { title: "错误信息", dataIndex: "errorMessage", width: 160, ellipsis: true, render: (v: string) => v || "-" },
           { title: "开始时间", dataIndex: "startedAt", width: 160, render: (v: string) => v ? new Date(v).toLocaleString() : "-" },

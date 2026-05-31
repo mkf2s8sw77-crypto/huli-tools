@@ -1,14 +1,12 @@
-<view class="container">
-  <view class="header">
-    <text class="title">积分流水</text>
+<ui-page title="积分流水">
+  <view wx:if="{{loading && list.length === 0}}">
+    <ui-card>
+      <text class="loading-state">正在加载...</text>
+    </ui-card>
   </view>
 
-  <view wx:if="{{loading && list.length === 0}}" class="card">
-    <text class="loading">正在加载...</text>
-  </view>
-
-  <view wx:elif="{{list.length === 0}}" class="card">
-    <text class="empty">暂无流水记录</text>
+  <view wx:elif="{{list.length === 0}}">
+    <ui-empty text="暂无流水记录" />
   </view>
 
   <view wx:else>
@@ -17,11 +15,11 @@
       wx:key="_id"
       class="tx-card"
     >
-      <view class="tx-row">
-        <text class="tx-type" style="color: {{item.typeColor}};">{{item.typeText}}</text>
+      <view class="list-row">
+        <ui-status text="{{item.typeText}}" type="{{item.typeStatus}}" />
         <text class="tx-date">{{item.createdAtText}}</text>
       </view>
-      <view class="tx-row">
+      <view class="list-row">
         <text wx:if="{{item.deltaAvailable !== 0}}" class="tx-delta">
           可用 {{item.deltaAvailableText}}
         </text>
@@ -29,19 +27,19 @@
           冻结 {{item.deltaFrozenText}}
         </text>
       </view>
-      <view class="tx-row">
+      <view class="list-row">
         <text class="tx-after">可用后: {{item.availableAfter}} / 冻结后: {{item.frozenAfter}}</text>
       </view>
-      <view wx:if="{{item.note}}" class="tx-row">
+      <view wx:if="{{item.note}}" class="list-row">
         <text class="tx-note">{{item.note}}</text>
       </view>
     </view>
 
     <view wx:if="{{hasMore}}" class="load-more" bindtap="onReachBottom">
-      <text class="load-more-text">加载更多...</text>
+      <text class="load-more__text">加载更多...</text>
     </view>
     <view wx:elif="{{list.length > 0}}" class="load-more">
-      <text class="load-more-text">没有更多记录了</text>
+      <text class="load-more__text">没有更多记录了</text>
     </view>
   </view>
-</view>
+</ui-page>

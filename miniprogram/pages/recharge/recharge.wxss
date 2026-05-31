@@ -1,40 +1,7 @@
-@import "../../app.wxss";
-
-.header {
-  margin-bottom: 48rpx;
-  text-align: center;
-}
-
-.title {
-  font-size: 48rpx;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.card {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
-}
-
-.loading {
-  display: block;
-  font-size: 28rpx;
-  color: #999;
-  text-align: center;
-}
-
-.empty {
-  display: block;
-  font-size: 28rpx;
-  color: #999;
-  text-align: center;
-}
+/* 充值页私有样式 */
 
 .package-card {
-  background: #fff;
+  background: var(--color-bg-card);
   border-radius: 16rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
@@ -51,13 +18,13 @@
 .package-name {
   font-size: 32rpx;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text);
 }
 
 .package-price {
   font-size: 32rpx;
   font-weight: 600;
-  color: #ff9900;
+  color: var(--color-price);
 }
 
 .package-body {
@@ -69,31 +36,24 @@
 .package-total {
   display: block;
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 8rpx;
 }
 
 .package-total {
-  color: #07c160;
+  color: var(--color-points);
   font-weight: 500;
-}
-
-.label {
-  display: block;
-  font-size: 28rpx;
-  color: #666;
-  margin-bottom: 16rpx;
 }
 
 .subvalue {
   display: block;
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-muted);
   margin-bottom: 16rpx;
 }
 
 .mock-card {
-  border: 1rpx dashed #ff9900;
+  border: 1rpx dashed var(--color-warning);
 }
 
 .link-card {
@@ -104,5 +64,5 @@
 
 .link-text {
   font-size: 28rpx;
-  color: #576b95;
+  color: var(--color-primary);
 }
