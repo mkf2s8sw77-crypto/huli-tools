@@ -7,6 +7,26 @@ const WECHAT_LOGIN_ENABLED = import.meta.env.VITE_WECHAT_LOGIN_ENABLED === "true
 const WECHAT_PROVIDER_ID = import.meta.env.VITE_WECHAT_PROVIDER_ID || "wx_open";
 const WECHAT_REDIRECT_URI = import.meta.env.VITE_WECHAT_REDIRECT_URI || "";
 
+function getErrorMessage(err: unknown, fallback: string) {
+  const e = err as {
+    message?: string;
+    error_description?: string;
+    errMsg?: string;
+    error?: string;
+    code?: string;
+    response?: { data?: { error_description?: string; error?: string; code?: string } };
+  };
+  return e?.message
+    || e?.error_description
+    || e?.response?.data?.error_description
+    || e?.errMsg
+    || e?.error
+    || e?.response?.data?.error
+    || e?.code
+    || e?.response?.data?.code
+    || fallback;
+}
+
 function createOAuthState() {
   if (crypto.randomUUID) return crypto.randomUUID();
   const bytes = new Uint8Array(16);
@@ -56,10 +76,10 @@ export default function LoginPage({ onLoginSuccess }: Props) {
       const redirectUri = getWechatRedirectUri();
 
       const result = await (auth as unknown as {
-        genProviderRedirectUri: (opts: { provider_id: string; redirect_uri: string; state: string }) => Promise<{ uri: string }>;
+        genProviderRedirectUri: (opts: { provider_id: string; provider_redirect_uri: string; state: string }) => Promise<{ uri: string }>;
       }).genProviderRedirectUri({
         provider_id: WECHAT_PROVIDER_ID,
-        redirect_uri: redirectUri,
+        provider_redirect_uri: redirectUri,
         state,
       });
 
@@ -69,8 +89,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
         message.error("获取微信授权地址失败，请检查 CloudBase 微信开放平台登录配置");
       }
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      message.error("微信登录发起失败: " + (e.message || "请检查 CloudBase 微信开放平台登录配置"));
+      message.error("微信登录发起失败: " + getErrorMessage(err, "请检查 CloudBase 微信开放平台登录配置"));
     } finally {
       setWechatLoading(false);
     }

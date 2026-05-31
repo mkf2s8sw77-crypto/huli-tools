@@ -46,6 +46,26 @@ const menuItems = [
 const WECHAT_PROVIDER_ID = import.meta.env.VITE_WECHAT_PROVIDER_ID || "wx_open";
 const WECHAT_REDIRECT_URI = import.meta.env.VITE_WECHAT_REDIRECT_URI || "";
 
+function getErrorMessage(err: unknown, fallback: string) {
+  const e = err as {
+    message?: string;
+    error_description?: string;
+    errMsg?: string;
+    error?: string;
+    code?: string;
+    response?: { data?: { error_description?: string; error?: string; code?: string } };
+  };
+  return e?.message
+    || e?.error_description
+    || e?.response?.data?.error_description
+    || e?.errMsg
+    || e?.error
+    || e?.response?.data?.error
+    || e?.code
+    || e?.response?.data?.code
+    || fallback;
+}
+
 function getWechatRedirectUri() {
   return WECHAT_REDIRECT_URI || window.location.origin + window.location.pathname;
 }
@@ -103,8 +123,7 @@ function App() {
       message.success("微信登录成功");
       return true;
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      message.error("微信登录失败: " + (e.message || "换取凭证失败，请重试"));
+      message.error("微信登录失败: " + getErrorMessage(err, "换取凭证失败，请重试"));
       window.history.replaceState({}, "", window.location.pathname + window.location.hash);
       return false;
     }
