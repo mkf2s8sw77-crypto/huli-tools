@@ -15,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import { auth } from "./services/cloudbase";
 import { adminApi } from "./services/adminApi";
+import { adminThemeGradients, adminThemeTokens } from "./theme";
 
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -69,6 +70,57 @@ function getErrorMessage(err: unknown, fallback: string) {
 function getWechatRedirectUri() {
   return WECHAT_REDIRECT_URI || window.location.origin + window.location.pathname;
 }
+
+const brandStyles = {
+  siderLogo: {
+    height: 56,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+  } as React.CSSProperties,
+  brandMark: {
+    width: 28,
+    height: 28,
+    borderRadius: "50%",
+    background: adminThemeGradients.brand,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  } as React.CSSProperties,
+  brandDot: {
+    width: 12,
+    height: 12,
+    borderRadius: "50%",
+    border: "2px solid rgba(255, 255, 255, 0.85)",
+  } as React.CSSProperties,
+  brandText: {
+    color: adminThemeTokens.colorOnPrimary,
+    fontWeight: 600,
+    fontSize: 15,
+    letterSpacing: 0,
+    whiteSpace: "nowrap" as const,
+  } as React.CSSProperties,
+  header: {
+    padding: "0 24px",
+    background: adminThemeTokens.colorBgContainer,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottom: "1px solid " + adminThemeTokens.colorBorder,
+    boxShadow: "0 1px 4px rgba(30, 90, 140, 0.04)",
+  } as React.CSSProperties,
+  content: {
+    margin: 20,
+    padding: 24,
+    background: adminThemeTokens.colorBgContainer,
+    borderRadius: adminThemeTokens.borderRadiusCard,
+    boxShadow: adminThemeTokens.shadowCard,
+    overflow: "auto" as const,
+  } as React.CSSProperties,
+};
 
 function App() {
   const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
@@ -192,8 +244,8 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <Spin size="large" description="加载中..." />
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: adminThemeTokens.colorBgLayout }}>
+        <Spin size="large" />
       </div>
     );
   }
@@ -221,11 +273,13 @@ function App() {
         collapsed={collapsed}
         onCollapse={setCollapsed}
         trigger={null}
-        theme="dark"
-        width={200}
+        width={220}
       >
-        <div style={{ height: 48, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: collapsed ? 14 : 16 }}>
-          {collapsed ? "管理" : "沪里工具管理端"}
+        <div style={brandStyles.siderLogo}>
+          <div style={brandStyles.brandMark}>
+            <div style={brandStyles.brandDot} />
+          </div>
+          {!collapsed && <span style={brandStyles.brandText}>沪里工具管理端</span>}
         </div>
         <Menu
           theme="dark"
@@ -236,7 +290,7 @@ function App() {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: "0 16px", background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #f0f0f0" }}>
+        <Header style={brandStyles.header}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -252,7 +306,7 @@ function App() {
             </Button>
           </Dropdown>
         </Header>
-        <Content style={{ margin: 16, padding: 16, background: "#fff", borderRadius: 8, overflow: "auto" }}>
+        <Content style={brandStyles.content}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />

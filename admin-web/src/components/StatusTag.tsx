@@ -40,5 +40,5 @@ export default function StatusTag({ domain, status }: Props) {
   const map = STATUS_COLORS[domain] || {};
   const entry = map[status];
   if (!entry) return <Tag>{status}</Tag>;
-  return <Tag color={entry.color}>{entry.text}</Tag>;
+  return <Tag color={entry.color} bordered={false} style={{ borderRadius: 999 }}>{entry.text}</Tag>;
 }

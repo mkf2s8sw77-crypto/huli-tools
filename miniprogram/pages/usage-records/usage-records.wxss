@@ -1,30 +1,61 @@
-/* 使用记录页私有样式 */
+/* 使用记录页 v2 */
 
-.record-card {
-  background: var(--color-bg-card);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+.info-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
 }
 
-.record-app {
+.info-card__app {
   font-size: 28rpx;
   font-weight: 600;
   color: var(--color-text);
 }
 
-.record-cost {
+.info-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.info-card__label {
   font-size: 26rpx;
   color: var(--color-text-secondary);
 }
 
-.record-error {
+.info-card__cost {
+  font-size: 26rpx;
+  color: var(--color-accent-warm);
+  font-weight: 500;
+}
+
+.info-card__cost--free {
+  color: var(--color-text-muted);
+}
+
+.info-card__error {
+  background: var(--color-danger-light);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.info-card__error text {
   font-size: 24rpx;
   color: var(--color-danger);
 }
 
-.record-time {
+.info-card__footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1rpx solid var(--color-border-soft);
+}
+
+.info-card__time {
   font-size: 22rpx;
   color: var(--color-text-muted);
 }

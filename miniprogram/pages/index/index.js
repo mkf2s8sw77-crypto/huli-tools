@@ -2,7 +2,7 @@ const api = require("../../services/api");
 
 Page({
   data: {
-    message: "欢迎使用沪里工具",
+    message: "沪里工具",
     loading: true,
     error: null,
     userSummary: null,
@@ -59,5 +59,21 @@ Page({
         wx.showToast({ title: "页面跳转失败", icon: "none" });
       },
     });
+  },
+
+  onGoRecharge() {
+    wx.navigateTo({ url: "/pages/recharge/recharge" });
+  },
+
+  onGoOrders() {
+    wx.navigateTo({ url: "/pages/orders/orders" });
+  },
+
+  onGoTransactions() {
+    wx.navigateTo({ url: "/pages/transactions/transactions" });
+  },
+
+  onGoUsageRecords() {
+    wx.navigateTo({ url: "/pages/usage-records/usage-records" });
   },
 });

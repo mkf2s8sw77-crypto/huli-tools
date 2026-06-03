@@ -1,7 +1,9 @@
-<view class="container">
-  <view wx:if="{{title}}" class="page-header">
+<view class="ui-page {{variant ? 'ui-page--' + variant : ''}}">
+  <view wx:if="{{title}}" class="ui-page__header">
+    <text wx:if="{{eyebrow}}" class="page-eyebrow">{{eyebrow}}</text>
     <text class="page-title">{{title}}</text>
     <text wx:if="{{subtitle}}" class="page-subtitle">{{subtitle}}</text>
   </view>
+  <slot name="hero"></slot>
   <slot></slot>
 </view>

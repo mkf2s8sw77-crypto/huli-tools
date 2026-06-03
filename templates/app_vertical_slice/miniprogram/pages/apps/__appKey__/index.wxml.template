@@ -1,24 +1,39 @@
-<ui-page title="__appName__">
-  <!-- TODO: 添加业务表单 -->
+<ui-page title="__appName__" subtitle="__appDescription__">
+  <!-- 应用头部 + 费用提示 -->
+  <view class="app-exec-header card card--soft">
+    <view class="app-exec-header__row">
+      <view class="app-icon-symbol app-icon-symbol--teal">
+        <text>__appIconChar__</text>
+      </view>
+      <view class="app-exec-header__info">
+        <text class="app-exec-header__name">__appName__</text>
+        <text class="app-exec-header__cost">消耗积分待配置</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 表单卡 -->
   <ui-form-field label="请输入参数">
     <input class="form-input" placeholder="参数值" />
   </ui-form-field>
 
-  <button
-    type="primary"
-    bindtap="onExecute"
+  <!-- 主操作区 -->
+  <ui-action-button
+    text="执行"
     disabled="{{loading}}"
     loading="{{loading}}"
-  >
-    执行
-  </button>
+    bind:tap="onExecute"
+    extra-class="app-exec-btn"
+  />
 
-  <ui-card wx:if="{{result}}" extraClass="result-section">
-    <text class="form-label">结果：</text>
-    <text class="result-value">{{result}}</text>
-  </ui-card>
+  <!-- 结果区 -->
+  <view wx:if="{{result}}" class="card card--elevated app-exec-result">
+    <text class="app-exec-result__label">结果</text>
+    <text class="app-exec-result__value">{{result}}</text>
+  </view>
 
-  <view wx:if="{{errorMsg}}" class="error-section">
-    <text class="error-text">{{errorMsg}}</text>
+  <!-- 错误 -->
+  <view wx:if="{{errorMsg}}" class="app-exec-error">
+    <text>{{errorMsg}}</text>
   </view>
 </ui-page>

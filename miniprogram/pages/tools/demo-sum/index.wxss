@@ -1,37 +1,95 @@
-/* demo-sum 页面私有样式 */
+/* demo-sum v2 — 应用执行页 */
 
-.cost-points {
-  display: block;
-  font-size: 40rpx;
-  font-weight: 600;
-  color: var(--color-price);
+.app-exec-header {
+  margin-bottom: var(--spacing-md);
 }
 
-.result .value {
-  display: block;
-  font-size: 48rpx;
-  font-weight: 600;
-  color: var(--color-success);
-  margin-top: 16rpx;
+.app-exec-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
-.subvalue {
+.app-exec-header__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-exec-header__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.app-exec-header__cost {
+  font-size: 24rpx;
+  color: var(--color-accent-warm);
+  font-weight: 500;
+  margin-top: 2rpx;
+}
+
+.app-exec-btn {
+  margin: var(--spacing-md) 0;
+}
+
+.app-exec-meta {
+  background: var(--color-surface);
+}
+
+.app-exec-meta::before {
+  display: none;
+}
+
+.app-exec-meta__label {
+  display: block;
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  margin-bottom: 4rpx;
+}
+
+.app-exec-meta__value {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  font-family: monospace;
+}
+
+.app-exec-meta__cost {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-accent-warm);
+  margin-top: 4rpx;
+}
+
+.app-exec-result {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.app-exec-result__label {
   display: block;
   font-size: 24rpx;
   color: var(--color-text-muted);
-  margin-top: 8rpx;
+  margin-bottom: var(--spacing-sm);
 }
 
-.error-card {
-  background: var(--color-danger-light);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-top: 24rpx;
-}
-
-.error-card text {
+.app-exec-result__value {
   display: block;
+  font-size: 56rpx;
+  font-weight: 700;
+  color: var(--color-success);
+  line-height: 1.2;
+}
+
+.app-exec-error {
+  background: var(--color-danger-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+.app-exec-error text {
   font-size: 28rpx;
   color: var(--color-danger);
-  text-align: center;
 }

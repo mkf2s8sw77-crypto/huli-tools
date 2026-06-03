@@ -1,35 +1,96 @@
-/* 我的页面私有样式 */
+/* 我的页面 v2 — 账户面板 */
 
-.value {
+/* ── 积分卡 ── */
+.account-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 8rpx 40rpx rgba(30, 90, 140, 0.16);
+}
+
+.account-card__bg {
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-hero);
+}
+
+.account-card__bg::after {
+  content: '';
+  position: absolute;
+  top: -60rpx;
+  right: -30rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.account-card__content {
+  position: relative;
+  z-index: 1;
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
+  color: var(--color-on-primary);
+}
+
+.account-card__label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
   display: block;
-  font-size: 32rpx;
-  color: var(--color-text);
-  font-weight: 500;
-  font-family: monospace;
+  margin-bottom: 4rpx;
 }
 
-.points-card {
-  text-align: center;
+.account-card__balance {
+  font-size: 80rpx;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+  display: block;
+  margin-bottom: var(--spacing-md);
 }
 
-.points-card .form-label {
-  text-align: center;
+.account-card__details {
+  display: flex;
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.15);
 }
 
-.points-sub {
+.account-card__detail {
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 2rpx;
 }
 
-.frozen {
-  display: block;
+.account-card__detail-label {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.account-card__detail-value {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.account-card__detail-value--warning {
+  color: var(--color-accent-warm-light);
+}
+
+/* ── 身份栏 ── */
+.id-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1rpx solid var(--color-border-soft);
+}
+
+.id-bar__text {
   font-size: 26rpx;
-  color: var(--color-warning);
-}
-
-.sub {
-  display: block;
-  font-size: 24rpx;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
+  font-family: monospace;
 }

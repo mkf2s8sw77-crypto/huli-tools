@@ -1,4 +1,4 @@
-<ui-page title="使用记录">
+<ui-page title="使用记录" subtitle="应用调用历史与积分消耗">
   <view wx:if="{{loading && list.length === 0}}">
     <ui-card>
       <text class="loading-state">正在加载...</text>
@@ -13,22 +13,23 @@
     <view
       wx:for="{{list}}"
       wx:key="_id"
-      class="record-card"
+      class="card info-card"
     >
-      <view class="list-row">
-        <text class="record-app">{{item.appKey}}</text>
+      <view class="info-card__top">
+        <text class="info-card__app">{{item.appKey}}</text>
         <ui-status text="{{item.statusText}}" type="{{item.statusType}}" />
       </view>
-      <view class="list-row">
-        <text wx:if="{{item.costPoints > 0}}" class="record-cost">消耗 {{item.costPoints}} 积分</text>
-        <text wx:else class="record-cost">免费</text>
+      <view class="info-card__row">
+        <text class="info-card__label">积分消耗</text>
+        <text wx:if="{{item.costPoints > 0}}" class="info-card__cost">{{item.costPoints}} 积分</text>
+        <text wx:else class="info-card__cost info-card__cost--free">免费</text>
       </view>
-      <view wx:if="{{item.errorMessage}}" class="list-row">
-        <text class="record-error">{{item.errorMessage}}</text>
+      <view wx:if="{{item.errorMessage}}" class="info-card__error">
+        <text>{{item.errorMessage}}</text>
       </view>
-      <view class="list-row">
-        <text class="record-time">{{item.startedAtText}}</text>
-        <text wx:if="{{item.finishedAtText !== '-'}}" class="record-time">完成于 {{item.finishedAtText}}</text>
+      <view class="info-card__footer">
+        <text class="info-card__time">{{item.startedAtText}}</text>
+        <text wx:if="{{item.finishedAtText !== '-'}}" class="info-card__time">完成于 {{item.finishedAtText}}</text>
       </view>
     </view>
 

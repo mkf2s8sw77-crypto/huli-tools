@@ -1,24 +1,66 @@
-/* __appKey__ 页面私有样式 — 平台通用样式由 app.wxss 提供 */
+/* __appKey__ v2 应用执行页 — 平台通用样式由 app.wxss 提供 */
 /* 新应用不得重新定义平台主色、卡片、按钮、状态标签等公共视觉规则 */
 
-.result-section {
-  margin-top: 24rpx;
+.app-exec-header {
+  margin-bottom: var(--spacing-md);
 }
 
-.result-value {
-  font-size: 32rpx;
+.app-exec-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.app-exec-header__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-exec-header__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.app-exec-header__cost {
+  font-size: 24rpx;
+  color: var(--color-accent-warm);
+  font-weight: 500;
+  margin-top: 2rpx;
+}
+
+.app-exec-btn {
+  margin: var(--spacing-md) 0;
+}
+
+.app-exec-result {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.app-exec-result__label {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.app-exec-result__value {
+  display: block;
+  font-size: 40rpx;
   color: var(--color-success);
   font-weight: 600;
 }
 
-.error-section {
-  margin-top: 24rpx;
-  padding: 24rpx;
+.app-exec-error {
   background: var(--color-danger-light);
-  border-radius: 16rpx;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  text-align: center;
 }
 
-.error-text {
+.app-exec-error text {
   font-size: 28rpx;
   color: var(--color-danger);
 }

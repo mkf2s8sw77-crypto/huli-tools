@@ -1,20 +1,42 @@
-/* AI 绘图页面私有样式 */
+/* AI 绘图 v2 — 应用执行页 */
 
-.cost-points {
-  display: block;
-  font-size: 40rpx;
+.app-exec-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.app-exec-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.app-exec-header__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-exec-header__name {
+  font-size: 30rpx;
   font-weight: 600;
-  color: var(--color-price);
+  color: var(--color-text);
+}
+
+.app-exec-header__cost {
+  font-size: 24rpx;
+  color: var(--color-accent-warm);
+  font-weight: 500;
+  margin-top: 2rpx;
 }
 
 .prompt-input {
   width: 100%;
   min-height: 160rpx;
   border: 1rpx solid var(--color-border);
-  border-radius: 8rpx;
-  padding: 16rpx;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
   font-size: 30rpx;
   box-sizing: border-box;
+  background: var(--color-surface);
 }
 
 .char-count {
@@ -22,45 +44,58 @@
   text-align: right;
   font-size: 22rpx;
   color: var(--color-text-muted);
-  margin-top: 8rpx;
+  margin-top: var(--spacing-xs);
 }
 
-.image-card {
+.app-exec-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+}
+
+.app-exec-btn {
+  width: 100%;
+}
+
+.app-exec-cancel {
+  margin-top: 0;
+}
+
+.app-exec-result {
   text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.app-exec-result__label {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
 }
 
 .result-image {
   width: 100%;
   max-height: 800rpx;
-  border-radius: 8rpx;
-  margin-bottom: 24rpx;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
 }
 
 .save-btn {
-  margin-top: 16rpx;
+  margin-top: var(--spacing-sm);
+  border-radius: var(--radius-md) !important;
 }
 
-.btn-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.cancel-btn {
-  margin-top: 8rpx;
-}
-
-.error-card {
+.app-exec-error {
   background: var(--color-danger-light);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-top: 24rpx;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  text-align: center;
 }
 
-.error-card text {
-  display: block;
+.app-exec-error text {
   font-size: 28rpx;
   color: var(--color-danger);
-  text-align: center;
 }

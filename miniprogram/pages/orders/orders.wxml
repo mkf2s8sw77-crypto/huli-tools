@@ -1,4 +1,4 @@
-<ui-page title="我的订单">
+<ui-page title="我的订单" subtitle="充值订单与支付状态">
   <view wx:if="{{loading && orders.length === 0}}">
     <ui-card>
       <text class="loading-state">正在加载...</text>
@@ -13,22 +13,23 @@
     <view
       wx:for="{{orders}}"
       wx:key="orderNo"
-      class="order-card"
+      class="card info-card"
     >
-      <view class="list-row">
-        <text class="order-no">{{item.orderNo}}</text>
+      <view class="info-card__top">
+        <text class="info-card__id">{{item.orderNo}}</text>
         <ui-status text="{{item.statusText}}" type="{{item.statusType}}" />
       </view>
-      <view class="list-row">
-        <text class="order-package">{{item.packageKey}}</text>
-        <text class="order-amount">{{item.amountYuan}} 元</text>
+      <view class="info-card__row">
+        <text class="info-card__label">{{item.packageKey}}</text>
+        <text class="info-card__amount">¥{{item.amountYuan}}</text>
       </view>
-      <view class="list-row">
-        <text class="order-points">到账 {{item.pointsTotal}} 积分</text>
+      <view class="info-card__row">
+        <text class="info-card__label">到账积分</text>
+        <ui-price value="{{item.pointsTotal}}" type="points" size="sm" />
       </view>
-      <view class="list-row">
-        <text class="order-time">{{item.createdAtText}}</text>
-        <text wx:if="{{item.paidAtText !== '-'}}" class="order-paid">支付于 {{item.paidAtText}}</text>
+      <view class="info-card__footer">
+        <text class="info-card__time">{{item.createdAtText}}</text>
+        <text wx:if="{{item.paidAtText !== '-'}}" class="info-card__time">支付于 {{item.paidAtText}}</text>
       </view>
     </view>
 

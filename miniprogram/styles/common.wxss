@@ -1,61 +1,127 @@
-/* 平台通用样式 —— 页面级可复用 class */
+/* 沪里工具设计系统 v2 —— 平台通用样式 */
 @import "./tokens.wxss";
 
+/* ── 页面容器 ── */
 .container {
-  padding: 32rpx;
+  padding: var(--spacing-lg);
 }
 
+/* ── 页面头部 ── */
 .page-header {
-  margin-bottom: 32rpx;
+  margin-bottom: var(--spacing-lg);
 }
 
 .page-title {
   display: block;
   font-size: 36rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text);
+  letter-spacing: 0;
 }
 
 .page-subtitle {
   display: block;
   font-size: 24rpx;
   color: var(--color-text-muted);
-  margin-top: 8rpx;
+  margin-top: var(--spacing-xs);
 }
 
+.page-eyebrow {
+  display: block;
+  font-size: 22rpx;
+  color: var(--color-brand-soft);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 4rpx;
+}
+
+/* ── 区域标题 ── */
 .section-title {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 24rpx;
-  padding-left: 8rpx;
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-xs);
+  position: relative;
 }
 
-/* 卡片 */
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4rpx;
+  bottom: 4rpx;
+  width: 6rpx;
+  border-radius: 3rpx;
+  background: var(--color-brand-soft);
+}
+
+/* ── 卡片 v2 ── */
 .card {
   background: var(--color-bg-card);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-card);
+  border: 1rpx solid var(--color-border-soft);
+  position: relative;
+  overflow: hidden;
 }
 
-/* 表单字段 */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, rgba(91, 168, 160, 0.15), transparent);
+}
+
+.card--elevated {
+  box-shadow: var(--shadow-elevated);
+  border-color: var(--color-border);
+}
+
+.card--soft {
+  background: var(--color-brand-soft-light);
+  border-color: rgba(91, 168, 160, 0.12);
+}
+
+.card--hero {
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
+  border: none;
+}
+
+.card--hero::before {
+  display: none;
+}
+
+/* ── 表单字段 ── */
 .form-label {
   display: block;
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: var(--color-text-secondary);
-  margin-bottom: 16rpx;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
 }
 
 .form-input {
   border: 1rpx solid var(--color-border);
-  border-radius: 8rpx;
-  padding: 16rpx;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
   font-size: 30rpx;
+  background: var(--color-surface);
+  transition: border-color 0.2s;
 }
 
-/* 价格/积分 */
+.form-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* ── 价格/积分 ── */
 .text-price {
   color: var(--color-price);
   font-weight: 600;
@@ -66,11 +132,15 @@
   font-weight: 600;
 }
 
-/* 状态标签 */
+/* ── 状态标签 v2 ── */
 .status-tag {
-  font-size: 24rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  display: inline-flex;
+  align-items: center;
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .status-tag--success {
@@ -89,24 +159,47 @@
 }
 
 .status-tag--default {
-  background: var(--color-bg);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
 }
 
-/* 状态文字 */
+.status-tag--info {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* ── 状态文字 ── */
 .text-success { color: var(--color-success); }
 .text-warning { color: var(--color-warning); }
 .text-danger { color: var(--color-danger); }
 .text-muted { color: var(--color-text-muted); }
 .text-secondary { color: var(--color-text-secondary); }
 
-/* 空状态 */
+/* ── 空状态 ── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64rpx 32rpx;
+  padding: 80rpx var(--spacing-lg);
+}
+
+.empty-state__icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state__icon-dot {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: var(--color-border);
 }
 
 .empty-state__text {
@@ -115,31 +208,31 @@
   text-align: center;
 }
 
-/* 加载中 */
+/* ── 加载中 ── */
 .loading-state {
   display: block;
   font-size: 28rpx;
   color: var(--color-text-muted);
   text-align: center;
-  padding: 32rpx;
+  padding: var(--spacing-lg);
 }
 
-/* 错误状态 */
+/* ── 错误状态 ── */
 .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32rpx;
+  padding: var(--spacing-lg);
 }
 
 .error-state__text {
   font-size: 28rpx;
   color: var(--color-danger);
   text-align: center;
-  margin-bottom: 16rpx;
+  margin-bottom: var(--spacing-sm);
 }
 
-/* 列表行 */
+/* ── 列表行 ── */
 .list-row {
   display: flex;
   justify-content: space-between;
@@ -151,10 +244,10 @@
   margin-bottom: 0;
 }
 
-/* 加载更多 */
+/* ── 加载更多 ── */
 .load-more {
   text-align: center;
-  padding: 24rpx;
+  padding: var(--spacing-md);
 }
 
 .load-more__text {
@@ -162,11 +255,12 @@
   color: var(--color-text-muted);
 }
 
-/* 菜单列表 */
+/* ── 菜单列表 v2 ── */
 .menu-list {
   background: var(--color-bg-card);
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1rpx solid var(--color-border-soft);
   overflow: hidden;
 }
 
@@ -174,12 +268,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 32rpx;
-  border-bottom: 1rpx solid var(--color-border);
+  padding: var(--spacing-lg);
+  border-bottom: 1rpx solid var(--color-border-soft);
+  transition: background 0.15s;
 }
 
 .menu-item:last-child {
   border-bottom: none;
+}
+
+.menu-item:active {
+  background: var(--color-surface);
+}
+
+.menu-item__left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.menu-item__icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
 }
 
 .menu-item__text {
@@ -188,11 +303,98 @@
 }
 
 .menu-item__arrow {
-  font-size: 28rpx;
+  font-size: 24rpx;
   color: var(--color-text-muted);
 }
 
-/* 主操作按钮覆盖 */
+/* ── 主操作按钮覆盖 v2 ── */
 button[type="primary"] {
-  background-color: var(--color-primary) !important;
+  background: var(--gradient-primary) !important;
+  border-radius: var(--radius-md) !important;
+  border: none !important;
+  box-shadow: 0 4rpx 16rpx rgba(30, 90, 140, 0.2) !important;
+}
+
+button[type="primary"]:active {
+  opacity: 0.85;
+}
+
+button[type="primary"][disabled] {
+  background: var(--color-border) !important;
+  box-shadow: none !important;
+}
+
+/* ── 护理线分隔符 ── */
+.care-divider {
+  height: 2rpx;
+  margin: var(--spacing-lg) 0;
+  background: linear-gradient(90deg, transparent, var(--color-brand-soft-light), var(--color-brand-soft), var(--color-brand-soft-light), transparent);
+  border: none;
+}
+
+/* ── CSS 品牌徽标 ── */
+.brand-mark {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-brand-soft) 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.brand-mark::after {
+  content: '';
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+/* ── 统计块 ── */
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-block__value {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.stat-block__label {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  margin-top: 4rpx;
+}
+
+/* ── CSS 应用图标符号 ── */
+.app-icon-symbol {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-on-primary);
+  flex-shrink: 0;
+}
+
+.app-icon-symbol--blue {
+  background: var(--gradient-primary);
+}
+
+.app-icon-symbol--teal {
+  background: var(--gradient-brand-soft);
+}
+
+.app-icon-symbol--gold {
+  background: var(--gradient-warm);
 }

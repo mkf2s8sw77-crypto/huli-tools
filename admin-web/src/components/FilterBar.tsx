@@ -1,6 +1,7 @@
 import { Input, Button, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import type { ReactNode } from "react";
+import { adminThemeTokens } from "../theme";
 
 interface Props {
   keyword: string;
@@ -12,19 +13,28 @@ interface Props {
 
 export default function FilterBar({ keyword, onChange, onSearch, placeholder, extra }: Props) {
   return (
-    <Space style={{ marginBottom: 16 }} wrap>
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      marginBottom: 20,
+      padding: "12px 16px",
+      background: adminThemeTokens.colorSurface,
+      borderRadius: 10,
+      flexWrap: "wrap",
+    }}>
       <Input
         placeholder={placeholder || "搜索"}
         value={keyword}
         onChange={(e) => onChange(e.target.value)}
         onPressEnter={onSearch}
-        style={{ width: 300 }}
+        style={{ width: 300, maxWidth: "100%", borderRadius: 8 }}
         allowClear
       />
-      <Button icon={<SearchOutlined />} type="primary" onClick={onSearch}>
+      <Button icon={<SearchOutlined />} type="primary" onClick={onSearch} style={{ borderRadius: 8 }}>
         搜索
       </Button>
-      {extra}
-    </Space>
+      {extra && <Space wrap>{extra}</Space>}
+    </div>
   );
 }

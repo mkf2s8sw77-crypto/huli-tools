@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, Form, Input, Button, message, Typography, Divider } from "antd";
 import { LockOutlined, UserOutlined, WechatOutlined } from "@ant-design/icons";
 import { auth } from "../services/cloudbase";
+import { adminThemeGradients, adminThemeTokens } from "../theme";
 
 const WECHAT_LOGIN_ENABLED = import.meta.env.VITE_WECHAT_LOGIN_ENABLED === "true";
 const WECHAT_PROVIDER_ID = import.meta.env.VITE_WECHAT_PROVIDER_ID || "wx_open";
@@ -37,6 +38,51 @@ function createOAuthState() {
 function getWechatRedirectUri() {
   return WECHAT_REDIRECT_URI || window.location.origin + window.location.pathname;
 }
+
+const loginStyles = {
+  wrapper: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    background: adminThemeGradients.loginBackground,
+  } as React.CSSProperties,
+  card: {
+    width: 420,
+    borderRadius: 16,
+    boxShadow: adminThemeTokens.shadowLogin,
+    border: "1px solid " + adminThemeTokens.colorBorder,
+  } as React.CSSProperties,
+  brandRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 8,
+  } as React.CSSProperties,
+  brandMark: {
+    width: 36,
+    height: 36,
+    borderRadius: "50%",
+    background: adminThemeGradients.brand,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  } as React.CSSProperties,
+  brandDot: {
+    width: 16,
+    height: 16,
+    borderRadius: "50%",
+    border: "2.5px solid rgba(255, 255, 255, 0.85)",
+  } as React.CSSProperties,
+  wechatBtn: {
+    background: adminThemeTokens.colorWechat,
+    borderColor: adminThemeTokens.colorWechat,
+    color: adminThemeTokens.colorOnPrimary,
+    borderRadius: adminThemeTokens.borderRadius,
+  } as React.CSSProperties,
+};
 
 interface Props {
   onLoginSuccess: () => void;
@@ -96,13 +142,18 @@ export default function LoginPage({ onLoginSuccess }: Props) {
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f5f5f5" }}>
-      <Card style={{ width: 400 }}>
-        <Typography.Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
-          沪里工具管理端
-        </Typography.Title>
-        <Typography.Text type="secondary" style={{ display: "block", textAlign: "center", marginBottom: 24 }}>
-          使用 CloudBase Auth 账号登录
+    <div style={loginStyles.wrapper}>
+      <Card style={loginStyles.card}>
+        <div style={loginStyles.brandRow}>
+          <div style={loginStyles.brandMark}>
+            <div style={loginStyles.brandDot} />
+          </div>
+          <Typography.Title level={3} style={{ margin: 0, color: adminThemeTokens.colorText }}>
+            沪里工具
+          </Typography.Title>
+        </div>
+        <Typography.Text type="secondary" style={{ display: "block", textAlign: "center", marginBottom: 28 }}>
+          管理端 · 使用 CloudBase Auth 账号登录
         </Typography.Text>
         <Form onFinish={handleLogin} layout="vertical" autoComplete="off">
           <Form.Item name="account" rules={[{ required: true, message: "请输入用户名或邮箱" }]}>
@@ -112,7 +163,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
             <Input.Password prefix={<LockOutlined />} placeholder="密码" size="large" autoComplete="current-password" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block size="large">
+            <Button type="primary" htmlType="submit" loading={loading} block size="large" style={{ borderRadius: adminThemeTokens.borderRadius }}>
               登录
             </Button>
           </Form.Item>
@@ -127,7 +178,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
               icon={<WechatOutlined />}
               loading={wechatLoading}
               onClick={handleWechatLogin}
-              style={{ background: "#07c160", borderColor: "#07c160", color: "#fff" }}
+              style={loginStyles.wechatBtn}
             >
               微信扫码登录
             </Button>

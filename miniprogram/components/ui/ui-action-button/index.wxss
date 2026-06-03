@@ -1,5 +1,16 @@
 @import "../../../styles/common.wxss";
 
 .ui-action-btn {
-  border-radius: 8rpx;
+  border-radius: var(--radius-md) !important;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.ui-action-btn--loading {
+  opacity: 0.7;
+}
+
+.ui-action-btn--disabled {
+  opacity: 0.55;
+  box-shadow: none !important;
 }

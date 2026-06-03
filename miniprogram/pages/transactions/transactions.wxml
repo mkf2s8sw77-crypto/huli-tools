@@ -1,4 +1,4 @@
-<ui-page title="积分流水">
+<ui-page title="积分流水" subtitle="所有积分变动记录">
   <view wx:if="{{loading && list.length === 0}}">
     <ui-card>
       <text class="loading-state">正在加载...</text>
@@ -13,26 +13,24 @@
     <view
       wx:for="{{list}}"
       wx:key="_id"
-      class="tx-card"
+      class="card info-card"
     >
-      <view class="list-row">
+      <view class="info-card__top">
         <ui-status text="{{item.typeText}}" type="{{item.typeStatus}}" />
-        <text class="tx-date">{{item.createdAtText}}</text>
+        <text class="info-card__time">{{item.createdAtText}}</text>
       </view>
-      <view class="list-row">
-        <text wx:if="{{item.deltaAvailable !== 0}}" class="tx-delta">
-          可用 {{item.deltaAvailableText}}
-        </text>
-        <text wx:if="{{item.deltaFrozen !== 0}}" class="tx-delta">
-          冻结 {{item.deltaFrozenText}}
-        </text>
+      <view class="tx-deltas">
+        <view wx:if="{{item.deltaAvailable !== 0}}" class="tx-delta-chip {{item.deltaAvailable > 0 ? 'tx-delta-chip--plus' : 'tx-delta-chip--minus'}}">
+          <text>可用 {{item.deltaAvailableText}}</text>
+        </view>
+        <view wx:if="{{item.deltaFrozen !== 0}}" class="tx-delta-chip">
+          <text>冻结 {{item.deltaFrozenText}}</text>
+        </view>
       </view>
-      <view class="list-row">
-        <text class="tx-after">可用后: {{item.availableAfter}} / 冻结后: {{item.frozenAfter}}</text>
+      <view class="info-card__footer">
+        <text class="info-card__time">可用: {{item.availableAfter}} / 冻结: {{item.frozenAfter}}</text>
       </view>
-      <view wx:if="{{item.note}}" class="list-row">
-        <text class="tx-note">{{item.note}}</text>
-      </view>
+      <text wx:if="{{item.note}}" class="tx-note">{{item.note}}</text>
     </view>
 
     <view wx:if="{{hasMore}}" class="load-more" bindtap="onReachBottom">

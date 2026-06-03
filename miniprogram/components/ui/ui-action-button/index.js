@@ -4,7 +4,8 @@ Component({
     btnType: { type: String, value: 'primary' },
     size: { type: String, value: 'default' },
     loading: { type: Boolean, value: false },
-    disabled: { type: Boolean, value: false }
+    disabled: { type: Boolean, value: false },
+    extraClass: { type: String, value: '' }
   },
   methods: {
     onTap: function () {

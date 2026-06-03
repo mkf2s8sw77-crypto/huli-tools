@@ -13,13 +13,15 @@
 - 后端仅使用微信云开发（云函数 + 云数据库），不引入独立外部服务。
 - 云函数代码风格保持 CommonJS，两空格缩进。
 
-## 3. 设计系统
+## 3. 设计系统（v2）
 
-- 详见 `docs/design_system.md`。主色蓝青 `#2b6cb0`，微信绿仅用于微信登录按钮和品牌标识。
-- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。
-- **管理端**：主题 Token 在 `admin-web/src/theme.ts`，由 `ConfigProvider` 注入。通用组件在 `admin-web/src/components/`。
-- 新页面和新应用必须使用公共组件和 Token，不得自定义平台主色、卡片、按钮、状态标签等公共视觉规则。
-- 业务结果展示区允许应用自定义布局和色彩。
+- 详见 `docs/design_system.md`。v2 视觉方向：专业温润的护理工具平台。
+- **色板**：深蓝青主色 `#1e5a8c` + 柔和青绿 `#5ba8a0` + 暖金 `#c4963a`。微信绿仅用于微信登录按钮。
+- **表面**：页面使用冷灰渐变背景，卡片带描边 + 柔阴影 + 顶部高光线，禁止回到旧版灰底白卡片平铺。
+- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`（含 spacing/radius/shadow/gradient 系列），通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。
+- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。深蓝青侧栏。通用组件在 `admin-web/src/components/`。
+- 新页面和新应用必须使用 v2 token 和公共组件，采用"应用执行页"模式。不得硬编码主色值、不得自定义按钮/状态标签/卡片公共样式。
+- 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
 ## 4. 安全铁律
 

@@ -1,30 +1,50 @@
-/* 积分流水页私有样式 */
+/* 积分流水页 v2 */
 
-.tx-card {
-  background: var(--color-bg-card);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+.info-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
 }
 
-.tx-date {
+.info-card__time {
   font-size: 22rpx;
   color: var(--color-text-muted);
 }
 
-.tx-delta {
-  font-size: 26rpx;
-  color: var(--color-text);
-  margin-right: 16rpx;
+.info-card__footer {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1rpx solid var(--color-border-soft);
 }
 
-.tx-after {
-  font-size: 24rpx;
-  color: var(--color-text-secondary);
+.tx-deltas {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.tx-delta-chip {
+  font-size: 26rpx;
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.tx-delta-chip--plus {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.tx-delta-chip--minus {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .tx-note {
+  display: block;
   font-size: 24rpx;
   color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
 }

@@ -4,7 +4,7 @@
   loading="{{loading}}"
   disabled="{{disabled || loading}}"
   bindtap="onTap"
-  class="ui-action-btn"
+  class="ui-action-btn {{loading ? 'ui-action-btn--loading' : ''}} {{disabled ? 'ui-action-btn--disabled' : ''}} {{extraClass}}"
 >
   {{text}}
 </button>

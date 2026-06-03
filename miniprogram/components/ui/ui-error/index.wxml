@@ -1,4 +1,5 @@
 <view class="card error-state">
+  <view class="error-state__icon">!</view>
   <text class="error-state__text">{{text}}</text>
-  <button wx:if="{{retryable}}" size="mini" bindtap="onRetry">重试</button>
+  <button wx:if="{{retryable}}" size="mini" type="primary" bindtap="onRetry" class="error-state__btn">重试</button>
 </view>

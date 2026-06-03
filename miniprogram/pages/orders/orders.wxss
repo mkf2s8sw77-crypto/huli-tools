@@ -1,37 +1,45 @@
-/* 订单页私有样式 */
+/* 订单页 v2 — 信息面板 */
 
-.order-card {
-  background: var(--color-bg-card);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+.info-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
 }
 
-.order-no {
-  font-size: 24rpx;
+.info-card__id {
+  font-size: 22rpx;
   color: var(--color-text-muted);
   font-family: monospace;
 }
 
-.order-package {
+.info-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.info-card__label {
   font-size: 28rpx;
   color: var(--color-text);
 }
 
-.order-amount {
-  font-size: 28rpx;
-  color: var(--color-price);
-  font-weight: 500;
+.info-card__amount {
+  font-size: 30rpx;
+  color: var(--color-accent-warm);
+  font-weight: 600;
 }
 
-.order-points {
-  font-size: 26rpx;
-  color: var(--color-points);
+.info-card__footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1rpx solid var(--color-border-soft);
 }
 
-.order-time,
-.order-paid {
+.info-card__time {
   font-size: 22rpx;
   color: var(--color-text-muted);
 }

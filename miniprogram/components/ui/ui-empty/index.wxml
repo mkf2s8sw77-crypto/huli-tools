@@ -1,3 +1,6 @@
 <view class="card empty-state">
+  <view class="empty-state__icon">
+    <view class="empty-state__icon-dot"></view>
+  </view>
   <text class="empty-state__text">{{text}}</text>
 </view>

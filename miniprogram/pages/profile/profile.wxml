@@ -1,4 +1,4 @@
-<ui-page title="我的">
+<ui-page title="我的账户">
   <view wx:if="{{loading}}">
     <ui-card>
       <text class="loading-state">正在加载...</text>
@@ -10,37 +10,67 @@
   </view>
 
   <view wx:else>
-    <ui-card>
-      <text class="form-label">用户身份</text>
-      <text class="value">{{maskedOpenid}}</text>
-    </ui-card>
-
-    <ui-card extraClass="points-card">
-      <text class="form-label">可用积分</text>
-      <ui-price value="{{points.availablePoints}}" type="points" size="xl" />
-      <view class="points-sub">
-        <text wx:if="{{points.frozenPoints > 0}}" class="frozen">冻结中: {{points.frozenPoints}}</text>
-        <text class="sub">累计充值: {{points.totalRechargedPoints}} / 累计消费: {{points.totalConsumedPoints}}</text>
-      </view>
-    </ui-card>
-
-    <view class="menu-list">
-      <view class="menu-item" bindtap="onGoRecharge">
-        <text class="menu-item__text">积分充值</text>
-        <text class="menu-item__arrow">></text>
-      </view>
-      <view class="menu-item" bindtap="onGoOrders">
-        <text class="menu-item__text">我的订单</text>
-        <text class="menu-item__arrow">></text>
-      </view>
-      <view class="menu-item" bindtap="onGoTransactions">
-        <text class="menu-item__text">积分流水</text>
-        <text class="menu-item__arrow">></text>
-      </view>
-      <view class="menu-item" bindtap="onGoUsageRecords">
-        <text class="menu-item__text">使用记录</text>
-        <text class="menu-item__arrow">></text>
+    <!-- 积分卡 -->
+    <view class="account-card">
+      <view class="account-card__bg"></view>
+      <view class="account-card__content">
+        <text class="account-card__label">可用积分</text>
+        <text class="account-card__balance">{{points.availablePoints}}</text>
+        <view class="account-card__details">
+          <view wx:if="{{points.frozenPoints > 0}}" class="account-card__detail">
+            <text class="account-card__detail-label">冻结中</text>
+            <text class="account-card__detail-value account-card__detail-value--warning">{{points.frozenPoints}}</text>
+          </view>
+          <view class="account-card__detail">
+            <text class="account-card__detail-label">累计充值</text>
+            <text class="account-card__detail-value">{{points.totalRechargedPoints}}</text>
+          </view>
+          <view class="account-card__detail">
+            <text class="account-card__detail-label">累计消费</text>
+            <text class="account-card__detail-value">{{points.totalConsumedPoints}}</text>
+          </view>
+        </view>
       </view>
     </view>
+
+    <!-- 用户身份 -->
+    <view class="id-bar">
+      <view class="brand-mark"></view>
+      <text class="id-bar__text">{{maskedOpenid}}</text>
+    </view>
+
+    <!-- 设置面板 -->
+    <ui-section title="账户管理">
+      <view class="menu-list">
+        <view class="menu-item" bindtap="onGoRecharge">
+          <view class="menu-item__left">
+            <view class="menu-item__icon" style="background: var(--color-accent-warm-light); color: var(--color-accent-warm);">¥</view>
+            <text class="menu-item__text">积分充值</text>
+          </view>
+          <text class="menu-item__arrow">›</text>
+        </view>
+        <view class="menu-item" bindtap="onGoOrders">
+          <view class="menu-item__left">
+            <view class="menu-item__icon" style="background: var(--color-primary-light); color: var(--color-primary);">单</view>
+            <text class="menu-item__text">我的订单</text>
+          </view>
+          <text class="menu-item__arrow">›</text>
+        </view>
+        <view class="menu-item" bindtap="onGoTransactions">
+          <view class="menu-item__left">
+            <view class="menu-item__icon" style="background: var(--color-brand-soft-light); color: var(--color-brand-soft);">流</view>
+            <text class="menu-item__text">积分流水</text>
+          </view>
+          <text class="menu-item__arrow">›</text>
+        </view>
+        <view class="menu-item" bindtap="onGoUsageRecords">
+          <view class="menu-item__left">
+            <view class="menu-item__icon" style="background: var(--color-success-light); color: var(--color-success);">记</view>
+            <text class="menu-item__text">使用记录</text>
+          </view>
+          <text class="menu-item__arrow">›</text>
+        </view>
+      </view>
+    </ui-section>
   </view>
 </ui-page>

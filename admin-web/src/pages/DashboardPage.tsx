@@ -32,8 +32,8 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="概览" />
-      <Row gutter={16} style={{ marginBottom: 24 }}>
+      <PageHeader title="概览" subtitle="平台运营数据概况" />
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <StatCard title="注册用户" value={d.totalUsers as number} prefix={<UserOutlined />} />
         </Col>
@@ -48,9 +48,9 @@ export default function DashboardPage() {
         </Col>
       </Row>
 
-      <Row gutter={16}>
+      <Row gutter={[16, 16]}>
         <Col span={12}>
-          <Card title="最近订单" size="small">
+          <Card title="最近订单" size="small" style={{ borderRadius: 12 }}>
             <Table
               dataSource={d.recentOrders as Record<string, unknown>[]}
               rowKey="_id"
@@ -65,7 +65,7 @@ export default function DashboardPage() {
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="最近审计" size="small">
+          <Card title="最近审计" size="small" style={{ borderRadius: 12 }}>
             <Table
               dataSource={d.recentAuditLogs as Record<string, unknown>[]}
               rowKey="_id"
