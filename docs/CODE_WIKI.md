@@ -8,7 +8,7 @@
 
 | 属性 | 说明 |
 |------|------|
-| 项目名称 | huli-tools（沪里工具） |
+| 项目名称 | huli-tools |
 | 类型 | 微信小程序 + 微信云开发（CloudBase） |
 | 小程序 APPID | `wx1654159e6e3bb334` |
 | 云环境 ID | `cloudbase-3gphz7fk0fe1b760` |

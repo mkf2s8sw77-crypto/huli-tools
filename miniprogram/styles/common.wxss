@@ -1,4 +1,4 @@
-/* 沪里工具设计系统 v2 —— 平台通用样式 */
+/* huli-tools 设计系统 — 柔彩多巴胺通用样式 */
 @import "./tokens.wxss";
 
 /* ── 页面容器 ── */
@@ -54,10 +54,10 @@
   bottom: 4rpx;
   width: 6rpx;
   border-radius: 3rpx;
-  background: var(--color-brand-soft);
+  background: var(--gradient-hero);
 }
 
-/* ── 卡片 v2 ── */
+/* ── 卡片 ── */
 .card {
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
@@ -75,8 +75,9 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2rpx;
-  background: linear-gradient(90deg, transparent, rgba(91, 168, 160, 0.15), transparent);
+  height: 3rpx;
+  background: var(--gradient-hero);
+  opacity: 0.4;
 }
 
 .card--elevated {
@@ -85,8 +86,8 @@
 }
 
 .card--soft {
-  background: var(--color-brand-soft-light);
-  border-color: rgba(91, 168, 160, 0.12);
+  background: var(--color-lavender-light);
+  border-color: var(--color-border-soft);
 }
 
 .card--hero {
@@ -132,7 +133,7 @@
   font-weight: 600;
 }
 
-/* ── 状态标签 v2 ── */
+/* ── 状态标签 ── */
 .status-tag {
   display: inline-flex;
   align-items: center;
@@ -188,7 +189,7 @@
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  background: var(--color-surface);
+  background: var(--color-lavender-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,7 +200,8 @@
   width: 32rpx;
   height: 32rpx;
   border-radius: 50%;
-  background: var(--color-border);
+  background: var(--color-lavender);
+  opacity: 0.5;
 }
 
 .empty-state__text {
@@ -255,7 +257,7 @@
   color: var(--color-text-muted);
 }
 
-/* ── 菜单列表 v2 ── */
+/* ── 菜单列表 ── */
 .menu-list {
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
@@ -307,12 +309,12 @@
   color: var(--color-text-muted);
 }
 
-/* ── 主操作按钮覆盖 v2 ── */
+/* ── 主操作按钮覆盖 ── */
 button[type="primary"] {
   background: var(--gradient-primary) !important;
   border-radius: var(--radius-md) !important;
   border: none !important;
-  box-shadow: 0 4rpx 16rpx rgba(30, 90, 140, 0.2) !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
 button[type="primary"]:active {
@@ -328,7 +330,7 @@ button[type="primary"][disabled] {
 .care-divider {
   height: 2rpx;
   margin: var(--spacing-lg) 0;
-  background: linear-gradient(90deg, transparent, var(--color-brand-soft-light), var(--color-brand-soft), var(--color-brand-soft-light), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-peach-light), var(--color-peach), var(--color-lavender), var(--color-lavender-light), transparent);
   border: none;
 }
 
@@ -337,7 +339,7 @@ button[type="primary"][disabled] {
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-brand-soft) 100%);
+  background: var(--gradient-hero);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -349,8 +351,9 @@ button[type="primary"][disabled] {
   width: 24rpx;
   height: 24rpx;
   border-radius: 50%;
-  border: 3rpx solid rgba(255, 255, 255, 0.9);
+  border: 3rpx solid var(--color-on-primary);
   background: transparent;
+  opacity: 0.9;
 }
 
 /* ── 统计块 ── */
@@ -397,4 +400,21 @@ button[type="primary"][disabled] {
 
 .app-icon-symbol--gold {
   background: var(--gradient-warm);
+}
+
+.app-icon-symbol--coral {
+  background: var(--gradient-warm);
+}
+
+.app-icon-symbol--peach {
+  background: var(--gradient-peach);
+}
+
+.app-icon-symbol--lavender {
+  background: var(--gradient-lavender);
+}
+
+.app-icon-symbol--lemon {
+  background: var(--gradient-lemon);
+  color: var(--color-text);
 }

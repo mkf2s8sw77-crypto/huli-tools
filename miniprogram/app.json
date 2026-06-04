@@ -11,9 +11,9 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#1e5a8c",
-    "navigationBarTitleText": "沪里工具",
-    "navigationBarTextStyle": "white"
+    "navigationBarBackgroundColor": "#F8F6F3",
+    "navigationBarTitleText": "huli-tools",
+    "navigationBarTextStyle": "black"
   },
   "tabBar": {
     "custom": true,

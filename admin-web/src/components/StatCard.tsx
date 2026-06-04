@@ -13,7 +13,7 @@ interface Props {
 const variantStyles: Record<NonNullable<Props["variant"]>, CSSProperties> = {
   default: {},
   primary: {
-    background: adminThemeGradients.primary,
+    background: adminThemeGradients.hero,
     borderColor: "transparent",
   },
   soft: {
@@ -32,13 +32,13 @@ export default function StatCard({ title, value, prefix, subtitle, variant = "de
       }}
     >
       <Statistic
-        title={<span style={isPrimary ? { color: "rgba(255,255,255,0.7)" } : undefined}>{title}</span>}
+        title={<span style={isPrimary ? { color: "rgba(255,255,255,0.8)" } : undefined}>{title}</span>}
         value={value}
         prefix={prefix}
         valueStyle={isPrimary ? { color: adminThemeTokens.colorOnPrimary } : { color: adminThemeTokens.colorText }}
       />
       {subtitle && (
-        <div style={{ marginTop: 4, fontSize: 12, color: isPrimary ? "rgba(255,255,255,0.6)" : adminThemeTokens.colorTextTertiary }}>
+        <div style={{ marginTop: 4, fontSize: 12, color: isPrimary ? "rgba(255,255,255,0.7)" : adminThemeTokens.colorTextTertiary }}>
           {subtitle}
         </div>
       )}

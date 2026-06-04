@@ -51,7 +51,7 @@
         </view>
         <view class="menu-item" bindtap="onGoOrders">
           <view class="menu-item__left">
-            <view class="menu-item__icon" style="background: var(--color-primary-light); color: var(--color-primary);">单</view>
+            <view class="menu-item__icon" style="background: var(--color-lavender-light); color: var(--color-lavender);">单</view>
             <text class="menu-item__text">我的订单</text>
           </view>
           <text class="menu-item__arrow">›</text>
@@ -65,7 +65,7 @@
         </view>
         <view class="menu-item" bindtap="onGoUsageRecords">
           <view class="menu-item__left">
-            <view class="menu-item__icon" style="background: var(--color-success-light); color: var(--color-success);">记</view>
+            <view class="menu-item__icon" style="background: var(--color-peach-light); color: var(--color-peach);">记</view>
             <text class="menu-item__text">使用记录</text>
           </view>
           <text class="menu-item__arrow">›</text>

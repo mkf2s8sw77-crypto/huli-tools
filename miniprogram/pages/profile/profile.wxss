@@ -1,4 +1,4 @@
-/* 我的页面 v2 — 账户面板 */
+/* 我的页面 — 柔彩多巴胺账户面板 */
 
 /* ── 积分卡 ── */
 .account-card {
@@ -6,7 +6,7 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   margin-bottom: var(--spacing-lg);
-  box-shadow: 0 8rpx 40rpx rgba(30, 90, 140, 0.16);
+  box-shadow: var(--shadow-elevated);
 }
 
 .account-card__bg {
@@ -23,7 +23,8 @@
   width: 280rpx;
   height: 280rpx;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-on-primary);
+  opacity: 0.08;
 }
 
 .account-card__content {
@@ -35,7 +36,8 @@
 
 .account-card__label {
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-on-primary);
+  opacity: 0.8;
   display: block;
   margin-bottom: 4rpx;
 }
@@ -53,7 +55,7 @@
   display: flex;
   gap: var(--spacing-lg);
   padding-top: var(--spacing-md);
-  border-top: 1rpx solid rgba(255, 255, 255, 0.15);
+  border-top: 1rpx solid var(--color-on-primary);
 }
 
 .account-card__detail {
@@ -64,7 +66,8 @@
 
 .account-card__detail-label {
   font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-on-primary);
+  opacity: 0.6;
 }
 
 .account-card__detail-value {
@@ -73,7 +76,7 @@
 }
 
 .account-card__detail-value--warning {
-  color: var(--color-accent-warm-light);
+  color: var(--color-lemon-light);
 }
 
 /* ── 身份栏 ── */

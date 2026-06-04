@@ -1,0 +1,81 @@
+version = 1
+project_name = "huli-tools-dopamine-ui"
+repo_path = "/Users/huli-dev/Documents/huli-tools"
+workspace_mode = "worktree"
+workspace_ref = "main"
+cleanup_on_success = true
+cleanup_on_failure = false
+claude_command = "claude"
+default_max_turns = 120
+default_effort = "high"
+
+[docs]
+master_spec = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-dopamine-ui-0604/master_spec_huli-tools-dopamine-ui_0604.md"
+test_case = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-dopamine-ui-0604/test_case_huli-tools-dopamine-ui_0604.md"
+
+[bootstrap]
+init_git_if_missing = false
+commands = [
+  "git status --short --branch",
+  "test -f AGENTS.md",
+  "test -f miniprogram/app.json",
+  "test -f miniprogram/styles/tokens.wxss",
+  "test -f admin-web/src/theme.ts",
+  "test -f private.wx1654159e6e3bb334.key"
+]
+
+[gates]
+preflight = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh"
+]
+post_phase = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "git diff --check"
+]
+
+[review]
+max_rounds = 3
+
+[smoke]
+max_rounds = 3
+
+[deploy]
+enabled = false
+start_command = "npm --prefix admin-web run dev -- --host 127.0.0.1"
+healthcheck_url = "http://127.0.0.1:60530"
+
+[[phases]]
+id = "p1"
+name = "小程序品牌、首页与大号浮动导航 MVP"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-dopamine-ui-0604/LLM_prompt_huli-tools-dopamine-ui-p1_0604.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p2"
+name = "小程序全页面与新应用模板柔彩统一"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-dopamine-ui-0604/LLM_prompt_huli-tools-dopamine-ui-p2_0604.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "git diff --check"
+]
+
+[[phases]]
+id = "p3"
+name = "管理端同步、文档更新与预览验收"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-dopamine-ui-0604/LLM_prompt_huli-tools-dopamine-ui-p3_0604.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
+  "npm --prefix admin-web run lint",
+  "npm --prefix admin-web run build",
+  "git diff --check"
+]

@@ -1,45 +1,55 @@
-/* 沪里工具设计系统 v2 Token — 所有页面和组件通过 @import 引用此文件 */
+/* huli-tools 设计系统 — 柔彩多巴胺 Token */
 
 page {
-  /* ── 主色系 ── */
-  --color-primary: #1e5a8c;
-  --color-primary-hover: #174a74;
-  --color-primary-bright: #2a7ab5;
-  --color-primary-light: #e6f0f8;
+  /* ── 主色系（晴空蓝） ── */
+  --color-primary: #5E95C8;
+  --color-primary-hover: #4E85B8;
+  --color-primary-bright: #82B5E0;
+  --color-primary-light: #EDF4FB;
   --color-on-primary: #ffffff;
 
-  /* ── 品牌辅助色 ── */
-  --color-brand-soft: #5ba8a0;
-  --color-brand-soft-bright: #6dbfb5;
-  --color-brand-soft-light: #eaf5f3;
-  --color-accent-warm: #c4963a;
-  --color-accent-warm-bright: #d4a85a;
-  --color-accent-warm-light: #fef8ec;
+  /* ── 品牌辅助色（薄荷青） ── */
+  --color-brand-soft: #5EBCB0;
+  --color-brand-soft-bright: #7ED1C6;
+  --color-brand-soft-light: #EBF7F5;
+
+  /* ── 暖调强调色（珊瑚橙） ── */
+  --color-accent-warm: #E8956B;
+  --color-accent-warm-bright: #F0B08E;
+  --color-accent-warm-light: #FDF0E8;
+
+  /* ── 多巴胺扩展色 ── */
+  --color-peach: #F0A8B2;
+  --color-peach-light: #FDF0F2;
+  --color-lemon: #E8C84A;
+  --color-lemon-light: #FEF8E6;
+  --color-lavender: #B6A8D8;
+  --color-lavender-light: #F2F0F8;
 
   /* ── 状态色 ── */
-  --color-success: #2e8b6a;
-  --color-success-light: #e6f5ee;
-  --color-warning: #c4963a;
-  --color-warning-light: #fef8ec;
-  --color-danger: #c0392b;
-  --color-danger-light: #fdf0ee;
+  --color-success: #4CAF82;
+  --color-success-light: #EAF6EF;
+  --color-warning: #E8A84C;
+  --color-warning-light: #FEF5E8;
+  --color-danger: #E06B6B;
+  --color-danger-light: #FDEDED;
 
   /* ── 文字 ── */
-  --color-text: #1a2a3a;
-  --color-text-secondary: #5a6a7a;
-  --color-text-muted: #8a96a4;
+  --color-text: #2D3748;
+  --color-text-secondary: #5A6B7D;
+  --color-text-muted: #8D99A8;
 
   /* ── 表面系统 ── */
-  --color-bg: #f0f3f7;
-  --color-surface: #f4f6f9;
+  --color-bg: #F5F3F0;
+  --color-surface: #F8F6F3;
   --color-surface-elevated: #ffffff;
   --color-bg-card: #ffffff;
-  --color-border: #e2e8f0;
-  --color-border-soft: #edf1f5;
+  --color-border: #E8E3DE;
+  --color-border-soft: #F0ECE8;
 
   /* ── 语义色 ── */
-  --color-price: #c4963a;
-  --color-points: #1e5a8c;
+  --color-price: #E8956B;
+  --color-points: #5E95C8;
 
   /* ── 圆角 ── */
   --radius-sm: 8rpx;
@@ -49,9 +59,9 @@ page {
   --radius-pill: 999rpx;
 
   /* ── 阴影 ── */
-  --shadow-soft: 0 2rpx 16rpx rgba(30, 90, 140, 0.06), 0 1rpx 4rpx rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 4rpx 24rpx rgba(30, 90, 140, 0.07), 0 1rpx 6rpx rgba(0, 0, 0, 0.03);
-  --shadow-elevated: 0 8rpx 40rpx rgba(30, 90, 140, 0.1), 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  --shadow-soft: 0 2rpx 16rpx rgba(0, 0, 0, 0.04), 0 1rpx 4rpx rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 4rpx 24rpx rgba(0, 0, 0, 0.05), 0 1rpx 6rpx rgba(0, 0, 0, 0.02);
+  --shadow-elevated: 0 8rpx 40rpx rgba(0, 0, 0, 0.07), 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
 
   /* ── 间距 ── */
   --spacing-xs: 8rpx;
@@ -61,11 +71,14 @@ page {
   --spacing-xl: 48rpx;
 
   /* ── 页面渐变 ── */
-  --page-gradient: linear-gradient(180deg, #e4ecf4 0%, #f0f3f7 320rpx, #f4f6f9 100%);
-  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-bright) 100%);
-  --gradient-hero: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-bright) 60%, var(--color-brand-soft) 100%);
-  --gradient-brand-soft: linear-gradient(135deg, var(--color-brand-soft) 0%, var(--color-brand-soft-bright) 100%);
-  --gradient-warm: linear-gradient(135deg, var(--color-accent-warm) 0%, var(--color-accent-warm-bright) 100%);
+  --page-gradient: linear-gradient(180deg, #EDE8F5 0%, #F5F3F0 320rpx, #F8F6F3 100%);
+  --gradient-primary: linear-gradient(135deg, #5E95C8 0%, #82B5E0 100%);
+  --gradient-hero: linear-gradient(135deg, #82B5E0 0%, #7ED1C6 50%, #F0A8B2 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #5EBCB0 0%, #7ED1C6 100%);
+  --gradient-warm: linear-gradient(135deg, #E8956B 0%, #F0B08E 100%);
+  --gradient-peach: linear-gradient(135deg, #F0A8B2 0%, #F5C4CB 100%);
+  --gradient-lemon: linear-gradient(135deg, #E8C84A 0%, #F0D87A 100%);
+  --gradient-lavender: linear-gradient(135deg, #B6A8D8 0%, #CDC2E6 100%);
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: var(--page-gradient);

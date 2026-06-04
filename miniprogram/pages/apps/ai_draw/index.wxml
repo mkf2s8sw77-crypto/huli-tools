@@ -2,7 +2,7 @@
   <!-- 应用头部 + 费用提示 -->
   <view class="app-exec-header card card--soft" wx:if="{{appInfo && appInfo.pricing}}">
     <view class="app-exec-header__row">
-      <view class="app-icon-symbol app-icon-symbol--teal">
+      <view class="app-icon-symbol app-icon-symbol--peach">
         <text>画</text>
       </view>
       <view class="app-exec-header__info">

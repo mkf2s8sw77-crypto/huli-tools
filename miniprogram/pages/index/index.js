@@ -2,7 +2,6 @@ const api = require("../../services/api");
 
 Page({
   data: {
-    message: "沪里工具",
     loading: true,
     error: null,
     userSummary: null,

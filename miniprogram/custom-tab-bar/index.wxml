@@ -8,7 +8,7 @@
       data-path="{{item.pagePath}}"
       bindtap="switchTab"
     >
-      <view wx:if="{{selected === index}}" class="tab-indicator"></view>
+      <text class="tab-bar-item__icon">{{item.icon}}</text>
       <text class="tab-text">{{item.text}}</text>
     </view>
   </view>

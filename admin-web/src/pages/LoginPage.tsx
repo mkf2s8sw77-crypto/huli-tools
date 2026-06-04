@@ -64,7 +64,7 @@ const loginStyles = {
     width: 36,
     height: 36,
     borderRadius: "50%",
-    background: adminThemeGradients.brand,
+    background: adminThemeGradients.hero,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -149,7 +149,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
             <div style={loginStyles.brandDot} />
           </div>
           <Typography.Title level={3} style={{ margin: 0, color: adminThemeTokens.colorText }}>
-            沪里工具
+            huli-tools
           </Typography.Title>
         </div>
         <Typography.Text type="secondary" style={{ display: "block", textAlign: "center", marginBottom: 28 }}>

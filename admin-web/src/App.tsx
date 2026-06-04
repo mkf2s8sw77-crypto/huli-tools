@@ -78,13 +78,13 @@ const brandStyles = {
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
   } as React.CSSProperties,
   brandMark: {
     width: 28,
     height: 28,
     borderRadius: "50%",
-    background: adminThemeGradients.brand,
+    background: adminThemeGradients.hero,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -110,7 +110,7 @@ const brandStyles = {
     alignItems: "center",
     justifyContent: "space-between",
     borderBottom: "1px solid " + adminThemeTokens.colorBorder,
-    boxShadow: "0 1px 4px rgba(30, 90, 140, 0.04)",
+    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.03)",
   } as React.CSSProperties,
   content: {
     margin: 20,
@@ -279,7 +279,7 @@ function App() {
           <div style={brandStyles.brandMark}>
             <div style={brandStyles.brandDot} />
           </div>
-          {!collapsed && <span style={brandStyles.brandText}>沪里工具管理端</span>}
+          {!collapsed && <span style={brandStyles.brandText}>huli-tools 管理端</span>}
         </div>
         <Menu
           theme="dark"

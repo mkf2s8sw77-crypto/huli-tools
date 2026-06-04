@@ -13,14 +13,14 @@
 - 后端仅使用微信云开发（云函数 + 云数据库），不引入独立外部服务。
 - 云函数代码风格保持 CommonJS，两空格缩进。
 
-## 3. 设计系统（v2）
+## 3. 设计系统（柔彩多巴胺）
 
-- 详见 `docs/design_system.md`。v2 视觉方向：专业温润的护理工具平台。
-- **色板**：深蓝青主色 `#1e5a8c` + 柔和青绿 `#5ba8a0` + 暖金 `#c4963a`。微信绿仅用于微信登录按钮。
-- **表面**：页面使用冷灰渐变背景，卡片带描边 + 柔阴影 + 顶部高光线，禁止回到旧版灰底白卡片平铺。
-- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`（含 spacing/radius/shadow/gradient 系列），通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。
-- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。深蓝青侧栏。通用组件在 `admin-web/src/components/`。
-- 新页面和新应用必须使用 v2 token 和公共组件，采用"应用执行页"模式。不得硬编码主色值、不得自定义按钮/状态标签/卡片公共样式。
+- 详见 `docs/design_system.md`。视觉方向：柔彩多巴胺工具平台。
+- **色板**：晴空蓝主色 `#5E95C8` + 薄荷青 `#5EBCB0` + 珊瑚橙 `#E8956B` + 桃粉/薰衣草/柠檬扩展。微信绿仅用于微信登录按钮。不得回退到旧深蓝青 `#1e5a8c`。
+- **表面**：页面使用淡紫灰暖渐变背景，卡片带描边 + 柔阴影 + 顶部彩虹高光线。
+- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部大号浮动胶囊导航在 `miniprogram/custom-tab-bar/`。
+- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。柔蓝灰侧栏 `#3B4A6B`。通用组件在 `admin-web/src/components/`。
+- 新页面和新应用必须使用柔彩多巴胺 token 和公共组件，采用"应用执行页"模式。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
 ## 4. 安全铁律

@@ -1,10 +1,10 @@
-# 沪里工具 Web 管理端
+# huli-tools Web 管理端
 
 `admin-web/` 是面向运营人员的浏览器管理端，使用 Vite + React + TypeScript + Ant Design，通过 CloudBase Web SDK 调用 `adminCore` 云函数。它只负责管理界面，不直接读写云数据库集合。
 
 ## 设计系统
 
-管理端通过 `src/theme.ts` 统一 Ant Design 主题 Token（主色 `#2b6cb0`、圆角 6px、状态色），由 `ConfigProvider` 在 `main.tsx` 中注入。
+管理端通过 `src/theme.ts` 统一 Ant Design 柔彩多巴胺主题 Token（晴空蓝主色 `#5E95C8`、圆角 8px、柔蓝灰侧栏 `#3B4A6B`），由 `ConfigProvider` 在 `main.tsx` 中注入。
 
 通用组件放在 `src/components/`：
 
