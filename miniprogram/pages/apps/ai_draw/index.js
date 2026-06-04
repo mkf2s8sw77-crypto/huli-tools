@@ -85,12 +85,17 @@ Page({
   },
 
   async onGenerate() {
+    if (this.generateInFlight || this.data.loading || this.data.polling || this.data.hasActiveTask) {
+      this.restoreActiveTask();
+      return;
+    }
     const prompt = this.data.prompt.trim();
     if (!prompt) {
       api.toastError(new Error("请输入绘图描述"));
       return;
     }
 
+    this.generateInFlight = true;
     this.clearPollTimer();
     this.setData({
       loading: true,
@@ -116,19 +121,25 @@ Page({
       });
 
       if (genRes.status === "succeeded") {
+        this.clearActiveTask();
         this.setData({
+          usageId,
           imageUrl: genRes.imageUrl,
           jobId: genRes.jobId || "",
           loading: false,
+          hasActiveTask: false,
+          taskStatusText: "",
         });
         this.refreshHomeBalance();
       } else if (genRes.status === "processing") {
+        const activeUsageId = genRes.usageId || usageId;
         this.saveActiveTask({
-          usageId,
+          usageId: activeUsageId,
           jobId: genRes.jobId,
           prompt,
         });
         this.setData({
+          usageId: activeUsageId,
           jobId: genRes.jobId,
           polling: true,
           loading: false,
@@ -142,6 +153,12 @@ Page({
     } catch (err) {
       console.error("生成失败:", err);
       const errorMsg = formatGenerationError(err);
+      const activeTask = wx.getStorageSync(ACTIVE_TASK_STORAGE_KEY);
+      if (err.code === "GENERATION_BUSY" && activeTask && activeTask.usageId && activeTask.jobId) {
+        this.generateInFlight = false;
+        this.restoreActiveTask();
+        return;
+      }
       this.setData({
         errorMsg,
         loading: false,
@@ -149,6 +166,8 @@ Page({
         taskStatusText: "",
       });
       api.toastError(new Error(errorMsg));
+    } finally {
+      this.generateInFlight = false;
     }
   },
 

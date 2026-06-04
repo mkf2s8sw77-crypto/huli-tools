@@ -215,6 +215,19 @@ async function getTask(usageId) {
   }
 }
 
+async function getTaskByJobId(jobId, openid) {
+  if (!jobId) return null;
+  try {
+    const res = await db.collection(TASK_COLLECTION)
+      .where({ jobId, userId: openid })
+      .limit(1)
+      .get();
+    return res.data && res.data[0] ? res.data[0] : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 async function saveTask(data) {
   const now = new Date();
   await db.collection(TASK_COLLECTION).doc(data.usageId).set({
@@ -349,6 +362,18 @@ async function generate(event, context) {
 
   if (!createResult || !createResult.ok) {
     const error = normalizeGenerationError(createResult, "创建任务失败");
+    if (error.code === "GENERATION_BUSY" && error.activeJobId) {
+      const activeTask = await getTaskByJobId(error.activeJobId, openid);
+      if (activeTask && activeTask.status === "processing") {
+        await callFailUsage(openid, usageId, "GENERATION_SUPERSEDED", "已合并到正在生成的任务", requestId);
+        return makeResponse(true, {
+          status: "processing",
+          jobId: activeTask.jobId,
+          usageId: activeTask.usageId,
+          reused: true,
+        }, requestId);
+      }
+    }
     await callFailUsage(openid, usageId, error.code, error.message, requestId);
     return makeResponse(false, error, requestId);
   }
