@@ -28,14 +28,14 @@
   <!-- 主操作区 -->
   <view class="app-exec-actions">
     <ui-action-button
-      text="{{loading ? '生成中...' : (polling ? '生成中(' + pollCount + ')...' : '生成图片')}}"
-      loading="{{loading || polling}}"
-      disabled="{{loading || polling || !prompt}}"
+      text="{{loading ? '提交中...' : (polling ? '后台生成中' : '生成图片')}}"
+      loading="{{loading}}"
+      disabled="{{loading || polling || hasActiveTask || !prompt}}"
       bind:tap="onGenerate"
       extra-class="app-exec-btn"
     />
     <button
-      wx:if="{{polling}}"
+      wx:if="{{polling || hasActiveTask}}"
       type="warn"
       size="mini"
       bindtap="onCancel"
@@ -43,6 +43,15 @@
     >
       取消
     </button>
+  </view>
+
+  <!-- 后台任务状态 -->
+  <view wx:if="{{polling || hasActiveTask || taskStatusText}}" class="card card--soft app-exec-task">
+    <view class="app-exec-task__spinner"></view>
+    <view class="app-exec-task__body">
+      <text class="app-exec-task__title">{{taskStatusText || '任务已提交，正在后台生成'}}</text>
+      <text class="app-exec-task__desc">可以停留等待，也可以稍后返回本页查看结果</text>
+    </view>
   </view>
 
   <!-- 结果区 -->

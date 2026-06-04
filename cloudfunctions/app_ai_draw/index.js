@@ -32,10 +32,6 @@ function buildUsageActionData(openid, data) {
   };
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function normalizePrompt(prompt) {
   return typeof prompt === "string" ? prompt.trim() : "";
 }
@@ -273,17 +269,6 @@ async function queryGenerationStatus(jobId) {
   );
 }
 
-async function pollGenerationStatus(jobId, maxAttempts, intervalMs) {
-  for (let i = 0; i < maxAttempts; i++) {
-    await sleep(intervalMs);
-    const result = await queryGenerationStatus(jobId);
-    if (result.status === "succeeded" || result.status === "failed") {
-      return result;
-    }
-  }
-  return { status: "processing", jobId };
-}
-
 async function finishWithImage(openid, usageId, jobId, imageUrl, requestId) {
   const finishRes = await callFinishUsage(openid, usageId, imageUrl, requestId);
   if (!finishRes.ok) {
@@ -387,28 +372,6 @@ async function generate(event, context) {
     return makeResponse(false, { code: "TASK_RECORD_FAILED", message: "保存绘图任务失败，请确认 app_ai_draw_tasks 集合已创建" }, requestId);
   }
 
-  let pollResult;
-  try {
-    pollResult = await pollGenerationStatus(jobId, 15, 2000);
-  } catch (err) {
-    await updateTask(usageId, { status: "processing", errorCode: "POLL_ERROR", errorMessage: err.message });
-    return makeResponse(true, { status: "processing", jobId }, requestId);
-  }
-
-  if (pollResult.status === "succeeded") {
-    const imageUrl = getImageUrl(pollResult);
-    if (!imageUrl) {
-      return failGeneration(openid, usageId, jobId, "API_ERROR", "任务成功但未返回图片 URL", requestId);
-    }
-    return finishWithImage(openid, usageId, jobId, imageUrl, requestId);
-  }
-
-  if (pollResult.status === "failed") {
-    const error = normalizeGenerationError(pollResult, "图片生成失败");
-    return failGeneration(openid, usageId, jobId, error.code, error.message, requestId);
-  }
-
-  await updateTask(usageId, { status: "processing" });
   return makeResponse(true, { status: "processing", jobId }, requestId);
 }
 

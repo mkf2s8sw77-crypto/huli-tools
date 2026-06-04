@@ -2,6 +2,7 @@ const api = require("../../../services/api");
 
 const MAX_POLL_COUNT = 60;
 const POLL_INTERVAL = 3000;
+const ACTIVE_TASK_STORAGE_KEY = "ai_draw_active_task";
 
 function stripCloudErrorPrefix(message) {
   return (message || "").replace(/^\[[^\]]+\]\s*/, "");
@@ -29,14 +30,16 @@ Page({
     usageId: "",
     jobId: "",
     errorMsg: "",
+    taskStatusText: "",
+    hasActiveTask: false,
   },
 
   onLoad() {
     this.loadAppInfo();
+    this.restoreActiveTask();
   },
 
   onUnload() {
-    this.cancelIfPolling("用户离开页面");
     this.clearPollTimer();
   },
 
@@ -45,7 +48,12 @@ Page({
   },
 
   onShow() {
-    if (this.data.polling && this.data.jobId && !this.pollTimer) {
+    if (!this.data.jobId) {
+      this.restoreActiveTask();
+      return;
+    }
+    if ((this.data.polling || this.data.hasActiveTask) && !this.pollTimer) {
+      this.setData({ polling: true });
       this.startPolling();
     }
   },
@@ -65,19 +73,15 @@ Page({
 
   async onCancel() {
     const { usageId, jobId, polling } = this.data;
-    if (!polling || !usageId || !jobId) return;
+    if (!usageId || !jobId) return;
     this.clearPollTimer();
     const cancelled = await this.cancelGeneration("用户手动取消");
     this.setData({
       polling: false,
       errorMsg: cancelled ? "已取消生成" : "取消失败，请稍后检查积分流水",
+      taskStatusText: "",
+      hasActiveTask: !cancelled,
     });
-  },
-
-  async cancelIfPolling(reason) {
-    const { usageId, jobId, polling } = this.data;
-    if (!polling || !usageId || !jobId) return false;
-    return this.cancelGeneration(reason);
   },
 
   async onGenerate() {
@@ -96,6 +100,8 @@ Page({
       usageId: "",
       jobId: "",
       errorMsg: "",
+      taskStatusText: "",
+      hasActiveTask: false,
     });
 
     try {
@@ -117,10 +123,17 @@ Page({
         });
         this.refreshHomeBalance();
       } else if (genRes.status === "processing") {
+        this.saveActiveTask({
+          usageId,
+          jobId: genRes.jobId,
+          prompt,
+        });
         this.setData({
           jobId: genRes.jobId,
           polling: true,
           loading: false,
+          taskStatusText: "任务已提交，正在后台生成",
+          hasActiveTask: true,
         });
         this.startPolling();
       } else {
@@ -133,6 +146,7 @@ Page({
         errorMsg,
         loading: false,
         polling: false,
+        taskStatusText: "",
       });
       api.toastError(new Error(errorMsg));
     }
@@ -149,15 +163,13 @@ Page({
     const { jobId, usageId, pollCount } = this.data;
     if (!jobId || pollCount >= MAX_POLL_COUNT) {
       this.clearPollTimer();
-      let cancelled = false;
-      if (jobId && usageId && pollCount >= MAX_POLL_COUNT) {
-        cancelled = await this.cancelGeneration("生成超时，已释放本次冻结积分");
-      }
       this.setData({
         polling: false,
         errorMsg: pollCount >= MAX_POLL_COUNT
-          ? (cancelled ? "生成超时，已释放本次冻结积分" : "生成超时，请稍后检查积分流水")
+          ? "任务仍在后台生成，可稍后返回本页查看"
           : "",
+        taskStatusText: pollCount >= MAX_POLL_COUNT ? "任务仍在后台生成" : "",
+        hasActiveTask: pollCount >= MAX_POLL_COUNT,
       });
       return;
     }
@@ -173,25 +185,34 @@ Page({
 
       if (queryRes.status === "succeeded") {
         this.clearPollTimer();
+        this.clearActiveTask();
         this.setData({
           imageUrl: queryRes.imageUrl,
           polling: false,
+          taskStatusText: "",
+          hasActiveTask: false,
         });
         this.refreshHomeBalance();
       } else if (queryRes.status === "failed") {
         this.clearPollTimer();
+        this.clearActiveTask();
         this.setData({
           polling: false,
           errorMsg: queryRes.error ? queryRes.error.message : "图片生成失败",
+          taskStatusText: "",
+          hasActiveTask: false,
         });
       }
     } catch (err) {
       console.error("轮询失败:", err);
       this.clearPollTimer();
       const errorMsg = formatGenerationError(err);
+      this.clearActiveTask();
       this.setData({
         polling: false,
         errorMsg,
+        taskStatusText: "",
+        hasActiveTask: false,
       });
       this.refreshHomeBalance();
     }
@@ -207,12 +228,44 @@ Page({
         usageId,
         reason,
       });
+      this.clearActiveTask();
       this.refreshHomeBalance();
       return true;
     } catch (err) {
       console.error("取消生成失败:", err);
       return false;
     }
+  },
+
+  saveActiveTask(task) {
+    if (!task || !task.usageId || !task.jobId) return;
+    wx.setStorageSync(ACTIVE_TASK_STORAGE_KEY, {
+      usageId: task.usageId,
+      jobId: task.jobId,
+      prompt: task.prompt || this.data.prompt,
+      createdAt: Date.now(),
+    });
+  },
+
+  clearActiveTask() {
+    wx.removeStorageSync(ACTIVE_TASK_STORAGE_KEY);
+  },
+
+  restoreActiveTask() {
+    const task = wx.getStorageSync(ACTIVE_TASK_STORAGE_KEY);
+    if (!task || !task.usageId || !task.jobId) return;
+    this.setData({
+      prompt: task.prompt || this.data.prompt,
+      usageId: task.usageId,
+      jobId: task.jobId,
+      polling: true,
+      loading: false,
+      pollCount: 0,
+      errorMsg: "",
+      taskStatusText: "正在查看后台生成结果",
+      hasActiveTask: true,
+    });
+    this.startPolling();
   },
 
   clearPollTimer() {
