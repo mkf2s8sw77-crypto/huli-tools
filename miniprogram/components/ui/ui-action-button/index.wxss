@@ -1,9 +1,12 @@
 @import "../../../styles/common.wxss";
 
 .ui-action-btn {
-  border-radius: var(--radius-md) !important;
-  font-weight: 600;
+  min-height: 96rpx;
+  border-radius: var(--radius-lg) !important;
+  font-weight: 700;
+  font-size: 34rpx;
   letter-spacing: 0;
+  box-shadow: 0 10rpx 24rpx rgba(94, 149, 200, 0.2) !important;
 }
 
 .ui-action-btn--loading {

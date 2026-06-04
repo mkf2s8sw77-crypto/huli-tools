@@ -1,3 +1,13 @@
+function createCloudError(err) {
+  const code = err.code || "UNKNOWN";
+  const rawMessage = err.message || "请求失败";
+  const error = new Error(`[${code}] ${rawMessage}`);
+  error.code = code;
+  error.rawMessage = rawMessage;
+  error.detail = err;
+  return error;
+}
+
 function callCloud(functionName, data) {
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
@@ -9,7 +19,7 @@ function callCloud(functionName, data) {
         resolve(result.data || {});
       } else {
         const err = result.error || { code: "UNKNOWN", message: "请求失败" };
-        reject(new Error(`[${err.code}] ${err.message}`));
+        reject(createCloudError(err));
       }
     }).catch((err) => {
       reject(new Error(err.message || "网络请求失败"));

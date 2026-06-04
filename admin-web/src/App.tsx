@@ -15,7 +15,8 @@ import {
 } from "@ant-design/icons";
 import { auth } from "./services/cloudbase";
 import { adminApi } from "./services/adminApi";
-import { adminThemeGradients, adminThemeTokens } from "./theme";
+import { adminThemeTokens } from "./theme";
+import huliTechLogo from "./assets/huli-tech-logo.png";
 
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -83,18 +84,10 @@ const brandStyles = {
   brandMark: {
     width: 28,
     height: 28,
-    borderRadius: "50%",
-    background: adminThemeGradients.hero,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 9,
+    objectFit: "cover" as const,
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.18)",
     flexShrink: 0,
-  } as React.CSSProperties,
-  brandDot: {
-    width: 12,
-    height: 12,
-    borderRadius: "50%",
-    border: "2px solid rgba(255, 255, 255, 0.85)",
   } as React.CSSProperties,
   brandText: {
     color: adminThemeTokens.colorOnPrimary,
@@ -276,9 +269,7 @@ function App() {
         width={220}
       >
         <div style={brandStyles.siderLogo}>
-          <div style={brandStyles.brandMark}>
-            <div style={brandStyles.brandDot} />
-          </div>
+          <img src={huliTechLogo} alt="huli-tech" style={brandStyles.brandMark} />
           {!collapsed && <span style={brandStyles.brandText}>huli-tools 管理端</span>}
         </div>
         <Menu

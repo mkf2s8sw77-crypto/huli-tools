@@ -1,14 +1,14 @@
 <view class="tab-bar">
   <view class="tab-bar__inner">
     <view
-      class="tab-bar-item {{selected === index ? 'active' : ''}}"
+      class="tab-bar-item {{item.active ? 'active' : ''}}"
       wx:for="{{list}}"
       wx:key="index"
       data-index="{{index}}"
       data-path="{{item.pagePath}}"
       bindtap="switchTab"
     >
-      <text class="tab-bar-item__icon">{{item.icon}}</text>
+      <view class="tab-bar-item__icon tab-icon {{item.iconClass}}"></view>
       <text class="tab-text">{{item.text}}</text>
     </view>
   </view>

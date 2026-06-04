@@ -1,5 +1,17 @@
 const api = require("../../services/api");
 
+const APP_ICON_CLASS_MAP = {
+  demo_sum: "icon-tile--lavender icon-tile--calculator",
+  ai_draw: "icon-tile--peach icon-tile--image",
+};
+
+function decorateApp(app) {
+  return {
+    ...app,
+    iconClass: APP_ICON_CLASS_MAP[app.appKey] || "icon-tile--teal icon-tile--toolbox",
+  };
+}
+
 Page({
   data: {
     loading: true,
@@ -30,7 +42,7 @@ Page({
 
       this.setData({
         userSummary: userData || null,
-        apps: appsData.apps || [],
+        apps: (appsData.apps || []).map(decorateApp),
         loading: false,
       });
     } catch (err) {

@@ -97,3 +97,10 @@
   color: var(--color-text-secondary);
   font-family: monospace;
 }
+
+.brand-logo {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  box-shadow: var(--shadow-soft);
+}

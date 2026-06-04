@@ -24,26 +24,26 @@
     <!-- 快捷入口 -->
     <view class="quick-nav">
       <view class="quick-nav__item" bindtap="onGoRecharge">
-        <view class="quick-nav__icon app-icon-symbol app-icon-symbol--coral">
-          <text>¥</text>
+        <view class="quick-nav__icon icon-tile icon-tile--coral icon-tile--recharge">
+          <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">充值</text>
       </view>
       <view class="quick-nav__item" bindtap="onGoOrders">
-        <view class="quick-nav__icon app-icon-symbol app-icon-symbol--lavender">
-          <text>单</text>
+        <view class="quick-nav__icon icon-tile icon-tile--lavender icon-tile--orders">
+          <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">订单</text>
       </view>
       <view class="quick-nav__item" bindtap="onGoTransactions">
-        <view class="quick-nav__icon app-icon-symbol app-icon-symbol--teal">
-          <text>流</text>
+        <view class="quick-nav__icon icon-tile icon-tile--teal icon-tile--transactions">
+          <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">流水</text>
       </view>
       <view class="quick-nav__item" bindtap="onGoUsageRecords">
-        <view class="quick-nav__icon app-icon-symbol app-icon-symbol--peach">
-          <text>记</text>
+        <view class="quick-nav__icon icon-tile icon-tile--peach icon-tile--records">
+          <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">记录</text>
       </view>
@@ -61,8 +61,8 @@
         bindtap="onTapApp"
       >
         <view class="app-card__body">
-          <view class="app-card__icon app-icon-symbol {{item.iconStyle || 'app-icon-symbol--teal'}}">
-            <text>{{item.iconChar || item.name[0]}}</text>
+          <view class="app-card__icon icon-tile icon-tile--app {{item.iconClass}}">
+            <view class="icon-tile__glyph"></view>
           </view>
           <view class="app-card__info">
             <view class="app-card__title-row">
@@ -70,14 +70,12 @@
               <ui-status wx:if="{{item.status === 'coming_soon'}}" text="即将上线" type="warning" />
             </view>
             <text class="app-card__desc">{{item.description || ''}}</text>
-            <text wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-card__cost">
-              {{item.pricing.costPoints}} 积分/次
-            </text>
+            <view wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-card__cost">
+              <text class="app-card__cost-text">{{item.pricing.costPoints}} 积分/次</text>
+            </view>
           </view>
         </view>
-        <view class="app-card__arrow">
-          <text class="menu-item__arrow">›</text>
-        </view>
+        <view class="app-card__arrow"></view>
       </view>
     </ui-section>
   </view>

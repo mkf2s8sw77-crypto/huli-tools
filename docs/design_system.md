@@ -4,7 +4,9 @@
 
 ## 1. 视觉方向
 
-**柔彩多巴胺工具平台**——以晴空蓝为主色传递信任感，薄荷青、桃粉、珊瑚橙、薰衣草紫、柠檬黄等柔和彩色带来轻快多巴胺层次。页面背景使用淡紫灰暖渐变，卡片分层呈现（描边 + 柔阴影 + 顶部彩虹高光线）。品牌符号使用 CSS-only 彩虹渐变圆形徽标，不新增图片依赖。微信导航栏采用暖灰底 + 黑色文字标题 `huli-tools`，与柔彩氛围一致。
+**柔彩多巴胺工具平台**——以晴空蓝为主色传递信任感，薄荷青、桃粉、珊瑚橙、薰衣草紫、柠檬黄等柔和彩色带来轻快多巴胺层次。页面背景使用淡紫灰暖渐变，卡片分层呈现（描边 + 柔阴影 + 顶部彩虹高光线）。品牌标识使用正式 huli-tech logo 资产。微信导航栏采用暖灰底 + 黑色文字标题 `huli-tools`，与柔彩氛围一致。
+
+Logo 使用 `https://media.huli.sh.cn/huli-tech-logo.png` 的本地化资产：小程序路径为 `miniprogram/assets/images/huli-tech-logo.png`，管理端路径为 `admin-web/src/assets/huli-tech-logo.png`。原图是方角，实际展示必须加圆角裁切。
 
 ## 2. 设计 Token
 
@@ -115,8 +117,8 @@
 
 | 类名 | 用途 |
 |---|---|
-| `.brand-mark` | 平台彩虹渐变圆形徽标 |
-| `.app-icon-symbol` | 应用图标符号（blue/teal/coral/peach/lavender/lemon 变体） |
+| `.brand-logo` | 平台 logo 图片容器，必须圆角裁切 |
+| `.icon-tile` | CSS-only 功能图标，不得使用单字占位符代替图标 |
 | `.care-divider` | 彩虹渐变分隔符 |
 | `.stat-block` | 轻量统计块 |
 
@@ -124,8 +126,8 @@
 
 - 位于 `miniprogram/custom-tab-bar/`。
 - 大号尺寸，单项点击高度不低于 96rpx。
-- 包含图标符号 + 文字。
-- 选中态使用晴空蓝渐变。
+- 包含 CSS 线性图标 + 文字。
+- 选中态使用柔彩 hero 渐变。
 - 页面底部 padding 已预留 `140rpx + env(safe-area-inset-bottom)`。
 
 ## 4. 管理端（admin-web）主题
@@ -158,6 +160,7 @@
 4. 不得给状态标签使用非 pill 样式。
 5. 不得在小程序中引入远程图片作为品牌/装饰元素。
 6. 微信绿 `#07c160` 仅用于微信登录按钮，不得作为平台色使用。
+7. 不得使用“单 / 流 / 记 / A / 积”等单字作为功能图标，必须使用 `.icon-tile` 或同等 CSS-only 图标。
 
 ## 6. 新应用接入要求
 
@@ -166,4 +169,5 @@
 2. 采用"应用执行页"模式（应用头部 + 表单卡 + 主操作 + 结果区）。
 3. 使用 `ui-page`、`ui-card`（含 variant）、`ui-status`、`ui-price` 等公共组件。
 4. 业务结果区可以自定义，但必须使用 token 颜色和间距变量。
-5. 模板 `templates/app_vertical_slice/` 已预配置柔彩多巴胺设计系统。
+5. 应用入口和应用执行页使用 `.icon-tile` 绘制图标，不使用文字缩写。
+6. 模板 `templates/app_vertical_slice/` 已预配置柔彩多巴胺设计系统。

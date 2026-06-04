@@ -3,6 +3,21 @@ const api = require("../../../services/api");
 const MAX_POLL_COUNT = 60;
 const POLL_INTERVAL = 3000;
 
+function stripCloudErrorPrefix(message) {
+  return (message || "").replace(/^\[[^\]]+\]\s*/, "");
+}
+
+function formatGenerationError(err) {
+  if (!err) return "生成失败，请重试";
+  if (err.code === "GENERATION_BUSY") {
+    return "生图服务正在处理上一张图片，请稍后再试";
+  }
+  if (err.code === "GENERATION_SERVICE_UNAVAILABLE") {
+    return "生图服务暂时不可用，请稍后再试";
+  }
+  return stripCloudErrorPrefix(err.rawMessage || err.message) || "生成失败，请重试";
+}
+
 Page({
   data: {
     prompt: "",
@@ -113,12 +128,13 @@ Page({
       }
     } catch (err) {
       console.error("生成失败:", err);
+      const errorMsg = formatGenerationError(err);
       this.setData({
-        errorMsg: err.message || "生成失败，请重试",
+        errorMsg,
         loading: false,
         polling: false,
       });
-      api.toastError(err);
+      api.toastError(new Error(errorMsg));
     }
   },
 
@@ -172,9 +188,10 @@ Page({
     } catch (err) {
       console.error("轮询失败:", err);
       this.clearPollTimer();
+      const errorMsg = formatGenerationError(err);
       this.setData({
         polling: false,
-        errorMsg: err.message || "图片生成失败",
+        errorMsg,
       });
       this.refreshHomeBalance();
     }

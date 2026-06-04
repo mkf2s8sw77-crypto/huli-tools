@@ -18,9 +18,10 @@
 - 详见 `docs/design_system.md`。视觉方向：柔彩多巴胺工具平台。
 - **色板**：晴空蓝主色 `#5E95C8` + 薄荷青 `#5EBCB0` + 珊瑚橙 `#E8956B` + 桃粉/薰衣草/柠檬扩展。微信绿仅用于微信登录按钮。不得回退到旧深蓝青 `#1e5a8c`。
 - **表面**：页面使用淡紫灰暖渐变背景，卡片带描边 + 柔阴影 + 顶部彩虹高光线。
+- **Logo**：两端使用 `https://media.huli.sh.cn/huli-tech-logo.png` 的本地化资产；展示时必须圆角裁切，不得使用方角原图。
 - **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部大号浮动胶囊导航在 `miniprogram/custom-tab-bar/`。
 - **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。柔蓝灰侧栏 `#3B4A6B`。通用组件在 `admin-web/src/components/`。
-- 新页面和新应用必须使用柔彩多巴胺 token 和公共组件，采用"应用执行页"模式。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
+- 新页面和新应用必须使用柔彩多巴胺 token 和公共组件，采用"应用执行页"模式。功能图标使用 `.icon-tile` CSS-only 图标，不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
 ## 4. 安全铁律
@@ -64,6 +65,7 @@
 - 重复支付回调不能重复到账；重复 finish/fail usage 不能重复结算或释放。
 - 积分账户余额和积分流水必须在 `corePoints` 内同一事务完成，禁止先改余额再另行写流水。
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
+- AI 绘图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed`，不得自动重试轰炸。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
 ## 9. 环境变量

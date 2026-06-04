@@ -1,13 +1,33 @@
 /* AI 绘图 v2 — 应用执行页 */
 
 .app-exec-header {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 34rpx;
+  padding: 34rpx;
+  border-radius: var(--radius-xl);
+  background: var(--gradient-hero);
+  box-shadow: var(--shadow-elevated);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-exec-header::after {
+  content: '';
+  position: absolute;
+  right: -42rpx;
+  top: -54rpx;
+  width: 230rpx;
+  height: 230rpx;
+  border-radius: 50%;
+  background: var(--color-on-primary);
+  opacity: 0.14;
 }
 
 .app-exec-header__row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 26rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .app-exec-header__info {
@@ -16,27 +36,39 @@
 }
 
 .app-exec-header__name {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: var(--color-text);
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-on-primary);
+  line-height: 1.25;
 }
 
 .app-exec-header__cost {
-  font-size: 24rpx;
+  align-self: flex-start;
+  font-size: 25rpx;
   color: var(--color-accent-warm);
-  font-weight: 500;
-  margin-top: 2rpx;
+  background: rgba(255, 255, 255, 0.84);
+  border-radius: var(--radius-pill);
+  padding: 7rpx 18rpx;
+  font-weight: 700;
+  margin-top: 10rpx;
+}
+
+.app-exec-header .icon-tile {
+  background: rgba(255, 255, 255, 0.18);
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+  --icon-line: var(--color-on-primary);
 }
 
 .prompt-input {
   width: 100%;
   min-height: 160rpx;
   border: 1rpx solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm);
+  border-radius: var(--radius-lg);
+  padding: 24rpx;
   font-size: 30rpx;
   box-sizing: border-box;
-  background: var(--color-surface);
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-peach-light) 100%);
 }
 
 .char-count {
@@ -66,6 +98,7 @@
 .app-exec-result {
   text-align: center;
   padding: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-peach-light) 100%);
 }
 
 .app-exec-result__label {

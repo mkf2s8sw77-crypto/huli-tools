@@ -2,8 +2,8 @@
   <!-- 应用头部 + 费用提示 -->
   <view class="app-exec-header card card--soft">
     <view class="app-exec-header__row">
-      <view class="app-icon-symbol app-icon-symbol--blue">
-        <text>__appIconChar__</text>
+      <view class="icon-tile icon-tile--app icon-tile--blue icon-tile--toolbox">
+        <view class="icon-tile__glyph"></view>
       </view>
       <view class="app-exec-header__info">
         <text class="app-exec-header__name">__appName__</text>

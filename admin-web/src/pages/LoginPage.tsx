@@ -3,6 +3,7 @@ import { Card, Form, Input, Button, message, Typography, Divider } from "antd";
 import { LockOutlined, UserOutlined, WechatOutlined } from "@ant-design/icons";
 import { auth } from "../services/cloudbase";
 import { adminThemeGradients, adminThemeTokens } from "../theme";
+import huliTechLogo from "../assets/huli-tech-logo.png";
 
 const WECHAT_LOGIN_ENABLED = import.meta.env.VITE_WECHAT_LOGIN_ENABLED === "true";
 const WECHAT_PROVIDER_ID = import.meta.env.VITE_WECHAT_PROVIDER_ID || "wx_open";
@@ -63,18 +64,10 @@ const loginStyles = {
   brandMark: {
     width: 36,
     height: 36,
-    borderRadius: "50%",
-    background: adminThemeGradients.hero,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 12,
+    objectFit: "cover" as const,
+    boxShadow: "0 3px 12px rgba(94, 149, 200, 0.22)",
     flexShrink: 0,
-  } as React.CSSProperties,
-  brandDot: {
-    width: 16,
-    height: 16,
-    borderRadius: "50%",
-    border: "2.5px solid rgba(255, 255, 255, 0.85)",
   } as React.CSSProperties,
   wechatBtn: {
     background: adminThemeTokens.colorWechat,
@@ -145,9 +138,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
     <div style={loginStyles.wrapper}>
       <Card style={loginStyles.card}>
         <div style={loginStyles.brandRow}>
-          <div style={loginStyles.brandMark}>
-            <div style={loginStyles.brandDot} />
-          </div>
+          <img src={huliTechLogo} alt="huli-tech" style={loginStyles.brandMark} />
           <Typography.Title level={3} style={{ margin: 0, color: adminThemeTokens.colorText }}>
             huli-tools
           </Typography.Title>

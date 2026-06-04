@@ -64,40 +64,47 @@
 .quick-nav {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--spacing-lg);
-  padding: 0 var(--spacing-sm);
+  margin-bottom: 40rpx;
+  padding: 0 8rpx;
 }
 
 .quick-nav__item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 10rpx;
+  min-width: 112rpx;
+  padding: 6rpx 0;
+  border-radius: var(--radius-lg);
 }
 
 .quick-nav__icon {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: var(--radius-lg);
-  font-size: 30rpx;
+  width: 84rpx;
+  height: 84rpx;
 }
 
 .quick-nav__text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: var(--color-text-secondary);
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 /* ── 应用卡片 ── */
 .app-card {
   display: flex;
   align-items: center;
-  padding: var(--spacing-md) var(--spacing-lg) !important;
+  padding: 28rpx 26rpx !important;
+  margin-bottom: 28rpx;
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-primary-light) 100%);
+  border-color: var(--color-border-soft);
+  box-shadow: var(--shadow-elevated);
 }
 
 .app-card__body {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 24rpx;
   flex: 1;
   min-width: 0;
 }
@@ -107,6 +114,8 @@
 }
 
 .app-card__info {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
 }
@@ -115,34 +124,71 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: 4rpx;
+  margin-bottom: 6rpx;
 }
 
 .app-card__name {
-  font-size: 30rpx;
-  font-weight: 600;
+  font-size: 32rpx;
+  font-weight: 700;
   color: var(--color-text);
+  line-height: 1.25;
 }
 
 .app-card__desc {
   display: block;
-  font-size: 24rpx;
+  font-size: 25rpx;
   color: var(--color-text-secondary);
+  line-height: 1.45;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .app-card__cost {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  min-height: 50rpx;
+  box-sizing: border-box;
+  background: var(--color-accent-warm-light);
+  border-radius: var(--radius-pill);
+  padding: 0 18rpx;
+  margin-top: 12rpx;
+}
+
+.app-card__cost-text {
   display: block;
-  font-size: 22rpx;
+  font-size: 23rpx;
   color: var(--color-accent-warm);
-  margin-top: 4rpx;
-  font-weight: 500;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .app-card__arrow {
+  width: 50rpx;
+  height: 50rpx;
   margin-left: var(--spacing-sm);
-  font-size: 32rpx;
-  color: var(--color-text-muted);
+  border-radius: 50%;
+  background: var(--color-bg-card);
+  border: 1rpx solid var(--color-border-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.app-card__arrow::before {
+  content: '';
+  position: absolute;
+  left: 17rpx;
+  top: 15rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-top: 5rpx solid var(--color-primary);
+  border-right: 5rpx solid var(--color-primary);
+  border-radius: 2rpx;
+  transform: rotate(45deg);
 }

@@ -44,6 +44,53 @@ function getImageUrl(result) {
   return result && result.images && result.images[0] ? result.images[0].public_url : null;
 }
 
+function getString(value) {
+  return typeof value === "string" ? value : "";
+}
+
+function getNumber(value) {
+  return typeof value === "number" ? value : null;
+}
+
+function getUpstreamErrorInfo(result, fallbackMessage) {
+  const error = result && result.error && typeof result.error === "object" ? result.error : {};
+  return {
+    stage: getString(result && result.stage) || getString(error.stage),
+    message: getString(result && result.message) || getString(error.message) || fallbackMessage || "图片生成失败",
+    retryAfterSeconds: getNumber(result && result.retry_after_seconds) || getNumber(error.retry_after_seconds),
+    activeJobId: getString(result && result.active_job_id) || getString(error.active_job_id),
+  };
+}
+
+function normalizeGenerationError(result, fallbackMessage) {
+  const info = getUpstreamErrorInfo(result, fallbackMessage);
+  const stage = info.stage.toLowerCase();
+  if (stage === "rate_limited" || info.activeJobId || info.message.indexOf("操作正在进行中") !== -1) {
+    return {
+      code: "GENERATION_BUSY",
+      message: "生图服务正在处理上一张图片，请稍后再试",
+      upstreamStage: info.stage,
+      upstreamMessage: info.message,
+      retryAfterSeconds: info.retryAfterSeconds,
+      activeJobId: info.activeJobId,
+    };
+  }
+  if (stage === "ui_changed") {
+    return {
+      code: "GENERATION_SERVICE_UNAVAILABLE",
+      message: "生图服务暂时不可用，请稍后再试",
+      upstreamStage: info.stage,
+      upstreamMessage: info.message,
+    };
+  }
+  return {
+    code: "GENERATION_FAILED",
+    message: info.message,
+    upstreamStage: info.stage,
+    upstreamMessage: info.message,
+  };
+}
+
 function httpsRequest(hostname, path, method, postData) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -316,9 +363,9 @@ async function generate(event, context) {
   }
 
   if (!createResult || !createResult.ok) {
-    const errMsg = createResult && createResult.message ? createResult.message : "创建任务失败";
-    await callFailUsage(openid, usageId, "GENERATION_FAILED", errMsg, requestId);
-    return makeResponse(false, { code: "GENERATION_FAILED", message: errMsg }, requestId);
+    const error = normalizeGenerationError(createResult, "创建任务失败");
+    await callFailUsage(openid, usageId, error.code, error.message, requestId);
+    return makeResponse(false, error, requestId);
   }
 
   const jobId = createResult.job_id;
@@ -357,8 +404,8 @@ async function generate(event, context) {
   }
 
   if (pollResult.status === "failed") {
-    const errMsg = pollResult.message || "图片生成失败";
-    return failGeneration(openid, usageId, jobId, "GENERATION_FAILED", errMsg, requestId);
+    const error = normalizeGenerationError(pollResult, "图片生成失败");
+    return failGeneration(openid, usageId, jobId, error.code, error.message, requestId);
   }
 
   await updateTask(usageId, { status: "processing" });
@@ -414,8 +461,8 @@ async function query(event, context) {
   }
 
   if (queryResult.status === "failed") {
-    const errMsg = queryResult.message || "图片生成失败";
-    return failGeneration(openid, usageId, jobId, "GENERATION_FAILED", errMsg, requestId);
+    const error = normalizeGenerationError(queryResult, "图片生成失败");
+    return failGeneration(openid, usageId, jobId, error.code, error.message, requestId);
   }
 
   await updateTask(usageId, { status: "processing" });
