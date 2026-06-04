@@ -65,7 +65,7 @@
 - 重复支付回调不能重复到账；重复 finish/fail usage 不能重复结算或释放。
 - 积分账户余额和积分流水必须在 `corePoints` 内同一事务完成，禁止先改余额再另行写流水。
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
-- AI 绘图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed`，不得自动重试轰炸。
+- AI 绘图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
 ## 9. 环境变量

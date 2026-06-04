@@ -75,7 +75,7 @@ function normalizeGenerationError(result, fallbackMessage) {
       activeJobId: info.activeJobId,
     };
   }
-  if (stage === "ui_changed") {
+  if (stage === "ui_changed" || stage === "worker_unavailable" || info.message === "fetch failed") {
     return {
       code: "GENERATION_SERVICE_UNAVAILABLE",
       message: "生图服务暂时不可用，请稍后再试",
