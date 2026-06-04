@@ -65,8 +65,9 @@
 - 重复支付回调不能重复到账；重复 finish/fail usage 不能重复结算或释放。
 - 积分账户余额和积分流水必须在 `corePoints` 内同一事务完成，禁止先改余额再另行写流水。
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
-- AI 绘图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
-- AI 绘图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
+- AI 生图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
+- AI 生图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
+- 用户媒体上传必须先由云函数签发受控 `cloudPath`，客户端只上传到该路径；业务云函数校验 `fileID/cloudPath` 归属后换取短期临时 URL 调上游，源素材默认私有短期保留并设置 `expiresAt`。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
 ## 9. 环境变量
@@ -76,7 +77,7 @@
 - `ADMIN_WEB_UIDS` — Web 管理端 CloudBase Auth uid 白名单
 - `PAYMENT_PROVIDER` — `mock` 或 `wechat`
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
-- `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串；未配置时内部写入接口应拒绝执行
+- `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
 
 真实微信支付额外需要：
 - `WX_PAY_MCH_ID`、`WX_PAY_APPID`、`WX_PAY_API_V3_KEY`、`WX_PAY_SERIAL_NO`、`WX_PAY_PRIVATE_KEY`、`WX_PAY_NOTIFY_URL`
@@ -92,6 +93,7 @@
 ## 11. 测试与交付
 
 - 每次提交前运行 `bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。
+- 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。
 - 涉及 `admin-web/` 的功能或验收规则时，同步更新 `admin-web/README.md`、`docs/admin_operations.md` 及 `promptDocs/prompt-pack-huli-tools-admin-web-0530/` 中对应测试/运行清单。

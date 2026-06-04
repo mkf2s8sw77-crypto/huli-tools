@@ -255,31 +255,37 @@ git diff --check
 - 断言：
   - 文件存在且章节齐全。
 
-### TC-20 AI 绘图 usage/job 绑定与扣费状态机
+### TC-20 护士职业定妆照 usage/job 绑定、上传素材与状态机
 
-- 目标：验证 `app_ai_draw` 不允许复用其他应用 usage，且异步任务能在成功、失败、取消时正确结算或释放积分。
-- 前置条件：已创建 `app_ai_draw_tasks` 集合；`app_ai_draw`、`coreApp`、`corePoints` 已部署并配置相同 `INTERNAL_API_SECRET`；当前用户可用积分不少于 `ai_draw` 价格。
+- 目标：验证 `app_ai_draw` 不允许复用其他应用 usage，主体照必传，参考图归属校验正确，且异步任务能在成功、失败、取消时正确结算或释放积分。
+- 前置条件：已创建 `app_ai_draw_tasks` 集合；`app_ai_draw`、`coreApp`、`corePoints` 已部署并配置相同 `INTERNAL_API_SECRET`；`ai_draw` 当前内测价格为 0 积分。
 - 步骤：
-  1. 调用 `api.createUsage("ai_draw", { prompt })` 获取 `usageId`。
-  2. 调用 `app_ai_draw.generate`，传入该 `usageId` 和合法 prompt。
-  3. 若返回 `processing`，继续调用 `app_ai_draw.query`，必须同时传入 `usageId` 和返回的 `jobId`。
-  4. 临时尝试用 `demo_sum` 的 `usageId` 调用 `app_ai_draw.generate`。
-  5. 临时尝试用不匹配的 `jobId` 调用 `app_ai_draw.query`。
+  1. 调用 `app_ai_draw.prepareUpload` 获取主体照 `cloudPath`，客户端上传后得到 `fileID`。
+  2. 可选调用 `app_ai_draw.prepareUpload` 获取 1-8 张参考图 `cloudPath`，客户端上传后得到对应 `fileID`。
+  3. 调用 `api.createUsage("ai_draw", { mode: "nurse_portrait", subject: true, referenceCount, composition })` 获取 `usageId`。
+  4. 调用 `app_ai_draw.generate`，传入该 `usageId`、`subjectAsset`、`referenceAssets` 和 `options`。
+  5. 若返回 `processing`，继续调用 `app_ai_draw.query`，必须同时传入 `usageId` 和返回的 `jobId`。
+  6. 临时尝试缺少 `subjectAsset` 调用 `app_ai_draw.generate`。
+  7. 临时尝试用非当前用户前缀的 `cloudPath/fileID` 调用 `app_ai_draw.generate`。
+  8. 临时尝试用 `demo_sum` 的 `usageId` 调用 `app_ai_draw.generate`。
+  9. 临时尝试用不匹配的 `jobId` 调用 `app_ai_draw.query`。
 - 断言：
-  - 正常成功时 usage 状态为 `succeeded`，流水包含 `freeze` 和 `settle`。
-  - 失败或取消时 usage 状态为 `released`，流水包含 `freeze` 和 `release`。
+  - 正常成功时 usage 状态为 `succeeded`；0 积分内测不产生实际扣减。
+  - 失败或取消时 usage 状态为 `failed` 或 `released`，不会产生余额扣减。
+  - 缺少主体照返回 `MISSING_SUBJECT`，不会触发外部绘图任务。
+  - 非当前用户素材返回 `ASSET_FORBIDDEN`，不会触发外部绘图任务。
   - 其他应用 usage 返回 `APP_MISMATCH`，不触发外部绘图任务。
   - 不匹配的 `jobId` 返回 `JOB_MISMATCH`，不会结算积分。
 
 ### TC-21 业务云函数必须校验 usage.appKey
 
 - 目标：验证示例和后续业务云函数不能复用其他应用的 usage。
-- 前置条件：已部署 `demoSum`、`app_ai_draw`、`coreApp`，当前用户可创建两个应用的 usage。
+- 前置条件：已部署 `demoSum`、`app_ai_draw`、`coreApp`，当前用户可创建两个应用的 usage，并已准备合法主体照素材。
 - 步骤：
-  1. 调用 `api.createUsage("ai_draw", { prompt: "test" })` 获取 `usageId`。
+  1. 调用 `api.createUsage("ai_draw", { mode: "nurse_portrait" })` 获取 `usageId`。
   2. 用该 `usageId` 调用 `demoSum`，传入合法数字参数。
   3. 调用 `api.createUsage("demo_sum", { a: 1, b: 2 })` 获取另一个 `usageId`。
-  4. 用该 `usageId` 调用 `app_ai_draw.generate`。
+  4. 用该 `usageId` 调用 `app_ai_draw.generate`，传入合法主体照和参数。
 - 断言：
   - 两次跨应用调用均返回 `APP_MISMATCH`。
   - 被误用的 usage 不会被结算为 `succeeded`。

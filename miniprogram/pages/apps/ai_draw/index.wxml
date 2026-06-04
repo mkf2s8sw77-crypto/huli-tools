@@ -1,36 +1,92 @@
 <ui-page>
-  <!-- 应用头部 + 费用提示 -->
-  <view class="app-exec-header app-exec-header--draw">
+  <view class="app-exec-header app-exec-header--portrait">
     <view class="app-exec-header__row">
       <view class="icon-tile icon-tile--app icon-tile--peach icon-tile--image">
         <view class="icon-tile__glyph"></view>
       </view>
       <view class="app-exec-header__info">
-        <text class="app-exec-header__name">{{appInfo ? appInfo.name : 'AI 绘图'}}</text>
-        <text class="app-exec-header__cost">本次消耗 {{appInfo && appInfo.pricing ? appInfo.pricing.costPoints : 1}} 积分</text>
+        <text class="app-exec-header__name">{{appInfo ? appInfo.name : '护士职业定妆照'}}</text>
+        <text class="app-exec-header__cost">{{costLabel}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 表单卡 -->
-  <ui-form-field label="绘图描述">
-    <textarea
-      class="prompt-input"
-      value="{{prompt}}"
-      bindinput="onInputPrompt"
-      placeholder="请描述您想要的图片，例如：一只可爱的猫咪在草地上奔跑"
-      maxlength="500"
-      auto-height
-    />
-    <text class="char-count">{{prompt.length}}/500</text>
+  <ui-form-field label="主体形象照">
+    <view wx:if="{{subjectAsset}}" class="subject-preview">
+      <image class="subject-preview__image" mode="aspectFill" src="{{subjectAsset.tempFilePath}}" />
+      <view class="subject-preview__body">
+        <text class="subject-preview__title">已上传主体照</text>
+        <text class="subject-preview__desc">{{subjectAsset.name}}</text>
+      </view>
+      <button class="asset-remove" size="mini" bindtap="removeSubject">移除</button>
+    </view>
+    <button
+      wx:else
+      class="asset-upload asset-upload--primary"
+      loading="{{uploadingSubject}}"
+      disabled="{{uploadingSubject || loading || polling || hasActiveTask}}"
+      bindtap="chooseSubject"
+    >
+      上传本人照片
+    </button>
   </ui-form-field>
 
-  <!-- 主操作区 -->
+  <ui-form-field label="参考图">
+    <view class="reference-grid">
+      <view
+        wx:for="{{referenceAssets}}"
+        wx:key="fileID"
+        class="reference-item"
+      >
+        <image class="reference-item__image" mode="aspectFill" src="{{item.tempFilePath}}" />
+        <button class="reference-item__remove" size="mini" data-index="{{index}}" bindtap="removeReference">×</button>
+      </view>
+      <button
+        wx:if="{{referenceAssets.length < 8}}"
+        class="reference-add"
+        loading="{{uploadingReference}}"
+        disabled="{{uploadingReference || loading || polling || hasActiveTask}}"
+        bindtap="chooseReferences"
+      >
+        +
+      </button>
+    </view>
+    <text class="field-hint">可上传制服、背景、医院 Logo、护士帽等参考图，最多 8 张</text>
+  </ui-form-field>
+
+  <ui-form-field label="构图">
+    <radio-group class="composition-group" bindchange="onCompositionChange">
+      <label
+        wx:for="{{compositionOptions}}"
+        wx:key="key"
+        class="composition-option {{composition === item.key ? 'composition-option--active' : ''}}"
+      >
+        <radio value="{{item.key}}" checked="{{composition === item.key}}" />
+        <view class="composition-option__text">
+          <text class="composition-option__label">{{item.label}}</text>
+          <text class="composition-option__desc">{{item.desc}}</text>
+        </view>
+      </label>
+    </radio-group>
+  </ui-form-field>
+
+  <ui-form-field label="补充要求">
+    <textarea
+      class="requirements-input"
+      value="{{requirements}}"
+      bindinput="onInputRequirements"
+      placeholder="例如：浅蓝背景、佩戴医院护士帽、制服更正式一些"
+      maxlength="300"
+      auto-height
+    />
+    <text class="char-count">{{requirements.length}}/300</text>
+  </ui-form-field>
+
   <view class="app-exec-actions">
     <ui-action-button
-      text="{{loading ? '提交中...' : (polling ? '后台生成中' : '生成图片')}}"
+      text="{{loading ? '提交中...' : (polling ? '后台生成中' : '生成定妆照')}}"
       loading="{{loading}}"
-      disabled="{{loading || polling || hasActiveTask || !prompt}}"
+      disabled="{{!canGenerate}}"
       bind:tap="onGenerate"
       extra-class="app-exec-btn"
     />
@@ -45,23 +101,20 @@
     </button>
   </view>
 
-  <!-- 后台任务状态 -->
   <view wx:if="{{polling || hasActiveTask || taskStatusText}}" class="card card--soft app-exec-task">
     <view class="app-exec-task__spinner"></view>
     <view class="app-exec-task__body">
       <text class="app-exec-task__title">{{taskStatusText || '任务已提交，正在后台生成'}}</text>
-      <text class="app-exec-task__desc">可以停留等待，也可以稍后返回本页查看结果</text>
+      <text class="app-exec-task__desc">生成耗时较长，可以稍后返回本页查看结果</text>
     </view>
   </view>
 
-  <!-- 结果区 -->
   <view wx:if="{{imageUrl}}" class="card card--elevated app-exec-result">
     <text class="app-exec-result__label">生成结果</text>
     <image class="result-image" mode="aspectFit" src="{{imageUrl}}" show-menu-by-longpress />
     <button class="save-btn" type="default" bindtap="onSaveImage">保存到相册</button>
   </view>
 
-  <!-- 错误 -->
   <view wx:if="{{errorMsg}}" class="app-exec-error">
     <text>{{errorMsg}}</text>
   </view>

@@ -56,7 +56,7 @@ huli-tools/
 │       ├── orders/               # 我的订单
 │       ├── transactions/         # 积分流水
 │       ├── usage-records/        # 使用记录
-│       ├── apps/ai_draw/         # AI 绘图应用
+│       ├── apps/ai_draw/         # 护士职业定妆照应用
 │       └── tools/demo-sum/       # 示例工具：求和
 └── cloudfunctions/               # 云函数目录
     ├── coreUser/                 # 用户身份与积分账户 bootstrap
@@ -65,7 +65,7 @@ huli-tools/
     ├── corePayment/              # 支付订单与充值包
     ├── adminCore/                # 管理接口与数据 seed
     ├── demoSum/                  # 示例业务云函数（求和）
-    ├── app_ai_draw/              # AI 绘图应用云函数
+    ├── app_ai_draw/              # 护士职业定妆照应用云函数
     ├── getOpenId/                # 获取用户 OPENID（示例）
     └── sum/                      # 求和示例（最简云函数）
 ```
@@ -341,14 +341,15 @@ huli-tools/
   3. 若输入非数字，调用 `coreApp.failUsage` 释放积分。
   4. 业务成功（求和），调用 `coreApp.finishUsage` 结算积分。
 
-#### app_ai_draw — AI 绘图应用
+#### app_ai_draw — 护士职业定妆照应用
 
-- **职责**：调用外部图片生成服务，演示异步任务与积分扣费链路。
+- **职责**：接收主体形象照和多张参考图，服务端组装护士职业标准照 prompt，调用 `gpt-image-2-web` 异步生图。
 - **关键约束**：
   1. `usageId` 必须属于当前用户且 `appKey` 必须为 `ai_draw`。
-  2. `app_ai_draw_tasks` 使用 `usageId` 作为文档 ID，绑定 `userId`、`usageId`、`jobId` 和任务状态。
-  3. `query` 必须同时校验 `usageId` 和 `jobId`，避免跨任务结算。
-  4. 生成失败、外部任务失败或前端超时取消时调用 `coreApp.failUsage` 释放冻结积分。
+  2. `prepareUpload` 只签发当前用户前缀下的受控 `cloudPath`；`generate` 必须校验 `fileID/cloudPath` 归属。
+  3. `app_ai_draw_tasks` 使用 `usageId` 作为文档 ID，绑定 `userId`、`usageId`、`jobId`、主体照、参考图、任务状态和 `expiresAt`。
+  4. `query` 必须同时校验 `usageId` 和 `jobId`，避免跨任务结算。
+  5. 生成失败、外部任务失败或前端超时取消时调用 `coreApp.failUsage` 释放或标记失败。
 
 ### 4.4 遗留/示例云函数
 

@@ -61,11 +61,11 @@ actions = [
 ]
 
 [phase.7]
-description = "AI 绘图基础应用与异步任务计费链路"
+description = "护士职业定妆照应用与异步生图链路"
 actions = [
-  "新增 app_ai_draw 云函数和 pages/apps/ai_draw 页面",
-  "创建 app_ai_draw_tasks 私有集合绑定 usageId/jobId",
-  "验证 AI 绘图成功结算、失败释放和超时取消",
+  "将 app_ai_draw 云函数和 pages/apps/ai_draw 页面替换为护士职业定妆照",
+  "创建 app_ai_draw_tasks 私有集合绑定 usageId/jobId/主体照/参考图",
+  "验证护士定妆照成功结算、失败释放、超时取消和上传素材校验",
 ]
 
 [env.required]

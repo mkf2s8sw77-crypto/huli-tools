@@ -16,7 +16,7 @@
 | `payment_orders` | 支付订单 | 是 |
 | `admin_audit_logs` | 管理员操作审计 | 是 |
 | `system_configs` | 系统配置（开关、白名单等） | 是 |
-| `app_ai_draw_tasks` | AI 绘图任务与 usage/job 绑定 | 是（AI 绘图应用启用时） |
+| `app_ai_draw_tasks` | 护士职业定妆照任务与 usage/job 绑定 | 是（护士定妆照应用启用时） |
 
 ## 1. users
 
@@ -133,12 +133,12 @@
   },
   {
     "appKey": "ai_draw",
-    "name": "AI 绘图",
-    "description": "输入描述生成图片，演示异步任务与积分结算链路",
+    "name": "护士职业定妆照",
+    "description": "上传本人形象照和参考图，生成护士职业标准照",
     "entryPage": "/pages/apps/ai_draw/index",
     "cloudFunctionName": "app_ai_draw",
     "status": "active",
-    "pricing": { "mode": "fixed", "costPoints": 1 },
+    "pricing": { "mode": "fixed", "costPoints": 0 },
     "sortOrder": 2
   }
 ]
@@ -310,7 +310,7 @@
 
 ## 10. app_ai_draw_tasks
 
-AI 绘图应用私有集合，用于把外部图片生成任务 `jobId` 绑定到当前用户的 `usageId`，防止跨应用 usage 复用、跨任务查询和重复结算。
+护士职业定妆照应用私有集合，用于把外部图片生成任务 `jobId` 绑定到当前用户的 `usageId`，防止跨应用 usage 复用、跨任务查询和重复结算；源素材只保存私有 Cloud Storage `fileID/cloudPath`，对外生成时由云函数换取短期临时 URL。
 
 ### 字段
 
@@ -320,11 +320,19 @@ AI 绘图应用私有集合，用于把外部图片生成任务 `jobId` 绑定�
 | `userId` | string | 关联用户 |
 | `usageId` | string | 关联 `app_usage_records._id` |
 | `jobId` | string | 外部图片生成任务 ID |
-| `prompt` | string | 用户绘图描述 |
+| `mode` | string | 当前固定为 `nurse_portrait`，旧任务可为空 |
+| `prompt` | string | 实际提交给上游的生成 prompt；旧任务为用户绘图描述 |
+| `generatedPrompt` | string | 服务端组装后的正式 prompt |
+| `subjectAsset` | Object | 主体形象照 `{ role, fileID, cloudPath, name }` |
+| `referenceAssets` | Array | 参考图数组，可包含制服、背景、Logo、护士帽等素材 |
+| `options` | Object | `{ composition, requirements }`，如 `half_body` / `full_body` / `id_photo` |
 | `status` | string | `processing` / `succeeded` / `failed` / `cancelled` |
 | `imageUrl` | string | 成功后的图片 URL |
+| `images` | Array | 上游返回的生成图片摘要数组 |
 | `errorCode` | string | 错误码（可选） |
 | `errorMessage` | string | 错误信息（可选） |
+| `expiresAt` | Date | 源素材短期保留到期时间，默认 7 天 |
+| `assetCleanedAt` | Date | 源素材清理时间（可选） |
 | `createdAt` | Date | 创建时间 |
 | `updatedAt` | Date | 更新时间 |
 | `finishedAt` | Date | 结束时间 |

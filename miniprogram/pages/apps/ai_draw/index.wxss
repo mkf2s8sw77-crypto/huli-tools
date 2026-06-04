@@ -1,4 +1,4 @@
-/* AI 绘图 v2 — 应用执行页 */
+/* 护士职业定妆照 — 应用执行页 */
 
 .app-exec-header {
   margin-bottom: 34rpx;
@@ -17,7 +17,7 @@
   top: -54rpx;
   width: 230rpx;
   height: 230rpx;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--color-on-primary);
   opacity: 0.14;
 }
@@ -46,7 +46,7 @@
   align-self: flex-start;
   font-size: 25rpx;
   color: var(--color-accent-warm);
-  background: rgba(255, 255, 255, 0.84);
+  background: var(--color-bg-card);
   border-radius: var(--radius-pill);
   padding: 7rpx 18rpx;
   font-weight: 700;
@@ -54,21 +54,190 @@
 }
 
 .app-exec-header .icon-tile {
-  background: rgba(255, 255, 255, 0.18);
-  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  background: var(--color-primary-light);
+  border: 2rpx solid var(--color-bg-card);
   box-shadow: none;
-  --icon-line: var(--color-on-primary);
+  --icon-line: var(--color-primary);
 }
 
-.prompt-input {
+.subject-preview {
+  display: grid;
+  grid-template-columns: 132rpx 1fr auto;
+  align-items: center;
+  gap: 18rpx;
+  padding: 18rpx;
+  border: 1rpx solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-elevated);
+}
+
+.subject-preview__image {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.subject-preview__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.subject-preview__title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.25;
+}
+
+.subject-preview__desc {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.asset-upload {
   width: 100%;
-  min-height: 160rpx;
+  min-height: 132rpx;
+  border-radius: var(--radius-lg);
+  border: 2rpx dashed var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  font-size: 30rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.asset-upload--primary {
+  border-color: var(--color-brand-soft);
+  color: var(--color-brand-soft);
+  background: var(--color-brand-soft-light);
+}
+
+.asset-remove {
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+  border-radius: var(--radius-pill);
+}
+
+.reference-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14rpx;
+}
+
+.reference-item,
+.reference-add {
+  height: 152rpx;
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1rpx solid var(--color-border);
+}
+
+.reference-item__image {
+  width: 100%;
+  height: 100%;
+}
+
+.reference-item__remove {
+  position: absolute;
+  right: 4rpx;
+  top: 4rpx;
+  width: 42rpx;
+  height: 42rpx;
+  min-height: 42rpx;
+  line-height: 42rpx;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  color: var(--color-on-primary);
+  background: var(--color-danger);
+  font-size: 28rpx;
+}
+
+.reference-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  border: 2rpx dashed var(--color-primary);
+  background: var(--color-primary-light);
+  font-size: 48rpx;
+  font-weight: 500;
+  padding: 0;
+}
+
+.field-hint {
+  display: block;
+  font-size: 23rpx;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+  margin-top: var(--spacing-sm);
+}
+
+.composition-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+}
+
+.composition-option {
+  min-width: 0;
+  padding: 18rpx 14rpx;
+  border-radius: var(--radius-lg);
+  border: 1rpx solid var(--color-border);
+  background: var(--color-surface-elevated);
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+}
+
+.composition-option--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.composition-option radio {
+  transform: scale(0.78);
+  margin-top: 2rpx;
+}
+
+.composition-option__text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.composition-option__label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.composition-option__desc {
+  font-size: 21rpx;
+  color: var(--color-text-muted);
+  line-height: 1.25;
+}
+
+.requirements-input {
+  width: 100%;
+  min-height: 136rpx;
   border: 1rpx solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 24rpx;
-  font-size: 30rpx;
+  font-size: 29rpx;
+  line-height: 1.45;
   box-sizing: border-box;
-  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-peach-light) 100%);
+  background: var(--color-surface-elevated);
 }
 
 .char-count {
@@ -106,8 +275,8 @@
 .app-exec-task__spinner {
   width: 42rpx;
   height: 42rpx;
-  border-radius: 50%;
-  border: 5rpx solid rgba(94, 149, 200, 0.18);
+  border-radius: var(--radius-pill);
+  border: 5rpx solid var(--color-primary-light);
   border-top-color: var(--color-primary);
   animation: app-exec-spin 0.9s linear infinite;
   flex-shrink: 0;
@@ -145,7 +314,7 @@
 .app-exec-result {
   text-align: center;
   padding: var(--spacing-lg);
-  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-peach-light) 100%);
+  background: var(--color-bg-card);
 }
 
 .app-exec-result__label {
@@ -160,6 +329,7 @@
   max-height: 800rpx;
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-md);
+  background: var(--color-surface);
 }
 
 .save-btn {

@@ -941,10 +941,10 @@ async function initSchema(event, context) {
       sortOrder: 1, createdAt: now, updatedAt: now,
     },
     {
-      appKey: "ai_draw", name: "AI 绘图",
-      description: "输入描述生成图片，演示异步任务与积分结算链路",
+      appKey: "ai_draw", name: "护士职业定妆照",
+      description: "上传本人形象照和参考图，生成护士职业标准照",
       entryPage: "/pages/apps/ai_draw/index", cloudFunctionName: "app_ai_draw",
-      status: "active", pricing: { mode: "fixed", costPoints: 1 },
+      status: "active", pricing: { mode: "fixed", costPoints: 0 },
       sortOrder: 2, createdAt: now, updatedAt: now,
     },
   ];

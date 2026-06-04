@@ -1,7 +1,7 @@
 {
   "name": "app_ai_draw",
   "version": "1.0.0",
-  "description": "AI 绘图应用云函数",
+  "description": "护士职业定妆照应用云函数",
   "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "latest"
