@@ -286,13 +286,35 @@ git diff --check
   2. 用该 `usageId` 调用 `demoSum`，传入合法数字参数。
   3. 调用 `api.createUsage("demo_sum", { a: 1, b: 2 })` 获取另一个 `usageId`。
   4. 用该 `usageId` 调用 `app_ai_draw.generate`，传入合法主体照和参数。
+  5. 调用 `api.createUsage("demo_sum", { a: 1, b: 2 })` 获取第三个 `usageId`。
+  6. 用该 `usageId` 调用 `app_nursing_undercover.startGame`，传入合法模式和难度。
 - 断言：
-  - 两次跨应用调用均返回 `APP_MISMATCH`。
+  - 三次跨应用调用均返回 `APP_MISMATCH`。
   - 被误用的 usage 不会被结算为 `succeeded`。
+
+### TC-22 谁是卧底（护理版）对局、AI fallback 与历史回看
+
+- 目标：验证 `app_nursing_undercover` 的 usage 归属、对局状态机、投票结算、取消释放和历史复盘。
+- 前置条件：已创建 `app_nursing_undercover_sessions` 集合；`app_nursing_undercover`、`coreApp`、`corePoints` 已部署并配置相同 `INTERNAL_API_SECRET`；如需真实 AI NPC，`app_nursing_undercover` 还需配置已启用的 `CLOUDBASE_AI_MODEL`。
+- 步骤：
+  1. 调用 `api.createUsage("nursing_undercover", { mode: "word_undercover", difficulty: "student" })` 获取 `usageId`。
+  2. 调用 `app_nursing_undercover.startGame`，传入 `usageId`、`mode=word_undercover`、`difficulty=student`、`npcCount=4`、`roundCount=2`。
+  3. 调用 `submitSpeech` 完成第 1 轮和第 2 轮发言，每次传入不同 `clientActionId`。
+  4. 临时重复调用一次相同 `clientActionId` 的 `submitSpeech`。
+  5. 调用 `submitVote`，传入任一非玩家角色和 `clientActionId`。
+  6. 调用 `listMyGames` 和 `getGame` 查看历史复盘。
+  7. 新建另一局，在未完成时调用 `cancelGame`。
+- 断言：
+  - 未结束时返回客户端的 NPC `secretLabel` 为 `***`，且不返回 `undercoverRoleId`。
+  - 重复 `submitSpeech` 不会重复生成 NPC 发言。
+  - 投票成功后 usage 状态为 `succeeded`，session 状态为 `finished`。
+  - 未配置或不可用 AI 时允许返回 `fallback=true`，但不得伪装为真实 AI 输出。
+  - 历史回看只返回当前用户自己的对局。
+  - 取消对局后 usage 状态为 `failed` 或 `released`，session 状态为 `cancelled`。
 
 ## 4. 设计系统视觉一致性验收
 
-- 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw` 页面无白屏。
+- 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw`、`nursing_undercover` 页面无白屏。
 - 所有页面使用 `ui-page` 组件统一页面壳，标题样式一致。
 - 卡片使用 `card` class 或 `ui-card` 组件，圆角 16rpx、阴影一致。
 - 状态标签颜色统一：成功绿、警告黄、危险红、默认灰。

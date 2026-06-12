@@ -57,6 +57,7 @@ huli-tools/
 │       ├── transactions/         # 积分流水
 │       ├── usage-records/        # 使用记录
 │       ├── apps/ai_draw/         # 护士职业定妆照应用
+│       ├── apps/nursing_undercover/ # 谁是卧底（护理版）应用
 │       └── tools/demo-sum/       # 示例工具：求和
 └── cloudfunctions/               # 云函数目录
     ├── coreUser/                 # 用户身份与积分账户 bootstrap
@@ -66,6 +67,7 @@ huli-tools/
     ├── adminCore/                # 管理接口与数据 seed
     ├── demoSum/                  # 示例业务云函数（求和）
     ├── app_ai_draw/              # 护士职业定妆照应用云函数
+    ├── app_nursing_undercover/   # 谁是卧底（护理版）应用云函数
     ├── getOpenId/                # 获取用户 OPENID（示例）
     └── sum/                      # 求和示例（最简云函数）
 ```
@@ -92,8 +94,8 @@ huli-tools/
 │  │ coreUser │ │ coreApp  │ │corePoints│ │corePayment│       │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
-│  │ adminCore│ │ demoSum  │ │app_ai_draw│                   │
-│  └──────────┘ └──────────┘ └──────────┘                    │
+│  │ adminCore│ │ demoSum  │ │app_ai_draw│ │app_nursing...│   │
+│  └──────────┘ └──────────┘ └──────────┘ └───────────────┘   │
 └──────────────────────────┬──────────────────────────────────┘
                            │ wx-server-sdk
 ┌──────────────────────────▼──────────────────────────────────┐
@@ -351,6 +353,17 @@ huli-tools/
   4. `query` 必须同时校验 `usageId` 和 `jobId`，避免跨任务结算。
   5. 生成失败、外部任务失败或前端超时取消时调用 `coreApp.failUsage` 释放或标记失败。
 
+#### app_nursing_undercover — 谁是卧底（护理版）
+
+- **职责**：提供护理教学版“谁是卧底”对局，支持词语卧底和病例推理卧底，AI NPC 参与发言、投票和复盘。
+- **关键约束**：
+  1. `usageId` 必须属于当前用户且 `appKey` 必须为 `nursing_undercover`。
+  2. `app_nursing_undercover_sessions` 保存对局、角色、发言、投票、结果和教学复盘。
+  3. 未结束对局返回客户端时必须隐藏 NPC 密令、阵营和 `undercoverRoleId`。
+  4. `submitSpeech` / `submitVote` 使用 `clientActionId` 做幂等，避免重复生成 NPC 发言或重复结算。
+  5. 投票成功必须先完成 `coreApp.finishUsage`，再把 session 标记为 `finished`；取消对局必须先 `failUsage`，再标记 `cancelled`。
+  6. CloudBase AI 模型 ID 通过 `CLOUDBASE_AI_MODEL` 环境变量配置，未配置或不可用时使用模板 fallback，不在代码中猜测模型 ID。
+
 ### 4.4 遗留/示例云函数
 
 | 云函数 | 说明 |
@@ -564,7 +577,7 @@ demoSum (业务示例)
 
 微信开发者工具 → 云开发 → 云函数 → 选中函数 → 版本与配置 → 环境变量
 
-> 注意：`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw` 中配置为**相同的随机字符串**。
+> 注意：`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover` 中配置为**相同的随机字符串**。`app_nursing_undercover` 如需启用 AI NPC，还需配置经过 CloudBase AI preflight 确认的 `CLOUDBASE_AI_MODEL`。
 
 ---
 
@@ -581,9 +594,9 @@ demoSum (业务示例)
 1. **打开项目**：用微信开发者工具打开项目根目录。
 2. **配置 APPID**：在 `project.config.json` 中将 `appid` 替换为真实小程序 APPID。
 3. **部署云函数**：右键以下云函数 → 「创建并部署：云端安装依赖」
-   - `coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`
+   - `coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`
 4. **配置环境变量**：为上述云函数配置 `ADMIN_OPENIDS`、`INTERNAL_API_SECRET`、`PAYMENT_PROVIDER`、`MOCK_PAYMENT_ENABLED`。
-5. **创建数据库集合**：在微信开发者工具云开发控制台中创建 10 个集合（详见 `docs/cloud_collections.md`）。
+5. **创建数据库集合**：在微信开发者工具云开发控制台中创建 11 个集合（详见 `docs/cloud_collections.md`）。
 6. **初始化 seed 数据**：调用 `adminCore.initSchema`：
    ```js
    wx.cloud.callFunction({

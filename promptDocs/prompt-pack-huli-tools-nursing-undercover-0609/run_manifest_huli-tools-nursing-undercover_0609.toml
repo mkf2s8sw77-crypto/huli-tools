@@ -1,0 +1,96 @@
+version = 1
+project_name = "huli-tools-nursing-undercover"
+repo_path = "/Users/huli-dev/Documents/huli-tools"
+workspace_mode = "worktree"
+workspace_ref = "feat/dopamine-ui"
+cleanup_on_success = true
+cleanup_on_failure = false
+claude_command = "claude"
+default_max_turns = 120
+default_effort = "high"
+
+[docs]
+master_spec = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-nursing-undercover-0609/master_spec_huli-tools-nursing-undercover_0609.md"
+test_case = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-nursing-undercover-0609/test_case_huli-tools-nursing-undercover_0609.md"
+
+[bootstrap]
+init_git_if_missing = false
+commands = [
+  "git status --short --branch",
+  "test -f AGENTS.md",
+  "test -f project.config.json",
+  "test -f cloudbaserc.json",
+  "test -d miniprogram",
+  "test -d cloudfunctions",
+  "test -d templates/app_vertical_slice",
+  "node -v"
+]
+
+[gates]
+preflight = [
+  "git status --short --branch",
+  "test -f AGENTS.md",
+  "test -f project.config.json",
+  "test -d miniprogram",
+  "test -d cloudfunctions"
+]
+post_phase = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
+  "git diff --check"
+]
+
+[review]
+max_rounds = 3
+
+[smoke]
+max_rounds = 3
+
+[deploy]
+enabled = false
+start_command = ""
+healthcheck_url = ""
+
+[cloudbase]
+env_id = "cloudbase-3gphz7fk0fe1b760"
+appid = "wx1654159e6e3bb334"
+new_function = "app_nursing_undercover"
+new_collection = "app_nursing_undercover_sessions"
+optional_preview_command = "NODE_OPTIONS=--no-experimental-webstorage npx -y miniprogram-ci preview --appid wx1654159e6e3bb334 --project-path /Users/huli-dev/Documents/huli-tools --private-key-path /Users/huli-dev/Documents/huli-tools/private.wx1654159e6e3bb334.key --use-project-config --upload-version nursing-undercover-preview --threads 0 --qrcode-format image --qrcode-output-dest /tmp/huli-tools-nursing-undercover-preview.png"
+
+[[phases]]
+id = "p1"
+name = "平台竖切与可玩最小对局"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-nursing-undercover-0609/LLM_prompt_huli-tools-nursing-undercover-p1_0609.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
+  "git diff --check",
+  "node -e \"JSON.parse(require('fs').readFileSync('miniprogram/app.json','utf8')); JSON.parse(require('fs').readFileSync('cloudbaserc.json','utf8')); console.log('json ok')\""
+]
+
+[[phases]]
+id = "p2"
+name = "CloudBase AI 编排、双模式和三档难度"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-nursing-undercover-0609/LLM_prompt_huli-tools-nursing-undercover-p2_0609.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
+  "git diff --check",
+  "node -e \"JSON.parse(require('fs').readFileSync('cloudfunctions/app_nursing_undercover/package.json','utf8')); console.log('package json ok')\""
+]
+
+[[phases]]
+id = "p3"
+name = "历史回看、文档同步和完整验收"
+prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools-nursing-undercover-0609/LLM_prompt_huli-tools-nursing-undercover-p3_0609.md"
+gate_commands = [
+  "bash scripts/check-js.sh",
+  "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
+  "git diff --check",
+  "git status --short --branch"
+]

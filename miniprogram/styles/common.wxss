@@ -596,3 +596,42 @@ button[type="primary"][disabled] {
   border-bottom: none;
   border-radius: 9rpx 9rpx 0 0;
 }
+
+/* undercover: magnifying glass with question mark */
+.icon-tile--undercover::before {
+  left: 18rpx;
+  top: 16rpx;
+  width: 34rpx;
+  height: 34rpx;
+  border: 5rpx solid var(--icon-line);
+  border-radius: 50%;
+}
+
+.icon-tile--undercover::after {
+  left: 48rpx;
+  top: 48rpx;
+  width: 18rpx;
+  height: 5rpx;
+  background: var(--icon-line);
+  border-radius: var(--radius-pill);
+  transform: rotate(45deg);
+}
+
+.icon-tile--undercover .icon-tile__glyph::before {
+  left: 31rpx;
+  top: 24rpx;
+  width: 8rpx;
+  height: 14rpx;
+  border-top: 5rpx solid var(--icon-line);
+  border-right: 5rpx solid var(--icon-line);
+  border-radius: 0 8rpx 0 0;
+}
+
+.icon-tile--undercover .icon-tile__glyph::after {
+  left: 33rpx;
+  top: 42rpx;
+  width: 5rpx;
+  height: 5rpx;
+  border-radius: 50%;
+  background: var(--icon-line);
+}

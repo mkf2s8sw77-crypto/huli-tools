@@ -3,6 +3,7 @@ const api = require("../../services/api");
 const APP_ICON_CLASS_MAP = {
   demo_sum: "icon-tile--lavender icon-tile--calculator",
   ai_draw: "icon-tile--peach icon-tile--image",
+  nursing_undercover: "icon-tile--lavender icon-tile--undercover",
 };
 
 function decorateApp(app) {

@@ -19,8 +19,8 @@ commands = [
 [gate.deploy]
 description = "云函数部署后人工/半自动验收步骤"
 steps = [
-  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 app_ai_draw）",
-  "2. 创建数据库集合（见 docs/cloud_collections.md，含 app_ai_draw_tasks）",
+  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 app_ai_draw、app_nursing_undercover）",
+  "2. 创建数据库集合（见 docs/cloud_collections.md，含 app_ai_draw_tasks、app_nursing_undercover_sessions）",
   "3. 配置云函数环境变量（见 docs/dev_setup.md）",
   "4. 调用 adminCore.initSchema 写入 seed 数据",
 ]
@@ -68,6 +68,14 @@ actions = [
   "验证护士定妆照成功结算、失败释放、超时取消和上传素材校验",
 ]
 
+[phase.8]
+description = "谁是卧底（护理版）教学游戏应用"
+actions = [
+  "新增 app_nursing_undercover 云函数和 pages/apps/nursing_undercover 页面",
+  "创建 app_nursing_undercover_sessions 私有集合绑定 usageId/session/发言/投票/复盘",
+  "验证词语卧底、病例推理、历史回看、取消释放和 AI fallback",
+]
+
 [env.required]
 description = "云函数环境变量（开发阶段最小集）"
 vars = [
@@ -75,6 +83,8 @@ vars = [
   { name = "PAYMENT_PROVIDER", example = "mock", note = "mock 或 wechat" },
   { name = "MOCK_PAYMENT_ENABLED", example = "true", note = "开发测试用，生产必须 false" },
   { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，必须显式配置且所有公共云函数保持一致" },
+  { name = "CLOUDBASE_AI_MODEL", example = "按 DescribeAIModels 启用结果填写", note = "app_nursing_undercover AI NPC 使用；未配置时走模板 fallback" },
+  { name = "CLOUDBASE_AI_ENV_ID", example = "cloudbase-3gphz7fk0fe1b760", note = "可选，CloudBase AI SDK 初始化环境" },
 ]
 
 [env.wechat_payment]

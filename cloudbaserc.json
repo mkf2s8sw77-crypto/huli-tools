@@ -65,6 +65,13 @@
       "handler": "index.main",
       "timeout": 60,
       "installDependency": true
+    },
+    {
+      "name": "app_nursing_undercover",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 60,
+      "installDependency": true
     }
   ]
 }

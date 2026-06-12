@@ -660,6 +660,7 @@ async function checkCollectionsExist() {
     "users", "point_accounts", "point_transactions", "apps",
     "app_usage_records", "recharge_packages", "payment_orders",
     "admin_audit_logs", "system_configs", "app_ai_draw_tasks",
+    "app_nursing_undercover_sessions",
   ];
   const missing = [];
   for (const name of required) {
@@ -946,6 +947,13 @@ async function initSchema(event, context) {
       entryPage: "/pages/apps/ai_draw/index", cloudFunctionName: "app_ai_draw",
       status: "active", pricing: { mode: "fixed", costPoints: 0 },
       sortOrder: 2, createdAt: now, updatedAt: now,
+    },
+    {
+      appKey: "nursing_undercover", name: "谁是卧底（护理版）",
+      description: "AI NPC 参与的护理教学卧底推理游戏，支持词语卧底和病例推理双模式",
+      entryPage: "/pages/apps/nursing_undercover/index", cloudFunctionName: "app_nursing_undercover",
+      status: "active", pricing: { mode: "fixed", costPoints: 0 },
+      sortOrder: 3, createdAt: now, updatedAt: now,
     },
   ];
 

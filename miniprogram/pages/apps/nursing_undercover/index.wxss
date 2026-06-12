@@ -1,0 +1,394 @@
+/* 谁是卧底（护理版）—— 业务私有样式，色彩使用 token */
+
+/* ── 应用头部 ── */
+.app-exec-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.app-exec-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.app-exec-header__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-exec-header__name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.app-exec-header__cost {
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+  margin-top: 4rpx;
+}
+
+/* ── 错误提示 ── */
+.nu-error-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-danger-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-error-bar__text {
+  font-size: 26rpx;
+  color: var(--color-danger);
+  flex: 1;
+}
+
+.nu-error-bar__close {
+  font-size: 32rpx;
+  color: var(--color-danger);
+  padding: 0 var(--spacing-sm);
+}
+
+/* ── 选项组 ── */
+.nu-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nu-option-group--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.nu-option {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2rpx solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  transition: all 0.2s;
+}
+
+.nu-option--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.nu-option--compact {
+  padding: var(--spacing-xs) var(--spacing-md);
+  flex: 1;
+  text-align: center;
+  min-width: 160rpx;
+}
+
+.nu-option__label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nu-option__desc {
+  display: block;
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  margin-top: 4rpx;
+}
+
+/* ── 操作区 ── */
+.nu-action-area {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ── 身份卡 ── */
+.nu-identity-card {
+  text-align: center;
+}
+
+.nu-identity-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.nu-identity-card__title {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.nu-identity-card__secret {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: var(--spacing-sm) 0;
+}
+
+.nu-identity-card__hint {
+  display: block;
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+}
+
+/* ── 轮次和发言 ── */
+.nu-round-header {
+  margin-top: var(--spacing-md);
+}
+
+.nu-round-label {
+  display: block;
+  font-size: 22rpx;
+  margin: var(--spacing-md) 0 var(--spacing-xs);
+}
+
+.nu-speech-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-speech-bubble {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1rpx solid var(--color-border-soft);
+}
+
+.nu-speech-bubble--player {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.nu-speech-bubble__name {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 4rpx;
+}
+
+.nu-speech-bubble__text {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* ── 输入区 ── */
+.nu-input-area {
+  margin-top: var(--spacing-md);
+}
+
+.nu-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  box-sizing: border-box;
+}
+
+.nu-input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
+/* ── 取消链接 ── */
+.nu-cancel-area {
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+.nu-cancel-link {
+  font-size: 26rpx;
+  text-decoration: underline;
+}
+
+/* ── 投票 ── */
+.nu-vote-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nu-vote-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  cursor: pointer;
+}
+
+.nu-vote-option--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.nu-vote-option__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nu-vote-option__check {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ── 结果卡 ── */
+.nu-result-card {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.nu-result-card--win {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+}
+
+.nu-result-card--lose {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+}
+
+.nu-result-card__title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.nu-result-card__subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+.nu-result-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-top: var(--spacing-md);
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+/* ── 角色揭晓 ── */
+.nu-reveal-section {
+  margin-top: var(--spacing-md);
+}
+
+.nu-role-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nu-role-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.nu-role-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nu-role-item__name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nu-role-item__secret {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  margin-top: 4rpx;
+}
+
+/* ── 投票结果 ── */
+.nu-vote-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  padding: 0 var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-vote-result-item {
+  font-size: 26rpx;
+  color: var(--color-text);
+}
+
+/* ── 教学复盘 ── */
+.nu-debrief-section {
+  margin-top: var(--spacing-md);
+}
+
+.nu-debrief__summary {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-debrief__block {
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-debrief__label {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.nu-debrief__item {
+  font-size: 26rpx;
+  color: var(--color-text);
+  line-height: 1.5;
+  padding-left: var(--spacing-sm);
+}
+
+/* ── 历史记录 ── */
+.nu-history-section {
+  margin-top: var(--spacing-xl);
+}
+
+.nu-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nu-history-item {
+  padding: var(--spacing-md);
+}
+
+.nu-history-item__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nu-history-item__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nu-history-item__bottom {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+}
