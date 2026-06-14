@@ -1,34 +1,85 @@
-/* 谁是卧底（护理版）—— 业务私有样式，色彩使用 token */
+/* 谁是卧底（护理版）v2 — 柔彩多巴胺应用执行页
+   覆盖范围：P0 配置阶段 / P1 游戏进行 / P2 投票 / P3 结果
+   所有色值均来自 tokens.wxss 的设计 token，业务结果区允许自定义布局与色彩。 */
 
-/* ── 应用头部 ── */
+/* ═══════════════════════════════════════════
+   P0 — 应用头部 hero 区
+   ═══════════════════════════════════════════ */
+
 .app-exec-header {
   margin-bottom: var(--spacing-lg);
+  padding: 34rpx;
+  border-radius: var(--radius-xl);
+  background: var(--gradient-hero);
+  box-shadow: var(--shadow-elevated);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-exec-header::after {
+  content: '';
+  position: absolute;
+  right: -42rpx;
+  top: -54rpx;
+  width: 230rpx;
+  height: 230rpx;
+  border-radius: 50%;
+  background: var(--color-on-primary);
+  opacity: 0.14;
 }
 
 .app-exec-header__row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 26rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .app-exec-header__info {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .app-exec-header__name {
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-on-primary);
+  line-height: 1.25;
 }
 
 .app-exec-header__cost {
-  font-size: 24rpx;
-  color: var(--color-text-muted);
-  margin-top: 4rpx;
+  align-self: flex-start;
+  font-size: 25rpx;
+  color: var(--color-accent-warm);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-pill);
+  padding: 7rpx 18rpx;
+  font-weight: 700;
+  margin-top: 10rpx;
 }
 
-/* ── 错误提示 ── */
+.app-exec-header__desc {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.86);
+  margin-top: 10rpx;
+  line-height: 1.45;
+}
+
+.app-exec-header .icon-tile {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+  --icon-line: var(--color-on-primary);
+}
+
+/* ═══════════════════════════════════════════
+   错误提示（保留原版）
+   ═══════════════════════════════════════════ */
+
 .nu-error-bar {
   display: flex;
   align-items: center;
@@ -51,317 +102,196 @@
   padding: 0 var(--spacing-sm);
 }
 
-/* ── 选项组 ── */
-.nu-option-group {
+/* ═══════════════════════════════════════════
+   P0 — section 阶段小标题
+   ═══════════════════════════════════════════ */
+
+.nu-section-eyebrow {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.nu-option-group--row {
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.nu-option {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2rpx solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-card);
-  transition: all 0.2s;
-}
-
-.nu-option--active {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-
-.nu-option--compact {
-  padding: var(--spacing-xs) var(--spacing-md);
-  flex: 1;
-  text-align: center;
-  min-width: 160rpx;
-}
-
-.nu-option__label {
-  display: block;
-  font-size: 28rpx;
+  align-items: center;
+  font-size: 24rpx;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm);
+  padding-left: 18rpx;
+  position: relative;
 }
 
-.nu-option__desc {
-  display: block;
-  font-size: 22rpx;
-  color: var(--color-text-muted);
-  margin-top: 4rpx;
+.nu-section-eyebrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6rpx;
+  height: 18rpx;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-hero);
 }
 
-/* ── 操作区 ── */
-.nu-action-area {
-  margin-top: var(--spacing-lg);
+.nu-section-eyebrow + .nu-mode-grid,
+.nu-section-eyebrow + .nu-difficulty-row,
+.nu-section-eyebrow + .nu-params-card {
   margin-bottom: var(--spacing-lg);
 }
 
-/* ── 身份卡 ── */
-.nu-identity-card {
-  text-align: center;
+/* ═══════════════════════════════════════════
+   P0 — 模式选择大卡
+   ═══════════════════════════════════════════ */
+
+.nu-mode-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
-.nu-identity-card__header {
+.nu-mode-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-card);
+  border: 2rpx solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.nu-mode-card--active {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-lavender-light) 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.nu-mode-card__icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.nu-mode-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.nu-mode-card__label {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.nu-mode-card__desc {
+  font-size: 23rpx;
+  color: var(--color-text-muted);
+  margin-top: 4rpx;
+  line-height: 1.45;
+}
+
+.nu-mode-card__check {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-}
-
-.nu-identity-card__title {
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
-}
-
-.nu-identity-card__secret {
-  display: block;
-  font-size: 40rpx;
+  font-size: 24rpx;
   font-weight: 700;
-  color: var(--color-primary);
-  margin: var(--spacing-sm) 0;
+  flex-shrink: 0;
 }
 
-.nu-identity-card__hint {
-  display: block;
-  font-size: 22rpx;
-  color: var(--color-text-muted);
-}
+/* ═══════════════════════════════════════════
+   P0 — 难度 chip
+   ═══════════════════════════════════════════ */
 
-/* ── 轮次和发言 ── */
-.nu-round-header {
-  margin-top: var(--spacing-md);
-}
-
-.nu-round-label {
-  display: block;
-  font-size: 22rpx;
-  margin: var(--spacing-md) 0 var(--spacing-xs);
-}
-
-.nu-speech-list {
+.nu-difficulty-row {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
 }
 
-.nu-speech-bubble {
+.nu-difficulty-chip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 24rpx;
   background: var(--color-bg-card);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1rpx solid var(--color-border-soft);
+  border: 2rpx solid var(--color-border-soft);
+  border-radius: var(--radius-pill);
+  transition: all 0.2s;
 }
 
-.nu-speech-bubble--player {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
+.nu-difficulty-chip--active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  box-shadow: var(--shadow-soft);
 }
 
-.nu-speech-bubble__name {
-  display: block;
-  font-size: 22rpx;
+.nu-difficulty-chip__dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.nu-difficulty-chip__dot--student { background: var(--color-primary); }
+.nu-difficulty-chip__dot--new_nurse { background: var(--color-accent-warm); }
+.nu-difficulty-chip__dot--specialist { background: var(--color-brand-soft); }
+
+.nu-difficulty-chip__label {
+  font-size: 27rpx;
   font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-bottom: 4rpx;
-}
-
-.nu-speech-bubble__text {
-  display: block;
-  font-size: 28rpx;
   color: var(--color-text);
-  line-height: 1.5;
-  word-break: break-all;
 }
 
-/* ── 输入区 ── */
-.nu-input-area {
-  margin-top: var(--spacing-md);
+.nu-difficulty-chip--active .nu-difficulty-chip__label {
+  color: var(--color-on-primary);
 }
 
-.nu-textarea {
-  width: 100%;
-  min-height: 120rpx;
-  box-sizing: border-box;
+/* ═══════════════════════════════════════════
+   P0 — 参数卡（NPC + 轮数）
+   ═══════════════════════════════════════════ */
+
+.nu-params-card {
+  padding: var(--spacing-md) var(--spacing-lg);
 }
 
-.nu-input-footer {
+.nu-param__row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--spacing-sm);
-}
-
-/* ── 取消链接 ── */
-.nu-cancel-area {
-  text-align: center;
-  padding: var(--spacing-md);
-}
-
-.nu-cancel-link {
-  font-size: 26rpx;
-  text-decoration: underline;
-}
-
-/* ── 投票 ── */
-.nu-vote-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.nu-vote-option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md);
-  cursor: pointer;
-}
-
-.nu-vote-option--selected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-
-.nu-vote-option__name {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.nu-vote-option__check {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* ── 结果卡 ── */
-.nu-result-card {
-  text-align: center;
-  padding: var(--spacing-xl) var(--spacing-lg);
-}
-
-.nu-result-card--win {
-  background: var(--color-success-light);
-  border-color: var(--color-success);
-}
-
-.nu-result-card--lose {
-  background: var(--color-danger-light);
-  border-color: var(--color-danger);
-}
-
-.nu-result-card__title {
-  display: block;
-  font-size: 36rpx;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.nu-result-card__subtitle {
-  display: block;
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
-  margin-top: var(--spacing-xs);
-}
-
-.nu-result-card__details {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  margin-top: var(--spacing-md);
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
-}
-
-/* ── 角色揭晓 ── */
-.nu-reveal-section {
-  margin-top: var(--spacing-md);
-}
-
-.nu-role-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.nu-role-item {
-  padding: var(--spacing-sm) var(--spacing-md);
-}
-
-.nu-role-item__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nu-role-item__name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.nu-role-item__secret {
-  display: block;
-  font-size: 24rpx;
-  color: var(--color-text-secondary);
-  margin-top: 4rpx;
-}
-
-/* ── 投票结果 ── */
-.nu-vote-result-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  padding: 0 var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-}
-
-.nu-vote-result-item {
-  font-size: 26rpx;
-  color: var(--color-text);
-}
-
-/* ── 教学复盘 ── */
-.nu-debrief-section {
-  margin-top: var(--spacing-md);
-}
-
-.nu-debrief__summary {
-  display: block;
-  font-size: 28rpx;
-  color: var(--color-text);
-  line-height: 1.6;
-  margin-bottom: var(--spacing-md);
-}
-
-.nu-debrief__block {
-  margin-bottom: var(--spacing-md);
-}
-
-.nu-debrief__label {
-  display: block;
-  font-size: 24rpx;
-  font-weight: 600;
-  color: var(--color-text-secondary);
   margin-bottom: var(--spacing-xs);
 }
 
-.nu-debrief__item {
-  font-size: 26rpx;
+.nu-param__label {
+  font-size: 28rpx;
+  font-weight: 600;
   color: var(--color-text);
-  line-height: 1.5;
-  padding-left: var(--spacing-sm);
 }
 
-/* ── 历史记录 ── */
+.nu-param__value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.nu-param slider {
+  margin: 0;
+  padding: 0 8rpx;
+}
+
+/* ═══════════════════════════════════════════
+   P0 — 历史记录
+   ═══════════════════════════════════════════ */
+
 .nu-history-section {
   margin-top: var(--spacing-xl);
 }
@@ -386,9 +316,703 @@
   font-size: 28rpx;
   font-weight: 600;
   color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  margin-right: var(--spacing-sm);
 }
 
 .nu-history-item__bottom {
   margin-top: 8rpx;
   font-size: 24rpx;
+}
+
+/* ═══════════════════════════════════════════
+   操作区（保留原版）
+   ═══════════════════════════════════════════ */
+
+.nu-action-area {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ═══════════════════════════════════════════
+   P1 — 密令纸
+   ═══════════════════════════════════════════ */
+
+.nu-secret-card {
+  position: relative;
+  padding: 48rpx var(--spacing-lg) var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-hero);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-elevated);
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+}
+
+.nu-secret-card::before {
+  content: '';
+  position: absolute;
+  right: -60rpx;
+  bottom: -60rpx;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nu-secret-card--civilian {
+  background: linear-gradient(135deg, var(--color-brand-soft) 0%, var(--color-brand-soft-bright) 100%);
+}
+
+.nu-secret-card--undercover {
+  background: linear-gradient(135deg, var(--color-accent-warm) 0%, var(--color-peach) 100%);
+}
+
+.nu-secret-card--compact {
+  padding: 36rpx var(--spacing-lg) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-secret-card__ribbon {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+  padding: 6rpx 18rpx;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text);
+  z-index: 1;
+}
+
+.nu-secret-card--civilian .nu-secret-card__ribbon { color: var(--color-brand-soft); }
+.nu-secret-card--undercover .nu-secret-card__ribbon { color: var(--color-accent-warm); }
+
+.nu-secret-card__row {
+  margin-bottom: var(--spacing-sm);
+  position: relative;
+  z-index: 1;
+}
+
+.nu-secret-card__eyebrow {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+  letter-spacing: 1rpx;
+}
+
+.nu-secret-card__sub {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.78);
+  margin-top: 4rpx;
+  line-height: 1.45;
+}
+
+.nu-secret-card__secret {
+  display: block;
+  font-size: 42rpx;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: break-all;
+  position: relative;
+  z-index: 1;
+  margin-bottom: var(--spacing-xs);
+  text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.08);
+}
+
+.nu-secret-card__hint {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.72);
+  position: relative;
+  z-index: 1;
+  line-height: 1.45;
+}
+
+/* ═══════════════════════════════════════════
+   P1 — 轮次进度条
+   ═══════════════════════════════════════════ */
+
+.nu-round-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.nu-round-bar__title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.nu-round-bar__track {
+  flex: 1;
+  height: 12rpx;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-soft);
+  overflow: hidden;
+  position: relative;
+}
+
+.nu-round-bar__fill {
+  height: 100%;
+  background: var(--gradient-hero);
+  border-radius: var(--radius-pill);
+  transition: width 0.35s ease;
+}
+
+/* ═══════════════════════════════════════════
+   P1 — 阵营色发言气泡
+   ═══════════════════════════════════════════ */
+
+.nu-round-label {
+  display: block;
+  font-size: 22rpx;
+  margin: var(--spacing-md) 0 var(--spacing-xs);
+  font-weight: 500;
+}
+
+.nu-speech-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-speech-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1rpx solid var(--color-border-soft);
+  position: relative;
+}
+
+.nu-speech-bubble--player {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.nu-speech-bubble--player::after {
+  content: '';
+  position: absolute;
+  left: -8rpx;
+  top: 28rpx;
+  width: 0;
+  height: 0;
+  border-top: 8rpx solid transparent;
+  border-bottom: 8rpx solid transparent;
+  border-right: 10rpx solid var(--color-primary);
+}
+
+.nu-speech-bubble__avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: var(--gradient-brand-soft);
+  color: var(--color-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-soft);
+}
+
+.nu-speech-bubble__avatar--player {
+  background: var(--gradient-primary);
+}
+
+.nu-speech-bubble__avatar--undercover {
+  background: var(--gradient-warm);
+}
+
+.nu-speech-bubble__avatar--civilian {
+  background: var(--gradient-brand-soft);
+}
+
+.nu-speech-bubble__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.nu-speech-bubble__meta {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-bottom: 4rpx;
+}
+
+.nu-speech-bubble__name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.nu-speech-bubble__text {
+  font-size: 28rpx;
+  color: var(--color-text);
+  line-height: 1.55;
+  word-break: break-all;
+}
+
+/* ═══════════════════════════════════════════
+   P1 — 输入区
+   ═══════════════════════════════════════════ */
+
+.nu-input-area {
+  margin-top: var(--spacing-md);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  border: 1rpx solid var(--color-border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.nu-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border: 1rpx solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  font-size: 28rpx;
+}
+
+.nu-input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
+.nu-cancel-area {
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+.nu-cancel-link {
+  font-size: 26rpx;
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════
+   P2 — 投票小标题 + 嫌犯档案
+   ═══════════════════════════════════════════ */
+
+.nu-vote-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.35;
+  margin: var(--spacing-lg) 0 var(--spacing-md);
+  padding-left: 26rpx;
+  position: relative;
+}
+
+.nu-vote-eyebrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8rpx;
+  bottom: 8rpx;
+  width: 8rpx;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-hero);
+}
+
+.nu-vote-eyebrow .icon-tile {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: var(--radius-md);
+}
+
+.nu-vote-eyebrow__dot {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: var(--gradient-warm);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-soft);
+}
+
+.nu-vote-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nu-vote-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-card);
+  border: 2rpx solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.nu-vote-option--selected {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-lavender-light) 100%);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2rpx);
+}
+
+.nu-vote-option__avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: var(--gradient-lavender);
+  color: var(--color-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s;
+}
+
+.nu-vote-option__avatar--selected {
+  background: var(--gradient-primary);
+  transform: scale(1.05);
+}
+
+.nu-vote-option__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.nu-vote-option__name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.nu-vote-option__hint {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  margin-top: 4rpx;
+}
+
+.nu-vote-option__check {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   P3 — 胜负结果渐变大卡
+   ═══════════════════════════════════════════ */
+
+.nu-result-hero {
+  position: relative;
+  text-align: center;
+  padding: 60rpx var(--spacing-lg) var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-elevated);
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+}
+
+.nu-result-hero::before {
+  content: '';
+  position: absolute;
+  right: -80rpx;
+  top: -80rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.nu-result-hero::after {
+  content: '';
+  position: absolute;
+  left: -60rpx;
+  bottom: -60rpx;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.nu-result-hero--win {
+  background: linear-gradient(135deg, var(--color-brand-soft) 0%, var(--color-brand-soft-bright) 100%);
+}
+
+.nu-result-hero--lose {
+  background: linear-gradient(135deg, var(--color-lavender) 0%, var(--color-peach) 100%);
+}
+
+.nu-result-hero--neutral {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1rpx solid var(--color-border-soft);
+}
+
+.nu-result-hero--neutral::before,
+.nu-result-hero--neutral::after {
+  display: none;
+}
+
+.nu-result-hero__icon {
+  position: relative;
+  z-index: 1;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-md);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.nu-result-hero__icon .nu-result-hero__icon-glyph {
+  font-size: 64rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.nu-result-hero--win .nu-result-hero__icon-glyph { color: var(--color-brand-soft); }
+.nu-result-hero--lose .nu-result-hero__icon-glyph { color: var(--color-lavender); }
+
+.nu-result-hero__title {
+  display: block;
+  position: relative;
+  z-index: 1;
+  font-size: 40rpx;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: var(--spacing-xs);
+}
+
+.nu-result-hero__subtitle {
+  display: block;
+  position: relative;
+  z-index: 1;
+  font-size: 26rpx;
+  opacity: 0.92;
+  line-height: 1.4;
+}
+
+.nu-result-hero__details {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.32);
+  font-size: 25rpx;
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════
+   P3 — 答案揭晓（翻牌卡）
+   ═══════════════════════════════════════════ */
+
+.nu-reveal-section {
+  margin-top: var(--spacing-md);
+}
+
+.nu-role-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nu-role-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  transition: all 0.2s;
+}
+
+.nu-role-item--undercover {
+  background: linear-gradient(135deg, var(--color-accent-warm-light) 0%, var(--color-peach-light) 100%);
+  border-color: var(--color-accent-warm);
+}
+
+.nu-role-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nu-role-item__name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nu-role-item__secret-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-top: 8rpx;
+}
+
+.nu-role-item__secret-label {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding-top: 2rpx;
+}
+
+.nu-role-item__secret {
+  flex: 1;
+  font-size: 25rpx;
+  color: var(--color-text);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.nu-role-item--undercover .nu-role-item__secret {
+  font-weight: 600;
+  color: var(--color-accent-warm);
+}
+
+/* ═══════════════════════════════════════════
+   P3 — 投票结果表格化
+   ═══════════════════════════════════════════ */
+
+.nu-vote-result-list {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.nu-vote-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  padding: 10rpx 0;
+  font-size: 26rpx;
+  color: var(--color-text);
+  border-bottom: 1rpx solid var(--color-border-soft);
+}
+
+.nu-vote-result-item:last-child {
+  border-bottom: none;
+}
+
+.nu-vote-result-item__voter {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nu-vote-result-item__arrow {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.nu-vote-result-item__target {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.nu-vote-result-item__reason {
+  flex-basis: 100%;
+  font-size: 23rpx;
+  color: var(--color-text-muted);
+  padding-left: 8rpx;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+   P3 — 教学复盘
+   ═══════════════════════════════════════════ */
+
+.nu-debrief-section {
+  margin-top: var(--spacing-md);
+}
+
+.nu-debrief {
+  padding: var(--spacing-lg);
+}
+
+.nu-debrief__summary {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text);
+  line-height: 1.65;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1rpx solid var(--color-border-soft);
+}
+
+.nu-debrief__block {
+  margin-bottom: var(--spacing-md);
+}
+
+.nu-debrief__label-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: var(--spacing-sm);
+}
+
+.nu-debrief__label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.nu-debrief__dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-soft);
+}
+
+.nu-debrief__dot--clue { background: var(--gradient-lemon); }
+.nu-debrief__dot--knowledge { background: var(--gradient-brand-soft); }
+.nu-debrief__dot--safety { background: var(--gradient-warm); }
+
+.nu-debrief__item {
+  font-size: 26rpx;
+  color: var(--color-text);
+  line-height: 1.55;
+  padding-left: var(--spacing-sm);
+  margin-top: 6rpx;
 }

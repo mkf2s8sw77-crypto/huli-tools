@@ -192,7 +192,7 @@ Page({
       roleNameMap[r.roleId] = r.roleId === "player" ? "我" : r.displayName;
     });
 
-    const speeches = this.groupSpeeches(session, roleNameMap);
+    const speeches = this.groupSpeeches(session, roleNameMap, isFinished);
 
     const votesWithNames = (session.votes || []).map((v) => ({
       ...v,
@@ -224,12 +224,21 @@ Page({
     });
   },
 
-  groupSpeeches(session, roleNameMap) {
+  groupSpeeches(session, roleNameMap, revealTeams) {
     const transcript = session.transcript || [];
     const currentRound = session.currentRound || 1;
 
+    const roleTeamMap = {};
+    (session.roles || []).forEach((r) => {
+      roleTeamMap[r.roleId] = r.team;
+    });
+
     function decorateSpeech(t) {
-      return { ...t, displayName: roleNameMap[t.roleId] || t.roleId };
+      const speech = { ...t, displayName: roleNameMap[t.roleId] || t.roleId };
+      if (revealTeams) {
+        speech.team = roleTeamMap[t.roleId] || (t.roleId === "player" ? "civilian" : "civilian");
+      }
+      return speech;
     }
 
     const current = transcript.filter((t) => t.roundNo === currentRound).map(decorateSpeech);

@@ -1,6 +1,6 @@
 <ui-page>
-  <!-- 应用头部 -->
-  <view class="app-exec-header">
+  <!-- 应用头部 — P0 hero 区 -->
+  <view class="app-exec-header app-exec-header--undercover">
     <view class="app-exec-header__row">
       <view class="icon-tile icon-tile--app icon-tile--lavender icon-tile--undercover">
         <view class="icon-tile__glyph"></view>
@@ -8,6 +8,9 @@
       <view class="app-exec-header__info">
         <text class="app-exec-header__name">{{appInfo ? appInfo.name : '谁是卧底（护理版）'}}</text>
         <text class="app-exec-header__cost">{{costLabel}}</text>
+        <text wx:if="{{phase === 'config'}}" class="app-exec-header__desc">与 AI 护士一起,揪出那个跟标准答案不一样的"卧底"</text>
+        <text wx:elif="{{phase === 'game' || phase === 'vote'}}" class="app-exec-header__desc">描述你的密令,观察每一句话,别暴露自己</text>
+        <text wx:elif="{{phase === 'result'}}" class="app-exec-header__desc">看看这局你学到了什么</text>
       </view>
     </view>
   </view>
@@ -22,62 +25,79 @@
   <view wx:if="{{phase === 'config'}}">
     <view wx:if="{{configLoading}}" class="loading-state">加载配置中...</view>
     <view wx:else>
-      <!-- 模式选择 -->
-      <ui-form-field label="游戏模式">
-        <view class="nu-option-group">
-          <view
-            wx:for="{{modes}}"
-            wx:key="key"
-            class="nu-option {{selectedMode === item.key ? 'nu-option--active' : ''}}"
-            data-mode="{{item.key}}"
-            bindtap="onModeChange"
-          >
-            <text class="nu-option__label">{{item.label}}</text>
-            <text class="nu-option__desc">{{item.desc}}</text>
+      <!-- 模式选择 — P0 大卡 -->
+      <view class="nu-section-eyebrow">第一步 · 选个玩法</view>
+      <view class="nu-mode-grid">
+        <view
+          wx:for="{{modes}}"
+          wx:key="key"
+          class="nu-mode-card {{selectedMode === item.key ? 'nu-mode-card--active' : ''}}"
+          data-mode="{{item.key}}"
+          bindtap="onModeChange"
+        >
+          <view class="nu-mode-card__icon icon-tile icon-tile--app {{selectedMode === item.key ? 'icon-tile--lavender' : 'icon-tile--coral'}}">
+            <view class="icon-tile__glyph"></view>
           </view>
-        </view>
-      </ui-form-field>
-
-      <!-- 难度选择 -->
-      <ui-form-field label="难度">
-        <view class="nu-option-group nu-option-group--row">
-          <view
-            wx:for="{{difficulties}}"
-            wx:key="key"
-            class="nu-option nu-option--compact {{selectedDifficulty === item.key ? 'nu-option--active' : ''}}"
-            data-difficulty="{{item.key}}"
-            bindtap="onDifficultyChange"
-          >
-            <text class="nu-option__label">{{item.label}}</text>
+          <view class="nu-mode-card__body">
+            <text class="nu-mode-card__label">{{item.label}}</text>
+            <text class="nu-mode-card__desc">{{item.desc}}</text>
           </view>
+          <view wx:if="{{selectedMode === item.key}}" class="nu-mode-card__check">✓</view>
         </view>
-      </ui-form-field>
+      </view>
 
-      <!-- NPC 数 -->
-      <ui-form-field label="AI 对手数量">
-        <slider
-          min="{{npcRange.min}}"
-          max="{{npcRange.max}}"
-          step="1"
-          value="{{selectedNpcCount}}"
-          show-value
-          activeColor="var(--color-primary)"
-          bindchange="onNpcCountChange"
-        />
-      </ui-form-field>
+      <!-- 难度选择 — P0 chip -->
+      <view class="nu-section-eyebrow">第二步 · 选个难度</view>
+      <view class="nu-difficulty-row">
+        <view
+          wx:for="{{difficulties}}"
+          wx:key="key"
+          class="nu-difficulty-chip {{selectedDifficulty === item.key ? 'nu-difficulty-chip--active' : ''}}"
+          data-difficulty="{{item.key}}"
+          bindtap="onDifficultyChange"
+        >
+          <view class="nu-difficulty-chip__dot {{selectedDifficulty === item.key ? 'nu-difficulty-chip__dot--' + item.key : ''}}"></view>
+          <text class="nu-difficulty-chip__label">{{item.label}}</text>
+        </view>
+      </view>
 
-      <!-- 发言轮数 -->
-      <ui-form-field label="发言轮数">
-        <slider
-          min="{{roundRange.min}}"
-          max="{{roundRange.max}}"
-          step="1"
-          value="{{selectedRoundCount}}"
-          show-value
-          activeColor="var(--color-primary)"
-          bindchange="onRoundCountChange"
-        />
-      </ui-form-field>
+      <!-- NPC + 轮数 — P0 参数卡 -->
+      <view class="nu-section-eyebrow">第三步 · 调个规模</view>
+      <view class="nu-params-card card">
+        <view class="nu-param">
+          <view class="nu-param__row">
+            <text class="nu-param__label">AI 对手</text>
+            <text class="nu-param__value">{{selectedNpcCount}} 人</text>
+          </view>
+          <slider
+            min="{{npcRange.min}}"
+            max="{{npcRange.max}}"
+            step="1"
+            value="{{selectedNpcCount}}"
+            activeColor="var(--color-primary)"
+            backgroundColor="var(--color-border-soft)"
+            block-size="20"
+            bindchange="onNpcCountChange"
+          />
+        </view>
+        <view class="care-divider"></view>
+        <view class="nu-param">
+          <view class="nu-param__row">
+            <text class="nu-param__label">发言轮数</text>
+            <text class="nu-param__value">{{selectedRoundCount}} 轮</text>
+          </view>
+          <slider
+            min="{{roundRange.min}}"
+            max="{{roundRange.max}}"
+            step="1"
+            value="{{selectedRoundCount}}"
+            activeColor="var(--color-primary)"
+            backgroundColor="var(--color-border-soft)"
+            block-size="20"
+            bindchange="onRoundCountChange"
+          />
+        </view>
+      </view>
 
       <!-- 开始按钮 -->
       <view class="nu-action-area">
@@ -91,7 +111,7 @@
 
       <!-- 最近对局 -->
       <view wx:if="{{historyGames.length > 0}}" class="nu-history-section">
-        <text class="section-title">最近对局</text>
+        <view class="nu-section-eyebrow">最近对局</view>
         <view class="nu-history-list">
           <view
             wx:for="{{historyGames}}"
@@ -102,7 +122,7 @@
           >
             <view class="nu-history-item__top">
               <text class="nu-history-item__title">{{item.scenarioTitle}}</text>
-              <text class="status-tag {{item.status === 'finished' ? (item.result.playerWon ? 'status-tag--success' : 'status-tag--danger') : 'status-tag--default'}}">{{item.status === 'finished' ? item.resultLabel : item.statusLabel}}</text>
+              <text class="status-tag {{item.status === 'finished' ? (item.result.playerWon ? 'status-tag--success' : 'status-tag--warning') : 'status-tag--default'}}">{{item.status === 'finished' ? item.resultLabel : item.statusLabel}}</text>
             </view>
             <view class="nu-history-item__bottom">
               <text class="text-muted">{{item.modeLabel}} · {{item.difficultyLabel}}</text>
@@ -118,46 +138,64 @@
 
   <!-- ===== 游戏进行阶段 ===== -->
   <view wx:if="{{phase === 'game'}}">
-    <!-- 身份卡 -->
-    <view class="nu-identity-card card">
-      <view class="nu-identity-card__header">
-        <text class="nu-identity-card__title">你的身份密令</text>
-        <text class="status-tag {{isUndercover ? 'status-tag--danger' : 'status-tag--info'}}">{{isUndercover ? '卧底' : '平民'}}</text>
+    <!-- 身份密令 — P1 密令纸 -->
+    <view class="nu-secret-card {{isUndercover ? 'nu-secret-card--undercover' : 'nu-secret-card--civilian'}}">
+      <view class="nu-secret-card__ribbon">{{isUndercover ? '卧底' : '平民'}}</view>
+      <view class="nu-secret-card__row">
+        <text class="nu-secret-card__eyebrow">你的密令</text>
+        <text class="nu-secret-card__sub">{{isUndercover ? '让平民误以为你是同伴,别被发现' : '说出线索,投票揪出卧底'}}</text>
       </view>
-      <text class="nu-identity-card__secret">{{playerSecret}}</text>
-      <text class="nu-identity-card__hint" wx:if="{{session.mode === 'word_undercover'}}">描述你的密令但不能直接说出来</text>
-      <text class="nu-identity-card__hint" wx:else>围绕护理情境讨论，不能暴露你的具体措施</text>
+      <text class="nu-secret-card__secret">{{playerSecret}}</text>
+      <text class="nu-secret-card__hint" wx:if="{{session.mode === 'word_undercover'}}">描述你的密令但不能直接说出来</text>
+      <text class="nu-secret-card__hint" wx:else>围绕护理情境讨论,不能暴露你的具体措施</text>
     </view>
 
-    <!-- 当前轮次 -->
-    <view class="nu-round-header">
-      <text class="section-title">第 {{session.currentRound}} / {{session.roundCount}} 轮</text>
+    <!-- 轮次进度 — P1 进度条 -->
+    <view class="nu-round-bar">
+      <text class="nu-round-bar__title">第 {{session.currentRound}} / {{session.roundCount}} 轮</text>
+      <view class="nu-round-bar__track">
+        <view class="nu-round-bar__fill" style="width: {{ (session.currentRound / session.roundCount) * 100 }}%;"></view>
+      </view>
     </view>
 
     <!-- 历史轮次发言 -->
     <view wx:for="{{allRoundSpeeches}}" wx:key="roundNo" wx:if="{{item.roundNo < session.currentRound}}">
       <text class="nu-round-label text-muted">第 {{item.roundNo}} 轮发言</text>
       <view class="nu-speech-list">
-        <view wx:for="{{item.speeches}}" wx:for-item="speech" wx:key="roleId" class="nu-speech-bubble {{speech.actorType === 'player' ? 'nu-speech-bubble--player' : ''}}">
-          <text class="nu-speech-bubble__name">{{speech.displayName}}</text>
-          <text class="nu-speech-bubble__text">{{speech.text}}</text>
+        <view wx:for="{{item.speeches}}" wx:for-item="speech" wx:key="roleId" class="nu-speech-bubble nu-speech-bubble--{{speech.actorType === 'player' ? 'player' : 'ai'}}">
+          <view class="nu-speech-bubble__avatar nu-speech-bubble__avatar--{{speech.actorType === 'player' ? 'player' : (speech.team === 'undercover' ? 'undercover' : 'civilian')}}">
+            <text>{{speech.actorType === 'player' ? '我' : speech.displayName[0]}}</text>
+          </view>
+          <view class="nu-speech-bubble__body">
+            <view class="nu-speech-bubble__meta">
+              <text class="nu-speech-bubble__name">{{speech.displayName}}</text>
+            </view>
+            <text class="nu-speech-bubble__text">{{speech.text}}</text>
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 当前轮发言 -->
     <view wx:if="{{currentRoundSpeeches.length > 0}}">
-      <text class="nu-round-label text-muted">本轮已发言</text>
+      <text class="nu-round-label text-muted">本轮已发言 · {{currentRoundSpeeches.length}}/{{session.roles.length}}</text>
       <view class="nu-speech-list">
-        <view wx:for="{{currentRoundSpeeches}}" wx:key="roleId" class="nu-speech-bubble {{item.actorType === 'player' ? 'nu-speech-bubble--player' : ''}}">
-          <text class="nu-speech-bubble__name">{{item.displayName}}</text>
-          <text class="nu-speech-bubble__text">{{item.text}}</text>
+        <view wx:for="{{currentRoundSpeeches}}" wx:key="roleId" class="nu-speech-bubble nu-speech-bubble--{{item.actorType === 'player' ? 'player' : 'ai'}}">
+          <view class="nu-speech-bubble__avatar nu-speech-bubble__avatar--{{item.actorType === 'player' ? 'player' : (item.team === 'undercover' ? 'undercover' : 'civilian')}}">
+            <text>{{item.actorType === 'player' ? '我' : item.displayName[0]}}</text>
+          </view>
+          <view class="nu-speech-bubble__body">
+            <view class="nu-speech-bubble__meta">
+              <text class="nu-speech-bubble__name">{{item.displayName}}</text>
+            </view>
+            <text class="nu-speech-bubble__text">{{item.text}}</text>
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 发言输入 -->
-    <view class="nu-input-area">
+    <view class="nu-input-area card">
       <textarea
         class="nu-textarea form-input"
         placeholder="输入你的发言..."
@@ -185,12 +223,13 @@
 
   <!-- ===== 投票阶段 ===== -->
   <view wx:if="{{phase === 'vote'}}">
-    <view class="nu-identity-card card">
-      <view class="nu-identity-card__header">
-        <text class="nu-identity-card__title">你的身份密令</text>
-        <text class="status-tag {{isUndercover ? 'status-tag--danger' : 'status-tag--info'}}">{{isUndercover ? '卧底' : '平民'}}</text>
+    <!-- 身份卡 — 投票时仍要确认自己的身份 -->
+    <view class="nu-secret-card {{isUndercover ? 'nu-secret-card--undercover' : 'nu-secret-card--civilian'}} nu-secret-card--compact">
+      <view class="nu-secret-card__ribbon">{{isUndercover ? '卧底' : '平民'}}</view>
+      <view class="nu-secret-card__row">
+        <text class="nu-secret-card__eyebrow">你的密令</text>
       </view>
-      <text class="nu-identity-card__secret">{{playerSecret}}</text>
+      <text class="nu-secret-card__secret">{{playerSecret}}</text>
     </view>
 
     <!-- 全部发言回顾 -->
@@ -198,24 +237,40 @@
     <view wx:for="{{allRoundSpeeches}}" wx:key="roundNo">
       <text class="nu-round-label text-muted">第 {{item.roundNo}} 轮</text>
       <view class="nu-speech-list">
-        <view wx:for="{{item.speeches}}" wx:for-item="speech" wx:key="roleId" class="nu-speech-bubble {{speech.actorType === 'player' ? 'nu-speech-bubble--player' : ''}}">
-          <text class="nu-speech-bubble__name">{{speech.displayName}}</text>
-          <text class="nu-speech-bubble__text">{{speech.text}}</text>
+        <view wx:for="{{item.speeches}}" wx:for-item="speech" wx:key="roleId" class="nu-speech-bubble nu-speech-bubble--{{speech.actorType === 'player' ? 'player' : 'ai'}}">
+          <view class="nu-speech-bubble__avatar nu-speech-bubble__avatar--{{speech.actorType === 'player' ? 'player' : (speech.team === 'undercover' ? 'undercover' : 'civilian')}}">
+            <text>{{speech.actorType === 'player' ? '我' : speech.displayName[0]}}</text>
+          </view>
+          <view class="nu-speech-bubble__body">
+            <view class="nu-speech-bubble__meta">
+              <text class="nu-speech-bubble__name">{{speech.displayName}}</text>
+            </view>
+            <text class="nu-speech-bubble__text">{{speech.text}}</text>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 投票选择 -->
-    <text class="section-title">选择你认为的卧底</text>
+    <!-- 投票选择 — P2 嫌犯档案 -->
+    <view class="nu-vote-eyebrow">
+      <view class="nu-vote-eyebrow__dot"></view>
+      <text>选择你认为的卧底</text>
+    </view>
     <view class="nu-vote-list">
       <view
         wx:for="{{voteTargets}}"
         wx:key="roleId"
-        class="nu-vote-option card {{selectedVoteTarget === item.roleId ? 'nu-vote-option--selected' : ''}}"
+        class="nu-vote-option {{selectedVoteTarget === item.roleId ? 'nu-vote-option--selected' : ''}}"
         data-role-id="{{item.roleId}}"
         bindtap="onSelectVoteTarget"
       >
-        <text class="nu-vote-option__name">{{item.displayName}}</text>
+        <view class="nu-vote-option__avatar {{selectedVoteTarget === item.roleId ? 'nu-vote-option__avatar--selected' : ''}}">
+          <text>{{item.displayName[0]}}</text>
+        </view>
+        <view class="nu-vote-option__body">
+          <text class="nu-vote-option__name">{{item.displayName}}</text>
+          <text class="nu-vote-option__hint">本轮发言 {{item.speechCount || 0}} 次</text>
+        </view>
         <view wx:if="{{selectedVoteTarget === item.roleId}}" class="nu-vote-option__check">✓</view>
       </view>
     </view>
@@ -236,35 +291,41 @@
 
   <!-- ===== 结果阶段 ===== -->
   <view wx:if="{{phase === 'result'}}">
-    <!-- 胜负结果 -->
-    <view wx:if="{{session.result}}" class="nu-result-card card {{session.result.playerWon ? 'nu-result-card--win' : 'nu-result-card--lose'}}">
-      <text class="nu-result-card__title">{{session.result.playerWon ? '恭喜，你赢了！' : '很遗憾，你输了'}}</text>
-      <text class="nu-result-card__subtitle">{{session.result.winner === 'civilian' ? '平民阵营胜利' : '卧底阵营胜利'}}</text>
-      <view class="nu-result-card__details">
-        <text>正确卧底：{{session.undercoverRoleId === 'player' ? '你自己' : undercoverName}}</text>
-        <text>被投出的人：{{session.result.votedOutRoleId === 'player' ? '你自己' : votedOutName}}</text>
+    <!-- 胜负结果 — P3 渐变大卡 -->
+    <view wx:if="{{session.result}}" class="nu-result-hero {{session.result.playerWon ? 'nu-result-hero--win' : 'nu-result-hero--lose'}}">
+      <view class="nu-result-hero__icon">
+        <text class="nu-result-hero__icon-glyph">{{session.result.playerWon ? '✓' : '!'}}</text>
+      </view>
+      <text class="nu-result-hero__title">{{session.result.playerWon ? '智勇双全,揪出卧底！' : '这次卧底技高一筹'}}</text>
+      <text class="nu-result-hero__subtitle">{{session.result.winner === 'civilian' ? '平民阵营胜利' : '卧底阵营胜利'}} · {{session.result.playerWon ? '下次继续' : '下次再战'}}</text>
+      <view class="nu-result-hero__details">
+        <text>正确卧底:{{session.undercoverRoleId === 'player' ? '你自己' : undercoverName}}</text>
+        <text>被投出的人:{{session.result.votedOutRoleId === 'player' ? '你自己' : votedOutName}}</text>
       </view>
     </view>
 
     <!-- 取消/失败状态 -->
-    <view wx:if="{{session.status === 'cancelled'}}" class="nu-result-card card">
-      <text class="nu-result-card__title">对局已取消</text>
+    <view wx:if="{{session.status === 'cancelled'}}" class="nu-result-hero nu-result-hero--neutral">
+      <text class="nu-result-hero__title">对局已取消</text>
     </view>
-    <view wx:if="{{session.status === 'failed'}}" class="nu-result-card card">
-      <text class="nu-result-card__title">对局失败</text>
-      <text wx:if="{{session.errorMessage}}" class="text-muted">{{session.errorMessage}}</text>
+    <view wx:if="{{session.status === 'failed'}}" class="nu-result-hero nu-result-hero--neutral">
+      <text class="nu-result-hero__title">对局失败</text>
+      <text wx:if="{{session.errorMessage}}" class="nu-result-hero__subtitle">{{session.errorMessage}}</text>
     </view>
 
-    <!-- 答案揭晓 -->
+    <!-- 答案揭晓 — P3 翻牌 -->
     <view wx:if="{{session.result}}" class="nu-reveal-section">
       <text class="section-title">答案揭晓</text>
       <view class="nu-role-list">
-        <view wx:for="{{session.roles}}" wx:key="roleId" class="nu-role-item card">
+        <view wx:for="{{session.roles}}" wx:key="roleId" class="nu-role-item card {{item.team === 'undercover' ? 'nu-role-item--undercover' : ''}}">
           <view class="nu-role-item__header">
             <text class="nu-role-item__name">{{item.displayName}}</text>
-            <text class="status-tag {{item.team === 'undercover' ? 'status-tag--danger' : 'status-tag--success'}}">{{item.team === 'undercover' ? '卧底' : '平民'}}</text>
+            <text class="status-tag {{item.team === 'undercover' ? 'status-tag--warning' : 'status-tag--success'}}">{{item.team === 'undercover' ? '卧底' : '平民'}}</text>
           </view>
-          <text class="nu-role-item__secret">密令：{{item.secretLabel}}</text>
+          <view class="nu-role-item__secret-row">
+            <text class="nu-role-item__secret-label">密令</text>
+            <text class="nu-role-item__secret">{{item.secretLabel}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -274,20 +335,29 @@
     <view wx:for="{{allRoundSpeeches}}" wx:key="roundNo">
       <text class="nu-round-label text-muted">第 {{item.roundNo}} 轮</text>
       <view class="nu-speech-list">
-        <view wx:for="{{item.speeches}}" wx:for-item="speech" wx:key="roleId" class="nu-speech-bubble {{speech.actorType === 'player' ? 'nu-speech-bubble--player' : ''}}">
-          <text class="nu-speech-bubble__name">{{speech.displayName}}</text>
-          <text class="nu-speech-bubble__text">{{speech.text}}</text>
+        <view wx:for="{{item.speeches}}" wx:for-item="speech" wx:key="roleId" class="nu-speech-bubble nu-speech-bubble--{{speech.actorType === 'player' ? 'player' : 'ai'}}">
+          <view class="nu-speech-bubble__avatar nu-speech-bubble__avatar--{{speech.actorType === 'player' ? 'player' : (speech.team === 'undercover' ? 'undercover' : 'civilian')}}">
+            <text>{{speech.actorType === 'player' ? '我' : speech.displayName[0]}}</text>
+          </view>
+          <view class="nu-speech-bubble__body">
+            <view class="nu-speech-bubble__meta">
+              <text class="nu-speech-bubble__name">{{speech.displayName}}</text>
+            </view>
+            <text class="nu-speech-bubble__text">{{speech.text}}</text>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 投票结果 -->
+    <!-- 投票结果 — P3 表格化 -->
     <view wx:if="{{votesWithNames.length > 0}}">
       <text class="section-title">投票结果</text>
-      <view class="nu-vote-result-list">
+      <view class="nu-vote-result-list card">
         <view wx:for="{{votesWithNames}}" wx:key="roleId" class="nu-vote-result-item">
-          <text>{{item.voterName}} → {{item.targetName}}</text>
-          <text wx:if="{{item.reason}}" class="text-muted"> ({{item.reason}})</text>
+          <text class="nu-vote-result-item__voter">{{item.voterName}}</text>
+          <text class="nu-vote-result-item__arrow">→</text>
+          <text class="nu-vote-result-item__target">{{item.targetName}}</text>
+          <text wx:if="{{item.reason}}" class="nu-vote-result-item__reason">{{item.reason}}</text>
         </view>
       </view>
     </view>
@@ -295,27 +365,36 @@
     <!-- 教学复盘 -->
     <view wx:if="{{session.debrief}}" class="nu-debrief-section">
       <text class="section-title">教学复盘</text>
-      <view class="card">
+      <view class="card nu-debrief">
         <text class="nu-debrief__summary">{{session.debrief.summary}}</text>
 
         <view wx:if="{{session.debrief.keyClues.length > 0}}" class="nu-debrief__block">
-          <text class="nu-debrief__label">关键线索</text>
+          <view class="nu-debrief__label-row">
+            <view class="nu-debrief__dot nu-debrief__dot--clue"></view>
+            <text class="nu-debrief__label">关键线索</text>
+          </view>
           <view wx:for="{{session.debrief.keyClues}}" wx:key="*this" class="nu-debrief__item">
-            <text>· {{item}}</text>
+            <text>{{item}}</text>
           </view>
         </view>
 
         <view wx:if="{{session.debrief.knowledgePoints.length > 0}}" class="nu-debrief__block">
-          <text class="nu-debrief__label">知识点</text>
+          <view class="nu-debrief__label-row">
+            <view class="nu-debrief__dot nu-debrief__dot--knowledge"></view>
+            <text class="nu-debrief__label">知识点</text>
+          </view>
           <view wx:for="{{session.debrief.knowledgePoints}}" wx:key="*this" class="nu-debrief__item">
-            <text>· {{item}}</text>
+            <text>{{item}}</text>
           </view>
         </view>
 
         <view wx:if="{{session.debrief.safetyNotes.length > 0}}" class="nu-debrief__block">
-          <text class="nu-debrief__label">安全提醒</text>
+          <view class="nu-debrief__label-row">
+            <view class="nu-debrief__dot nu-debrief__dot--safety"></view>
+            <text class="nu-debrief__label">安全提醒</text>
+          </view>
           <view wx:for="{{session.debrief.safetyNotes}}" wx:key="*this" class="nu-debrief__item">
-            <text>· {{item}}</text>
+            <text>{{item}}</text>
           </view>
         </view>
       </view>
