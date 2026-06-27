@@ -12,6 +12,7 @@
 - `admin-web/` Web 管理端允许使用 Vite + React + TypeScript + Ant Design，但不适用于小程序端。
 - 后端运行时仅部署在微信云开发（云函数 + 云数据库），不得新增独立业务后端；业务确需调用外部 API 时，必须经云函数服务端调用并遵守状态机、鉴权和错误分类规则，客户端不得直连。
 - 云函数代码风格保持 CommonJS，两空格缩进。
+- 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。
 
 ## 3. 设计系统（柔彩多巴胺）
 
@@ -97,3 +98,4 @@
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。
 - 涉及 `admin-web/` 的功能或验收规则时，同步更新 `admin-web/README.md`、`docs/admin_operations.md` 及 `promptDocs/prompt-pack-huli-tools-admin-web-0530/` 中对应测试/运行清单。
+- macOS 上 `tcb` 登录态保存在系统 Keychain（不在 `~/.tcb/`），不要用 `~/.tcb/cli.json` 是否存在判断登录状态；以 `tcb env list` 能否返回为准。
