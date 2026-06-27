@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>卧底 - P2 投票</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button onclick="location.href='p0-config.html'">P0 配置</button>
+  <button onclick="location.href='p1-game.html'">P1 游戏</button>
+  <button class="active" onclick="location.href='p2-vote.html'">P2 投票</button>
+  <button onclick="location.href='p3-result.html'">P3 结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar">
+    <span class="status-bar__time">9:41</span>
+    <span class="status-bar__icons"></span>
+  </div>
+  <div class="nav-bar">huli-tools</div>
+
+  <div class="scroll-content">
+    <!-- P2 应用头部 -->
+    <div class="app-exec-header app-exec-header--undercover">
+      <div class="app-exec-header__row">
+        <div class="icon-tile icon-tile--app icon-tile--lavender icon-tile--undercover">
+          <div class="icon-tile__glyph"></div>
+        </div>
+        <div class="app-exec-header__info">
+          <span class="app-exec-header__name">谁是卧底（护理版）</span>
+          <span class="app-exec-header__cost">免费</span>
+          <span class="app-exec-header__desc">描述你的密令,观察每一句话,别暴露自己</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 密令纸 compact -->
+    <div class="nu-secret-card nu-secret-card--civilian nu-secret-card--compact">
+      <div class="nu-secret-card__ribbon">平民</div>
+      <div class="nu-secret-card__row">
+        <span class="nu-secret-card__eyebrow">你的密令</span>
+      </div>
+      <span class="nu-secret-card__secret">评估导管留置必要性、检查穿刺点、采集血培养后考虑拔管</span>
+    </div>
+
+    <!-- 发言回顾(简版) -->
+    <span class="section-title">发言回顾</span>
+    <span class="nu-round-label text-muted">第 1 轮 · 5 人发言</span>
+    <div class="nu-speech-list">
+      <div class="nu-speech-bubble">
+        <div class="nu-speech-bubble__avatar">赵</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">赵护士</span>
+          <span class="nu-speech-bubble__text">需要立即评估导管必要性,看穿刺点有没有红肿热痛。</span>
+        </div>
+      </div>
+      <div class="nu-speech-bubble">
+        <div class="nu-speech-bubble__avatar">张</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">张护士</span>
+          <span class="nu-speech-bubble__text">同意,马上采血培养,确认后应尽早拔管。</span>
+        </div>
+      </div>
+      <div class="nu-speech-bubble">
+        <div class="nu-speech-bubble__avatar">陈</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">陈护士</span>
+          <span class="nu-speech-bubble__text">采血培养对,但拔管前要先确认有没有其他感染源。</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 投票选择 -->
+    <div class="nu-vote-eyebrow">
+      <div class="nu-vote-eyebrow__dot"></div>
+      <span>选择你认为的卧底</span>
+    </div>
+    <div class="nu-vote-list">
+      <div class="nu-vote-option nu-vote-option--selected">
+        <div class="nu-vote-option__avatar nu-vote-option__avatar--selected">陈</div>
+        <div class="nu-vote-option__body">
+          <span class="nu-vote-option__name">陈护士</span>
+          <span class="nu-vote-option__hint">本轮发言 2 次</span>
+        </div>
+        <div class="nu-vote-option__check">✓</div>
+      </div>
+      <div class="nu-vote-option">
+        <div class="nu-vote-option__avatar">赵</div>
+        <div class="nu-vote-option__body">
+          <span class="nu-vote-option__name">赵护士</span>
+          <span class="nu-vote-option__hint">本轮发言 3 次</span>
+        </div>
+      </div>
+      <div class="nu-vote-option">
+        <div class="nu-vote-option__avatar">张</div>
+        <div class="nu-vote-option__body">
+          <span class="nu-vote-option__name">张护士</span>
+          <span class="nu-vote-option__hint">本轮发言 2 次</span>
+        </div>
+      </div>
+      <div class="nu-vote-option">
+        <div class="nu-vote-option__avatar">吴</div>
+        <div class="nu-vote-option__body">
+          <span class="nu-vote-option__name">吴护士</span>
+          <span class="nu-vote-option__hint">本轮发言 2 次</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nu-action-area">
+      <button class="nu-action-btn">确认投票</button>
+    </div>
+
+    <div class="nu-cancel-area">
+      <span class="nu-cancel-link">取消对局</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

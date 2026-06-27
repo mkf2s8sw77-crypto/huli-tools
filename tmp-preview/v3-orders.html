@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>订单 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --color-bg: #F5F0E8; --color-surface: #FBF8F2; --color-bg-card: #ffffff;
+  --color-border-soft: #EDE5D3;
+  --color-primary: #8A6A3A; --color-on-primary: #ffffff;
+  --color-accent-warm: #C8804A; --color-accent-warm-light: #F4E2D2;
+  --color-success: #6F8F5A; --color-success-light: #E5ECDC;
+  --color-warning: #B8904A; --color-warning-light: #F0E5C8;
+  --color-text: #2D2418; --color-text-secondary: #5A4A38; --color-text-muted: #8A7A66;
+  --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+  --gradient-hero: linear-gradient(135deg, #B8956A 0%, #98A888 100%);
+  --page-bg: linear-gradient(180deg, #EFE6D2 0%, #F5F0E8 160px, #F8F4EB 100%);
+  --font-serif: "Noto Serif SC", "Songti SC", Georgia, serif;
+  --font-sans: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --shadow-card: 0 1px 1px rgba(255,255,255,0.5) inset, 0 2px 12px rgba(125,98,50,0.08);
+  --shadow-elevated: 0 1px 1px rgba(255,255,255,0.6) inset, 0 8px 24px rgba(125,98,50,0.1);
+}
+html, body { margin: 0; }
+body { font-family: var(--font-sans); background: #555; color: var(--color-text); -webkit-font-smoothing: antialiased; }
+.page-frame { width: 390px; height: 844px; overflow: hidden; background: var(--page-bg); position: relative; margin: 24px auto; box-shadow: 0 12px 60px rgba(0,0,0,0.3); }
+.status-bar { position: absolute; top: 0; left: 0; right: 0; height: 44px; background: #F5F0E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 15px; font-weight: 600; color: #2D2418; z-index: 10; }
+.status-bar__time { font-variant-numeric: tabular-nums; }
+.status-bar__icons { display: flex; gap: 6px; align-items: center; }
+.status-bar__icons::after { content: ''; display: inline-block; width: 24px; height: 12px; background: #2D2418; border-radius: 3px; }
+.nav-bar { position: absolute; top: 44px; left: 0; right: 0; height: 44px; background: #F5F0E8; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #2D2418; z-index: 10; border-bottom: 0.5px solid rgba(0,0,0,0.05); }
+.scroll-content { position: absolute; top: 88px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 16px; padding-bottom: 32px; }
+.serif-num { font-family: var(--font-serif); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+.phase-switcher { position: fixed; top: 12px; left: 12px; z-index: 100; background: rgba(0,0,0,0.7); border-radius: 6px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 360px; }
+.phase-switcher button { background: transparent; border: none; color: #fff; padding: 6px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+.phase-switcher button.active { background: #8A6A3A; }
+</style>
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button onclick="location.href='v3-p0-config.html'">P0</button>
+  <button onclick="location.href='v3-index.html'">首页</button>
+  <button onclick="location.href='v3-profile.html'">我的</button>
+  <button class="active" onclick="location.href='v3-orders.html'">订单</button>
+  <button onclick="location.href='v3-recharge.html'">充值</button>
+  <button onclick="location.href='v3-undercover-game.html'">卧底中</button>
+  <button onclick="location.href='v3-undercover-result.html'">卧底结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar"><span class="status-bar__time">9:41</span><span class="status-bar__icons"></span></div>
+  <div class="nav-bar">我的订单</div>
+
+  <div class="scroll-content">
+    <p style="font-size: 12px; color: var(--color-text-muted); margin: 0 0 16px; padding-left: 16px;">充值订单与支付状态</p>
+
+    <!-- mini-hero -->
+    <div style="position: relative; overflow: hidden; border-radius: 24px; padding: 16px; margin-bottom: 16px; background: var(--gradient-hero); box-shadow: var(--shadow-elevated); color: #fff;">
+      <div style="position: absolute; top: -20px; right: -15px; width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.10);"></div>
+      <div style="display: flex; align-items: center; position: relative; z-index: 1;">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+          <span class="serif-num" style="font-size: 18px; font-weight: 600; color: #fff; line-height: 1.1;">3</span>
+          <span style="font-size: 11px; color: #fff; opacity: 0.8;">累计订单</span>
+        </div>
+        <div style="width: 1px; height: 28px; background: rgba(255,255,255,0.32); margin: 0 16px;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+          <span class="serif-num" style="font-size: 18px; font-weight: 600; color: #fff; line-height: 1.1;">2</span>
+          <span style="font-size: 11px; color: #fff; opacity: 0.8;">当前显示</span>
+        </div>
+        <div style="width: 1px; height: 28px; background: rgba(255,255,255,0.32); margin: 0 16px;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+          <span class="serif-num" style="font-size: 18px; font-weight: 600; color: #fff; line-height: 1.1;">¥18</span>
+          <span style="font-size: 11px; color: #fff; opacity: 0.8;">最近金额</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 订单卡 1 -->
+    <div style="background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-card); border: 0.5px solid var(--color-border-soft);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11px; color: var(--color-text-muted); font-family: 'JetBrains Mono', monospace;">ORD-20260614-001</span>
+        <span style="display: inline-flex; align-items: center; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; background: #E5ECDC; color: #6F8F5A;">已支付</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 14px; color: var(--color-text);">standard-30</span>
+        <span class="serif-num" style="font-size: 15px; color: var(--color-accent-warm); font-weight: 600;">¥18.00</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 14px; color: var(--color-text);">到账积分</span>
+        <span class="serif-num" style="font-size: 15px; color: var(--color-primary); font-weight: 600;">3000</span>
+      </div>
+      <div style="height: 1px; background: var(--color-border-soft); margin: 6px 0;"></div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-size: 11px; color: var(--color-text-muted);">2026-06-14 14:23</span>
+        <span style="font-size: 11px; color: var(--color-text-muted);">支付于 14:23</span>
+      </div>
+    </div>
+
+    <!-- 订单卡 2 -->
+    <div style="background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-card); border: 0.5px solid var(--color-border-soft);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11px; color: var(--color-text-muted); font-family: 'JetBrains Mono', monospace;">ORD-20260530-002</span>
+        <span style="display: inline-flex; align-items: center; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; background: #FEF5E8; color: #B8904A;">已创建</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 14px; color: var(--color-text);">standard-30</span>
+        <span class="serif-num" style="font-size: 15px; color: var(--color-accent-warm); font-weight: 600;">¥18.00</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 14px; color: var(--color-text);">到账积分</span>
+        <span class="serif-num" style="font-size: 15px; color: var(--color-primary); font-weight: 600;">3000</span>
+      </div>
+      <div style="height: 1px; background: var(--color-border-soft); margin: 6px 0;"></div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-size: 11px; color: var(--color-text-muted);">2026-05-30 09:11</span>
+        <span style="font-size: 11px; color: var(--color-text-muted);">未支付</span>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 12px; font-size: 13px; color: var(--color-text-muted);">没有更多订单了</div>
+  </div>
+</div>
+
+</body>
+</html>

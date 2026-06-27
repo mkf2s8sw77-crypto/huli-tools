@@ -45,7 +45,7 @@
 
 .app-exec-header__name {
   font-size: 36rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-on-primary);
   line-height: 1.25;
 }
@@ -57,7 +57,7 @@
   background: var(--color-bg-card);
   border-radius: var(--radius-pill);
   padding: 7rpx 18rpx;
-  font-weight: 700;
+  font-weight: 600;
   margin-top: 10rpx;
 }
 
@@ -180,7 +180,7 @@
 
 .nu-mode-card__label {
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
   line-height: 1.3;
 }
@@ -202,7 +202,7 @@
   align-items: center;
   justify-content: center;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -278,7 +278,7 @@
 
 .nu-param__value {
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -379,7 +379,7 @@
   top: 24rpx;
   right: 24rpx;
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 1rpx;
   padding: 6rpx 18rpx;
   border-radius: var(--radius-pill);
@@ -416,7 +416,7 @@
 .nu-secret-card__secret {
   display: block;
   font-size: 42rpx;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.4;
   word-break: break-all;
   position: relative;
@@ -449,7 +449,7 @@
 
 .nu-round-bar__title {
   font-size: 26rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -527,7 +527,7 @@
   align-items: center;
   justify-content: center;
   font-size: 28rpx;
-  font-weight: 700;
+  font-weight: 600;
   flex-shrink: 0;
   box-shadow: var(--shadow-soft);
 }
@@ -691,7 +691,7 @@
   align-items: center;
   justify-content: center;
   font-size: 32rpx;
-  font-weight: 700;
+  font-weight: 600;
   flex-shrink: 0;
   box-shadow: var(--shadow-soft);
   transition: all 0.2s;
@@ -711,7 +711,7 @@
 
 .nu-vote-option__name {
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
   line-height: 1.3;
 }
@@ -732,7 +732,7 @@
   align-items: center;
   justify-content: center;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -808,7 +808,7 @@
 
 .nu-result-hero__icon .nu-result-hero__icon-glyph {
   font-size: 64rpx;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -820,7 +820,7 @@
   position: relative;
   z-index: 1;
   font-size: 40rpx;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.3;
   margin-bottom: var(--spacing-xs);
 }
@@ -945,7 +945,7 @@
 }
 
 .nu-vote-result-item__target {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary);
 }
 
@@ -993,7 +993,7 @@
 
 .nu-debrief__label {
   font-size: 26rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
 }
 

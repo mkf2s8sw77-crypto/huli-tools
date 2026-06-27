@@ -1,7 +1,24 @@
 <ui-page title="使用记录" subtitle="应用调用历史与积分消耗">
+  <!-- mini-hero(骨架 B):使用汇总 -->
+  <view class="list-hero fade-in" wx:if="{{!loading && list.length > 0}}">
+    <view class="list-hero__row">
+      <view class="list-hero__col">
+        <text class="list-hero__value serif-num">{{list.length}}</text>
+        <text class="list-hero__label">当前显示</text>
+      </view>
+      <view class="list-hero__divider"></view>
+      <view class="list-hero__col">
+        <text class="list-hero__value serif-num">{{hasMore ? '...' : list.length}}</text>
+        <text class="list-hero__label">已加载完成</text>
+      </view>
+    </view>
+  </view>
+
   <view wx:if="{{loading && list.length === 0}}">
     <ui-card>
-      <text class="loading-state">正在加载...</text>
+      <view class="skeleton" style="height: 60rpx; margin-bottom: 12rpx;"></view>
+      <view class="skeleton" style="height: 60rpx; margin-bottom: 12rpx;"></view>
+      <view class="skeleton" style="height: 60rpx;"></view>
     </ui-card>
   </view>
 
@@ -13,7 +30,7 @@
     <view
       wx:for="{{list}}"
       wx:key="_id"
-      class="card info-card"
+      class="info-card card lift-on-hover fade-in-{{index % 4 + 1}}"
     >
       <view class="info-card__top">
         <text class="info-card__app">{{item.appKey}}</text>
@@ -27,6 +44,7 @@
       <view wx:if="{{item.errorMessage}}" class="info-card__error">
         <text>{{item.errorMessage}}</text>
       </view>
+      <view class="care-divider"></view>
       <view class="info-card__footer">
         <text class="info-card__time">{{item.startedAtText}}</text>
         <text wx:if="{{item.finishedAtText !== '-'}}" class="info-card__time">完成于 {{item.finishedAtText}}</text>

@@ -36,8 +36,9 @@
 }
 
 .app-exec-header__name {
-  font-size: 36rpx;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 38rpx;
+  font-weight: 600;
   color: var(--color-on-primary);
   line-height: 1.25;
 }
@@ -49,8 +50,9 @@
   background: var(--color-bg-card);
   border-radius: var(--radius-pill);
   padding: 7rpx 18rpx;
-  font-weight: 700;
+  font-weight: 600;
   margin-top: 10rpx;
+  font-variant-numeric: tabular-nums;
 }
 
 .app-exec-header .icon-tile {

@@ -1,79 +1,106 @@
-/* 充值页 — 柔彩多巴胺 */
+/* 充值页 v3 — 自然疗愈 */
 
+.recharge-hero {
+  background: var(--gradient-warm);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-elevated);
+  color: var(--color-on-primary);
+  position: relative;
+  overflow: hidden;
+}
+.recharge-hero::after {
+  content: "";
+  position: absolute;
+  top: -50rpx; right: -30rpx;
+  width: 200rpx; height: 200rpx;
+  border-radius: 50%;
+  background: var(--color-on-primary);
+  opacity: 0.10;
+}
+.recharge-hero__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  position: relative;
+  z-index: 1;
+}
+.recharge-hero__title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--color-on-primary);
+  line-height: 1.25;
+}
+.recharge-hero__sub {
+  font-size: 24rpx;
+  color: var(--color-on-primary);
+  opacity: 0.86;
+}
+
+/* ── 充值包卡 ── */
 .pkg-card__header {
   margin-bottom: 0;
 }
-
 .pkg-card__title {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
-
 .pkg-card__name {
   font-size: 32rpx;
   font-weight: 600;
   color: var(--color-text);
 }
-
 .pkg-card__price {
-  font-size: 36rpx;
-  font-weight: 700;
+  font-size: 38rpx;
+  font-weight: 600;
   color: var(--color-accent-warm);
+  font-variant-numeric: tabular-nums;
 }
-
 .pkg-card__body {
   margin-bottom: var(--spacing-md);
 }
-
 .pkg-card__row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-xs);
 }
-
 .pkg-card__row--total {
   margin-top: var(--spacing-sm);
   padding-top: var(--spacing-sm);
   border-top: 1rpx solid var(--color-border-soft);
 }
-
 .pkg-card__label {
   font-size: 26rpx;
   color: var(--color-text-secondary);
 }
-
 .pkg-card__val {
   font-size: 26rpx;
   color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
-
 .pkg-card__val--bonus {
   color: var(--color-success);
-  font-weight: 500;
+  font-weight: 600;
 }
-
 .pkg-card__btn {
   width: 100%;
 }
 
-/* ── 模拟支付 ── */
+/* ── 模拟支付(开发/测试) ── */
 .mock-card {
-  border: 2rpx dashed var(--color-warning);
+  border: 1rpx dashed var(--color-warning);
   background: var(--color-warning-light);
 }
-
-.mock-card::before {
-  display: none;
-}
-
+.mock-card::before { display: none; }
 .mock-card__order {
   display: block;
   font-size: 24rpx;
   color: var(--color-text-muted);
   margin-bottom: var(--spacing-sm);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 /* ── 链接卡 ── */
@@ -81,8 +108,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
 }
-
 .link-card__text {
   font-size: 28rpx;
   color: var(--color-primary);

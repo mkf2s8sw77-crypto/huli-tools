@@ -1,7 +1,7 @@
 <ui-page variant="dashboard">
   <view wx:if="{{loading}}">
     <ui-card>
-      <text class="loading-state">正在加载...</text>
+      <view class="skeleton" style="height: 96rpx; border-radius: 16rpx;"></view>
     </ui-card>
   </view>
 
@@ -10,38 +10,38 @@
   </view>
 
   <view wx:else>
-    <!-- 积分摘要卡 -->
-    <view wx:if="{{userSummary}}" class="points-hero">
+    <!-- 积分摘要卡(骨架 A hero) -->
+    <view wx:if="{{userSummary}}" class="points-hero lift-on-hover fade-in" bindtap="onGoRecharge">
       <view class="points-hero__main">
-        <text class="points-hero__label">可用积分</text>
-        <text class="points-hero__value">{{userSummary.points.availablePoints}}</text>
+        <text class="points-hero__label serif-num">可用积分</text>
+        <text class="points-hero__value serif-num">{{userSummary.points.availablePoints}}</text>
       </view>
-      <view class="points-hero__action" bindtap="onGoRecharge">
+      <view class="points-hero__action tap-feedback">
         <text class="points-hero__action-text">充值</text>
       </view>
     </view>
 
-    <!-- 快捷入口 -->
-    <view class="quick-nav">
-      <view class="quick-nav__item" bindtap="onGoRecharge">
+    <!-- 快捷入口(骨架 A) -->
+    <view class="quick-nav fade-in fade-in-1">
+      <view class="quick-nav__item tap-feedback" bindtap="onGoRecharge">
         <view class="quick-nav__icon icon-tile icon-tile--coral icon-tile--recharge">
           <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">充值</text>
       </view>
-      <view class="quick-nav__item" bindtap="onGoOrders">
+      <view class="quick-nav__item tap-feedback" bindtap="onGoOrders">
         <view class="quick-nav__icon icon-tile icon-tile--lavender icon-tile--orders">
           <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">订单</text>
       </view>
-      <view class="quick-nav__item" bindtap="onGoTransactions">
+      <view class="quick-nav__item tap-feedback" bindtap="onGoTransactions">
         <view class="quick-nav__icon icon-tile icon-tile--teal icon-tile--transactions">
           <view class="icon-tile__glyph"></view>
         </view>
         <text class="quick-nav__text">流水</text>
       </view>
-      <view class="quick-nav__item" bindtap="onGoUsageRecords">
+      <view class="quick-nav__item tap-feedback" bindtap="onGoUsageRecords">
         <view class="quick-nav__icon icon-tile icon-tile--peach icon-tile--records">
           <view class="icon-tile__glyph"></view>
         </view>
@@ -49,34 +49,36 @@
       </view>
     </view>
 
-    <!-- 应用目录 -->
-    <ui-section title="应用目录">
-      <ui-empty wx:if="{{apps.length === 0}}" text="暂无可用应用" />
+    <!-- 应用目录(骨架 A 列表) -->
+    <view class="fade-in fade-in-2">
+      <ui-section title="应用目录">
+        <ui-empty wx:if="{{apps.length === 0}}" text="暂无可用应用" />
 
-      <view
-        wx:for="{{apps}}"
-        wx:key="appKey"
-        class="app-card card"
-        data-app="{{item}}"
-        bindtap="onTapApp"
-      >
-        <view class="app-card__body">
-          <view class="app-card__icon icon-tile icon-tile--app {{item.iconClass}}">
-            <view class="icon-tile__glyph"></view>
-          </view>
-          <view class="app-card__info">
-            <view class="app-card__title-row">
-              <text class="app-card__name">{{item.name}}</text>
-              <ui-status wx:if="{{item.status === 'coming_soon'}}" text="即将上线" type="warning" />
+        <view
+          wx:for="{{apps}}"
+          wx:key="appKey"
+          class="app-card card lift-on-hover"
+          data-app="{{item}}"
+          bindtap="onTapApp"
+        >
+          <view class="app-card__body">
+            <view class="app-card__icon icon-tile icon-tile--app {{item.iconClass}}">
+              <view class="icon-tile__glyph"></view>
             </view>
-            <text class="app-card__desc">{{item.description || ''}}</text>
-            <view wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-card__cost">
-              <text class="app-card__cost-text">{{item.pricing.costPoints}} 积分/次</text>
+            <view class="app-card__info">
+              <view class="app-card__title-row">
+                <text class="app-card__name serif-num">{{item.name}}</text>
+                <ui-status wx:if="{{item.status === 'coming_soon'}}" text="即将上线" type="warning" />
+              </view>
+              <text class="app-card__desc">{{item.description || ''}}</text>
+              <view wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-card__cost">
+                <text class="app-card__cost-text serif-num">{{item.pricing.costPoints}} 积分/次</text>
+              </view>
             </view>
           </view>
+          <view class="app-card__arrow"></view>
         </view>
-        <view class="app-card__arrow"></view>
-      </view>
-    </ui-section>
+      </ui-section>
+    </view>
   </view>
 </ui-page>

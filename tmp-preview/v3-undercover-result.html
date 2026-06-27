@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卧底结果 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --color-bg: #F5F0E8; --color-surface: #FBF8F2; --color-bg-card: #ffffff;
+  --color-border-soft: #EDE5D3;
+  --color-primary: #8A6A3A; --color-on-primary: #ffffff;
+  --color-accent-warm: #C8804A; --color-accent-warm-light: #F4E2D2;
+  --color-success: #6F8F5A; --color-success-light: #E5ECDC;
+  --color-warning: #B8904A; --color-warning-light: #F0E5C8;
+  --color-lavender: #9A8AA8; --color-lavender-light: #ECE7EF;
+  --color-lemon: #C8A24A; --color-lemon-light: #F4ECD2;
+  --color-text: #2D2418; --color-text-secondary: #5A4A38; --color-text-muted: #8A7A66;
+  --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+  --gradient-lavender: linear-gradient(135deg, #9A8AA8 0%, #C8988A 100%);
+  --gradient-lemon: linear-gradient(135deg, #C8A24A 0%, #D6BA68 100%);
+  --page-bg: linear-gradient(180deg, #EFE6D2 0%, #F5F0E8 160px, #F8F4EB 100%);
+  --font-serif: "Noto Serif SC", "Songti SC", Georgia, serif;
+  --font-sans: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --shadow-card: 0 1px 1px rgba(255,255,255,0.5) inset, 0 2px 12px rgba(125,98,50,0.08);
+  --shadow-elevated: 0 1px 1px rgba(255,255,255,0.6) inset, 0 8px 24px rgba(125,98,50,0.1);
+}
+html, body { margin: 0; }
+body { font-family: var(--font-sans); background: #555; color: var(--color-text); -webkit-font-smoothing: antialiased; }
+.page-frame { width: 390px; height: 844px; overflow: hidden; background: var(--page-bg); position: relative; margin: 24px auto; box-shadow: 0 12px 60px rgba(0,0,0,0.3); }
+.status-bar { position: absolute; top: 0; left: 0; right: 0; height: 44px; background: #F5F0E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 15px; font-weight: 600; color: #2D2418; z-index: 10; }
+.status-bar__time { font-variant-numeric: tabular-nums; }
+.status-bar__icons { display: flex; gap: 6px; align-items: center; }
+.status-bar__icons::after { content: ''; display: inline-block; width: 24px; height: 12px; background: #2D2418; border-radius: 3px; }
+.nav-bar { position: absolute; top: 44px; left: 0; right: 0; height: 44px; background: #F5F0E8; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #2D2418; z-index: 10; border-bottom: 0.5px solid rgba(0,0,0,0.05); }
+.scroll-content { position: absolute; top: 88px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 16px; padding-bottom: 32px; }
+.serif-num { font-family: var(--font-serif); font-variant-numeric: tabular-nums; font-weight: 600; }
+.text-muted { color: var(--color-text-muted); }
+.phase-switcher { position: fixed; top: 12px; left: 12px; z-index: 100; background: rgba(0,0,0,0.7); border-radius: 6px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 360px; }
+.phase-switcher button { background: transparent; border: none; color: #fff; padding: 6px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+.phase-switcher button.active { background: #8A6A3A; }
+</style>
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button onclick="location.href='v3-p0-config.html'">P0</button>
+  <button onclick="location.href='v3-index.html'">首页</button>
+  <button onclick="location.href='v3-profile.html'">我的</button>
+  <button onclick="location.href='v3-orders.html'">订单</button>
+  <button onclick="location.href='v3-recharge.html'">充值</button>
+  <button onclick="location.href='v3-undercover-game.html'">卧底中</button>
+  <button class="active" onclick="location.href='v3-undercover-result.html'">卧底结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar"><span class="status-bar__time">9:41</span><span class="status-bar__icons"></span></div>
+  <div class="nav-bar">huli-tools</div>
+
+  <div class="scroll-content">
+    <!-- 胜负大卡(输了) -->
+    <div style="position: relative; text-align: center; padding: 30px 16px 16px; border-radius: 24px; color: #fff; box-shadow: var(--shadow-elevated); margin-bottom: 12px; overflow: hidden; background: var(--gradient-lavender);">
+      <div style="position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.14);"></div>
+      <div style="position: absolute; left: -30px; bottom: -30px; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.10);"></div>
+      <div style="position: relative; z-index: 1; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <span style="font-size: 32px; font-weight: 600; line-height: 1; color: var(--color-lavender);">!</span>
+      </div>
+      <span class="serif-num" style="display: block; position: relative; z-index: 1; font-size: 20px; font-weight: 600; line-height: 1.3; margin-bottom: 4px;">这次卧底技高一筹</span>
+      <span style="display: block; position: relative; z-index: 1; font-size: 13px; opacity: 0.92; line-height: 1.4;">卧底阵营胜利 · 下次再战</span>
+      <div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 4px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.32); font-size: 12.5px; line-height: 1.4;">
+        <span>正确卧底：陈护士</span>
+        <span>被投出的人：赵护士</span>
+      </div>
+    </div>
+
+    <!-- 答案揭晓 -->
+    <div style="display: block; font-size: 15px; font-weight: 600; color: var(--color-text); line-height: 1.35; margin: 12px 0 11px; padding-left: 13px; position: relative;">
+      <span style="position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      答案揭晓
+    </div>
+
+    <div style="background: linear-gradient(135deg, var(--color-accent-warm-light) 0%, var(--color-peach-light, #F2E2DC) 100%); border: 0.5px solid var(--color-accent-warm); border-radius: 16px; padding: 8px 12px; margin-bottom: 8px; box-shadow: var(--shadow-card);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="serif-num" style="font-size: 14px; font-weight: 600; color: var(--color-text);">陈护士</span>
+        <span style="display: inline-flex; align-items: center; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; background: #FEF5E8; color: #B8904A;">卧底</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 6px; margin-top: 4px;">
+        <span style="flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--color-text-muted); padding-top: 1px;">密令</span>
+        <span style="flex: 1; font-size: 12.5px; color: var(--color-accent-warm); font-weight: 600; line-height: 1.5; word-break: break-all;">继续使用导管并加用广谱抗生素</span>
+      </div>
+    </div>
+
+    <div style="background: #fff; border-radius: 16px; padding: 8px 12px; margin-bottom: 8px; box-shadow: var(--shadow-card); border: 0.5px solid var(--color-border-soft);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="serif-num" style="font-size: 14px; font-weight: 600; color: var(--color-text);">赵护士</span>
+        <span style="display: inline-flex; align-items: center; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; background: #E5ECDC; color: #6F8F5A;">平民</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 6px; margin-top: 4px;">
+        <span style="flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--color-text-muted); padding-top: 1px;">密令</span>
+        <span style="flex: 1; font-size: 12.5px; color: var(--color-text); line-height: 1.5; word-break: break-all;">评估导管留置必要性、检查穿刺点、采集血培养后考虑拔管</span>
+      </div>
+    </div>
+
+    <div style="background: #fff; border-radius: 16px; padding: 8px 12px; margin-bottom: 8px; box-shadow: var(--shadow-card); border: 0.5px solid var(--color-border-soft);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="serif-num" style="font-size: 14px; font-weight: 600; color: var(--color-text);">张护士</span>
+        <span style="display: inline-flex; align-items: center; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; background: #E5ECDC; color: #6F8F5A;">平民</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 6px; margin-top: 4px;">
+        <span style="flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--color-text-muted); padding-top: 1px;">密令</span>
+        <span style="flex: 1; font-size: 12.5px; color: var(--color-text); line-height: 1.5; word-break: break-all;">评估导管留置必要性、检查穿刺点、采集血培养后考虑拔管</span>
+      </div>
+    </div>
+
+    <!-- 教学复盘 dot pattern -->
+    <div style="display: block; font-size: 15px; font-weight: 600; color: var(--color-text); line-height: 1.35; margin: 12px 0 11px; padding-left: 13px; position: relative;">
+      <span style="position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      教学复盘
+    </div>
+    <div style="background: #fff; border-radius: 16px; padding: 16px; box-shadow: var(--shadow-card); border: 0.5px solid var(--color-border-soft);">
+      <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 8px;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--gradient-lemon); box-shadow: var(--shadow-soft);"></div>
+        <span style="font-size: 13px; font-weight: 600; color: var(--color-text);">关键线索</span>
+      </div>
+      <div style="font-size: 13px; color: var(--color-text); line-height: 1.55; padding-left: 8px; margin-top: 3px;">· 患者体温 38.5℃ 持续升高，穿刺点疑似红肿</div>
+      <div style="font-size: 13px; color: var(--color-text); line-height: 1.55; padding-left: 8px; margin-top: 3px;">· 卧底发言中回避"拔管"二字，反复强调"继续观察"</div>
+
+      <div style="display: flex; align-items: center; gap: 5px; margin: 14px 0 8px;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #7A8B6A 0%, #98A888 100%); box-shadow: var(--shadow-soft);"></div>
+        <span style="font-size: 13px; font-weight: 600; color: var(--color-text);">知识点</span>
+      </div>
+      <div style="font-size: 13px; color: var(--color-text); line-height: 1.55; padding-left: 8px; margin-top: 3px;">· CRBSI 诊断三联征：发热 + 穿刺点炎症 + 血培养阳性</div>
+      <div style="font-size: 13px; color: var(--color-text); line-height: 1.55; padding-left: 8px; margin-top: 3px;">· 怀疑 CRBSI 时，应拔除导管并送尖端培养</div>
+    </div>
+
+    <div style="margin: 16px 0;">
+      <button style="display: block; width: 100%; padding: 14px; background: var(--gradient-primary); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-soft); text-align: center; font-family: var(--font-sans);">再来一局</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

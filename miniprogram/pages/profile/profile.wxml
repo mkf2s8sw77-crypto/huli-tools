@@ -1,7 +1,7 @@
 <ui-page title="我的账户">
   <view wx:if="{{loading}}">
     <ui-card>
-      <text class="loading-state">正在加载...</text>
+      <view class="skeleton" style="height: 200rpx; border-radius: 24rpx;"></view>
     </ui-card>
   </view>
 
@@ -10,75 +10,78 @@
   </view>
 
   <view wx:else>
-    <!-- 积分卡 -->
-    <view class="account-card">
+    <!-- 账户卡(骨架 A hero) -->
+    <view class="account-card fade-in">
       <view class="account-card__bg"></view>
       <view class="account-card__content">
         <text class="account-card__label">可用积分</text>
-        <text class="account-card__balance">{{points.availablePoints}}</text>
+        <text class="account-card__balance serif-num">{{points.availablePoints}}</text>
+        <view class="care-divider" style="background: rgba(255,255,255,0.32); margin: 16rpx 0 20rpx;"></view>
         <view class="account-card__details">
           <view wx:if="{{points.frozenPoints > 0}}" class="account-card__detail">
             <text class="account-card__detail-label">冻结中</text>
-            <text class="account-card__detail-value account-card__detail-value--warning">{{points.frozenPoints}}</text>
+            <text class="account-card__detail-value serif-num">{{points.frozenPoints}}</text>
           </view>
           <view class="account-card__detail">
             <text class="account-card__detail-label">累计充值</text>
-            <text class="account-card__detail-value">{{points.totalRechargedPoints}}</text>
+            <text class="account-card__detail-value serif-num">{{points.totalRechargedPoints}}</text>
           </view>
           <view class="account-card__detail">
             <text class="account-card__detail-label">累计消费</text>
-            <text class="account-card__detail-value">{{points.totalConsumedPoints}}</text>
+            <text class="account-card__detail-value serif-num">{{points.totalConsumedPoints}}</text>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 用户身份 -->
-    <view class="id-bar">
+    <!-- 用户身份条(并入 account-card 的下方,作为单独一行) -->
+    <view class="id-bar lift-on-hover fade-in fade-in-1">
       <image class="brand-logo" src="/assets/images/huli-tech-logo.png" mode="aspectFill" />
       <text class="id-bar__text">{{maskedOpenid}}</text>
     </view>
 
-    <!-- 设置面板 -->
-    <ui-section title="账户管理">
-      <view class="menu-list">
-        <view class="menu-item" bindtap="onGoRecharge">
-          <view class="menu-item__left">
-            <view class="menu-item__icon icon-tile icon-tile--coral icon-tile--recharge">
-              <view class="icon-tile__glyph"></view>
+    <!-- 设置面板(骨架 A 列表) -->
+    <view class="fade-in fade-in-2">
+      <ui-section title="账户管理">
+        <view class="menu-list">
+          <view class="menu-item" bindtap="onGoRecharge">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--coral icon-tile--recharge">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">积分充值</text>
             </view>
-            <text class="menu-item__text">积分充值</text>
+            <text class="menu-item__arrow">›</text>
           </view>
-          <text class="menu-item__arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="onGoOrders">
-          <view class="menu-item__left">
-            <view class="menu-item__icon icon-tile icon-tile--lavender icon-tile--orders">
-              <view class="icon-tile__glyph"></view>
+          <view class="menu-item" bindtap="onGoOrders">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--lavender icon-tile--orders">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">我的订单</text>
             </view>
-            <text class="menu-item__text">我的订单</text>
+            <text class="menu-item__arrow">›</text>
           </view>
-          <text class="menu-item__arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="onGoTransactions">
-          <view class="menu-item__left">
-            <view class="menu-item__icon icon-tile icon-tile--teal icon-tile--transactions">
-              <view class="icon-tile__glyph"></view>
+          <view class="menu-item" bindtap="onGoTransactions">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--teal icon-tile--transactions">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">积分流水</text>
             </view>
-            <text class="menu-item__text">积分流水</text>
+            <text class="menu-item__arrow">›</text>
           </view>
-          <text class="menu-item__arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="onGoUsageRecords">
-          <view class="menu-item__left">
-            <view class="menu-item__icon icon-tile icon-tile--peach icon-tile--records">
-              <view class="icon-tile__glyph"></view>
+          <view class="menu-item" bindtap="onGoUsageRecords">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--peach icon-tile--records">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">使用记录</text>
             </view>
-            <text class="menu-item__text">使用记录</text>
+            <text class="menu-item__arrow">›</text>
           </view>
-          <text class="menu-item__arrow">›</text>
         </view>
-      </view>
-    </ui-section>
+      </ui-section>
+    </view>
   </view>
 </ui-page>

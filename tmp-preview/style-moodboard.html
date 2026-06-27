@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>huli-tools 视觉风格参考</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: 'Outfit', -apple-system, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: #f5f3f0;
+  color: #1f2533;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  padding: 40px 24px 80px;
+}
+h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  font-weight: 400;
+  margin: 0 0 8px;
+  color: #14171e;
+}
+.subtitle { color: #7c7a72; font-size: 15px; max-width: 700px; margin: 0 0 32px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.mood {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 24px 32px;
+  border: 1px solid #e9e3d6;
+  box-shadow: 0 4px 18px -10px rgba(0,0,0,0.08);
+}
+.mood h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #14171e;
+}
+.mood .tag {
+  font-size: 11px;
+  color: #7c7a72;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.mood .desc {
+  font-size: 13px;
+  color: #5a6b7d;
+  margin: 0 0 20px;
+  line-height: 1.55;
+}
+
+.mock {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  border-radius: 22px;
+  border: 6px solid #14171e;
+  padding: 10px;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 12px 32px -12px rgba(0,0,0,0.2);
+}
+.mock::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 50%;
+  transform: translateX(-50%);
+  width: 48px; height: 14px;
+  background: #14171e;
+  border-radius: 0 0 10px 10px;
+  z-index: 2;
+}
+.mock-frame {
+  padding-top: 18px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.bar { height: 8px; border-radius: 3px; background: #e9e3d6; margin: 4px 0; }
+.bar-sm { width: 60%; }
+.bar-md { width: 80%; }
+.bar-lg { height: 64px; border-radius: 12px; }
+
+/* ===== Style A — 极简专业 ===== */
+.style-a {
+  background: #FAFAFA;
+  color: #14171e;
+}
+.style-a .mood { background: #FAFAFA; }
+.style-a .mood h2 { font-family: 'Outfit'; }
+.style-a .hero-bar {
+  background: #14171e;
+  border-radius: 14px;
+  height: 88px;
+  position: relative;
+  margin-bottom: 16px;
+  padding: 14px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.style-a .hero-bar .label { font-size: 10px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
+.style-a .hero-bar .value { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.style-a .row { display: flex; gap: 8px; margin: 10px 0; }
+.style-a .cell {
+  flex: 1; background: #fff; border: 1px solid #EBEBEB; border-radius: 10px;
+  padding: 12px 8px; text-align: center;
+}
+.style-a .cell-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #14171e; margin: 0 auto 6px;
+}
+.style-a .cell-icon--b { background: #2D3748; }
+.style-a .cell-icon--c { background: #4A5568; }
+.style-a .cell-icon--d { background: #718096; }
+.style-a .cell-text { font-size: 9px; font-weight: 500; color: #14171e; }
+.style-a .card {
+  background: #fff; border: 1px solid #EBEBEB; border-radius: 10px;
+  padding: 12px; margin-top: 8px;
+}
+.style-a .card .row-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.style-a .card .row-item .v { font-size: 11px; font-weight: 600; }
+
+/* ===== Style B — 现代科技 ===== */
+.style-b { background: #0F1729; color: #fff; }
+.style-b .mood { background: #0F1729; color: #fff; border-color: rgba(255,255,255,0.1); }
+.style-b .mood h2, .style-b .mood .desc, .style-b .mood .tag { color: #fff; }
+.style-b .mood .tag { color: #6B7B95; }
+.style-b .mood .desc { color: #8B9AB4; }
+.style-b .mock { background: #0F1729; border-color: rgba(255,255,255,0.2); }
+.style-b .mock::before { background: #14171e; }
+.style-b .mock-frame { background: #0F1729; }
+.style-b .hero-bar {
+  background: linear-gradient(135deg, #1E3A8A 0%, #6D28D9 100%);
+  border-radius: 14px;
+  height: 88px;
+  margin-bottom: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.style-b .hero-bar::after {
+  content: '';
+  position: absolute;
+  right: -20px; top: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+}
+.style-b .hero-bar .label { font-size: 10px; opacity: 0.85; letter-spacing: 1.5px; text-transform: uppercase; }
+.style-b .hero-bar .value { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.style-b .row { display: flex; gap: 8px; margin: 10px 0; }
+.style-b .cell {
+  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+  padding: 12px 8px; text-align: center;
+  backdrop-filter: blur(8px);
+}
+.style-b .cell-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, #60A5FA, #A78BFA);
+  margin: 0 auto 6px;
+}
+.style-b .cell-icon--b { background: linear-gradient(135deg, #34D399, #60A5FA); }
+.style-b .cell-icon--c { background: linear-gradient(135deg, #F472B6, #A78BFA); }
+.style-b .cell-icon--d { background: linear-gradient(135deg, #FBBF24, #F472B6); }
+.style-b .cell-text { font-size: 9px; font-weight: 500; color: #fff; }
+.style-b .card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+  padding: 12px; margin-top: 8px;
+  backdrop-filter: blur(8px);
+}
+.style-b .card .row-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.style-b .card .row-item .v { font-size: 11px; font-weight: 600; }
+.style-b .bar { background: rgba(255,255,255,0.08); }
+
+/* ===== Style C — 自然疗愈 ===== */
+.style-c {
+  background: #F5F0E8;
+  color: #3D3529;
+}
+.style-c .mood { background: #F5F0E8; }
+.style-c .hero-bar {
+  background: linear-gradient(135deg, #C8B898 0%, #A8C2A8 100%);
+  border-radius: 18px;
+  height: 88px;
+  margin-bottom: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.style-c .hero-bar::after {
+  content: '';
+  position: absolute;
+  right: -30px; bottom: -30px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+}
+.style-c .hero-bar .label { font-size: 10px; opacity: 0.75; letter-spacing: 1px; }
+.style-c .hero-bar .value {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums;
+  line-height: 1.2; letter-spacing: -0.01em;
+}
+.style-c .row { display: flex; gap: 8px; margin: 10px 0; }
+.style-c .cell {
+  flex: 1; background: #FBF8F2; border: 1px solid #E8DCC4; border-radius: 12px;
+  padding: 12px 8px; text-align: center;
+}
+.style-c .cell-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #C8B898; margin: 0 auto 6px;
+}
+.style-c .cell-icon--b { background: #A8C2A8; }
+.style-c .cell-icon--c { background: #D4A0A0; }
+.style-c .cell-icon--d { background: #8A9A8A; }
+.style-c .cell-text { font-size: 9px; font-weight: 500; color: #3D3529; }
+.style-c .card {
+  background: #FBF8F2; border: 1px solid #E8DCC4; border-radius: 14px;
+  padding: 12px; margin-top: 8px;
+  box-shadow: 0 1px 0 #fff inset, 0 4px 12px -8px rgba(125,98,50,0.1);
+}
+.style-c .card .row-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.style-c .card .row-item .v { font-size: 11px; font-weight: 600; }
+.style-c .bar { background: #E8DCC4; }
+
+/* ===== 3 column style chooser ===== */
+.legend {
+  max-width: 1400px;
+  margin: 40px auto 0;
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px 28px;
+  border: 1px solid #e9e3d6;
+}
+.legend h3 { margin: 0 0 12px; font-size: 16px; }
+.legend table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.legend td { padding: 8px 12px; border-bottom: 1px solid #f0ebdf; }
+.legend td:first-child { font-weight: 600; color: #14171e; width: 24%; }
+.legend td:last-child { color: #5a6b7d; }
+</style>
+</head>
+<body>
+
+<h1>huli-tools 视觉风格 · 三种参考方向</h1>
+<p class="subtitle">在动手重新设计前,先确定整体调性。这里出 3 张模拟主页(极简专业/现代科技/自然疗愈),用现有色板/字体/排版做对比,挑一个你想要的(或告诉我"这都不对,我要 X")。</p>
+
+<div class="grid">
+
+  <!-- Style A: 极简专业 -->
+  <div class="mood style-a">
+    <h2>Style A · 极简专业</h2>
+    <div class="tag">黑白灰 · 几何感 · 强调留白</div>
+    <p class="desc">去彩色,全部灰阶 + 一种强调色(冷蓝或深绿)。无渐变,无圆角装饰,强线条感。专业感最强,最不像"营销页面",最像企业内部工具。</p>
+    <div class="mock">
+      <div class="mock-frame" style="padding: 16px 14px 14px;">
+        <div class="hero-bar">
+          <span class="label">Available Points</span>
+          <span class="value">2,840</span>
+        </div>
+        <div class="row">
+          <div class="cell"><div class="cell-icon"></div><div class="cell-text">充值</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--b"></div><div class="cell-text">订单</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--c"></div><div class="cell-text">流水</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--d"></div><div class="cell-text">记录</div></div>
+        </div>
+        <div class="card">
+          <div class="row-item">
+            <div class="bar bar-md"></div>
+            <div class="v">120</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row-item">
+            <div class="bar bar-md"></div>
+            <div class="v">¥18</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Style B: 现代科技 -->
+  <div class="mood style-b">
+    <h2>Style B · 现代科技</h2>
+    <div class="tag">深色 · 玻璃感 · 渐变点缀</div>
+    <p class="desc">深色背景,glassmorphism(毛玻璃),icon 用冷暖渐变。前卫、有未来感,适合做"AI 工具"或"高端 SaaS"。但跟护理这个**温暖职业**有一点违和。</p>
+    <div class="mock">
+      <div class="mock-frame" style="padding: 16px 14px 14px;">
+        <div class="hero-bar">
+          <span class="label">Available Points</span>
+          <span class="value">2,840</span>
+        </div>
+        <div class="row">
+          <div class="cell"><div class="cell-icon"></div><div class="cell-text">充值</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--b"></div><div class="cell-text">订单</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--c"></div><div class="cell-text">流水</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--d"></div><div class="cell-text">记录</div></div>
+        </div>
+        <div class="card">
+          <div class="row-item">
+            <div class="bar bar-md" style="background: rgba(96,165,250,0.3);"></div>
+            <div class="v" style="color: #60A5FA;">120</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row-item">
+            <div class="bar bar-md" style="background: rgba(167,139,250,0.3);"></div>
+            <div class="v" style="color: #A78BFA;">¥18</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Style C: 自然疗愈 -->
+  <div class="mood style-c">
+    <h2>Style C · 自然疗愈</h2>
+    <div class="tag">莫兰迪 · 暖米 · 纸质 · 衬线标题</div>
+    <p class="desc">暖米底 + 莫兰迪色块 + 衬线标题数字,有"医院"或"健康"机构的稳重感和文化感。不像"科技产品",更像"专业培训机构的内部系统",适合护士/医生这个职业。</p>
+    <div class="mock">
+      <div class="mock-frame" style="padding: 16px 14px 14px;">
+        <div class="hero-bar">
+          <span class="label">可用积分</span>
+          <span class="value">2,840</span>
+        </div>
+        <div class="row">
+          <div class="cell"><div class="cell-icon"></div><div class="cell-text">充值</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--b"></div><div class="cell-text">订单</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--c"></div><div class="cell-text">流水</div></div>
+          <div class="cell"><div class="cell-icon cell-icon--d"></div><div class="cell-text">记录</div></div>
+        </div>
+        <div class="card">
+          <div class="row-item">
+            <div class="bar bar-md"></div>
+            <div class="v" style="color: #8A6A3A;">120</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row-item">
+            <div class="bar bar-md"></div>
+            <div class="v" style="color: #8A6A3A;">¥18</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <h3>三种风格对比</h3>
+  <table>
+    <tr><td>Style A · 极简专业</td><td>无彩色 · 强线条 · 高冷专业 · 适合"内部系统"</td></tr>
+    <tr><td>Style B · 现代科技</td><td>深色玻璃 · 渐变霓虹 · 科技感强 · 适合"AI 工具"</td></tr>
+    <tr><td>Style C · 自然疗愈</td><td>莫兰迪 · 暖米 · 衬线 · 稳重文化 · 适合"健康/教育"</td></tr>
+  </table>
+  <p style="font-size: 12px; color: #7c7a72; margin-top: 14px;">
+    现在的"柔彩多巴胺"是 Style C(暖色柔光)+ Style B(渐变点缀)的混合,去掉粉色/桃粉,留下蓝绿橙三色 + 圆角 + 渐变。<br>
+    如果选"重新设计",最现实的几个方向:(1) 全 Style A 化(冷专业),(2) 全 Style C 化(暖疗愈),(3) 混搭(A 的色 + C 的衬线标题),(4) 全新方向(告诉我)。
+  </p>
+</div>
+
+</body>
+</html>

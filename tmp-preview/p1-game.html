@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>卧底 - P1 游戏进行</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button onclick="location.href='p0-config.html'">P0 配置</button>
+  <button class="active" onclick="location.href='p1-game.html'">P1 游戏</button>
+  <button onclick="location.href='p2-vote.html'">P2 投票</button>
+  <button onclick="location.href='p3-result.html'">P3 结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar">
+    <span class="status-bar__time">9:41</span>
+    <span class="status-bar__icons"></span>
+  </div>
+  <div class="nav-bar">huli-tools</div>
+
+  <div class="scroll-content">
+    <!-- P1 应用头部 -->
+    <div class="app-exec-header app-exec-header--undercover">
+      <div class="app-exec-header__row">
+        <div class="icon-tile icon-tile--app icon-tile--lavender icon-tile--undercover">
+          <div class="icon-tile__glyph"></div>
+        </div>
+        <div class="app-exec-header__info">
+          <span class="app-exec-header__name">谁是卧底（护理版）</span>
+          <span class="app-exec-header__cost">免费</span>
+          <span class="app-exec-header__desc">描述你的密令,观察每一句话,别暴露自己</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 密令纸 — 我方是卧底 -->
+    <div class="nu-secret-card nu-secret-card--undercover">
+      <div class="nu-secret-card__ribbon">卧底</div>
+      <div class="nu-secret-card__row">
+        <span class="nu-secret-card__eyebrow">你的密令</span>
+        <span class="nu-secret-card__sub">让平民误以为你是同伴,别被发现</span>
+      </div>
+      <span class="nu-secret-card__secret">继续使用导管并加用广谱抗生素</span>
+      <span class="nu-secret-card__hint">围绕护理情境讨论,不能暴露你的具体措施</span>
+    </div>
+
+    <!-- 轮次进度 -->
+    <div class="nu-round-bar">
+      <span class="nu-round-bar__title">第 2 / 3 轮</span>
+      <div class="nu-round-bar__track">
+        <div class="nu-round-bar__fill" style="width: 66.6%;"></div>
+      </div>
+    </div>
+
+    <!-- 第 1 轮历史 -->
+    <span class="nu-round-label text-muted">第 1 轮发言</span>
+    <div class="nu-speech-list">
+      <div class="nu-speech-bubble">
+        <div class="nu-speech-bubble__avatar">赵</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">赵护士</span>
+          <span class="nu-speech-bubble__text">体温 38.5 偏高,需立即评估导管必要性,看穿刺点有没有红肿热痛。</span>
+        </div>
+      </div>
+      <div class="nu-speech-bubble">
+        <div class="nu-speech-bubble__avatar">张</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">张护士</span>
+          <span class="nu-speech-bubble__text">同意,马上采血培养,确认后应尽早拔管。</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 当前轮发言 -->
+    <span class="nu-round-label text-muted">本轮已发言 · 2/5</span>
+    <div class="nu-speech-list">
+      <div class="nu-speech-bubble nu-speech-bubble--player">
+        <div class="nu-speech-bubble__avatar nu-speech-bubble__avatar--player">我</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">我</span>
+          <span class="nu-speech-bubble__text">我同意继续观察,毕竟拔管是侵入性操作,先看培养结果比较稳妥。</span>
+        </div>
+      </div>
+      <div class="nu-speech-bubble">
+        <div class="nu-speech-bubble__avatar">吴</div>
+        <div class="nu-speech-bubble__body">
+          <span class="nu-speech-bubble__name">吴护士</span>
+          <span class="nu-speech-bubble__text">血培养要 48 小时,期间体温还会升,还是建议评估后尽快拔管。</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 输入区 -->
+    <div class="nu-input-area">
+      <textarea class="nu-textarea" placeholder="输入你的发言...">我的意思是培养结果没出来前,贸然拔管可能会丢失通路,</textarea>
+      <div class="nu-input-footer">
+        <span class="text-muted">37/200</span>
+        <button class="nu-action-btn nu-action-btn--small">提交发言</button>
+      </div>
+    </div>
+
+    <div class="nu-cancel-area">
+      <span class="nu-cancel-link">取消对局</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

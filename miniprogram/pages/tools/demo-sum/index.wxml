@@ -1,57 +1,61 @@
 <ui-page>
-  <!-- 应用头部 + 费用提示 -->
-  <view class="app-exec-header app-exec-header--sum">
+  <!-- 应用头部 + 费用提示(骨架 C) -->
+  <view class="app-exec-header lift-on-hover fade-in app-exec-header--sum">
     <view class="app-exec-header__row">
       <view class="icon-tile icon-tile--app icon-tile--lavender icon-tile--calculator">
         <view class="icon-tile__glyph"></view>
       </view>
       <view class="app-exec-header__info">
-        <text class="app-exec-header__name">{{appInfo ? appInfo.name : '积分示例工具'}}</text>
+        <text class="app-exec-header__name serif-num">{{appInfo ? appInfo.name : '积分示例工具'}}</text>
         <text class="app-exec-header__cost">本次消耗 {{appInfo && appInfo.pricing ? appInfo.pricing.costPoints : 1}} 积分</text>
       </view>
     </view>
   </view>
 
   <!-- 表单卡 -->
-  <view class="app-exec-form-grid">
-    <ui-form-field label="数字 A">
-      <input type="number" value="{{a}}" bindinput="onInputA" placeholder="请输入数字" class="form-input" />
-    </ui-form-field>
+  <view class="fade-in fade-in-1">
+    <view class="app-exec-form-grid">
+      <ui-form-field label="数字 A">
+        <input type="number" value="{{a}}" bindinput="onInputA" placeholder="请输入数字" class="form-input" />
+      </ui-form-field>
 
-    <ui-form-field label="数字 B">
-      <input type="number" value="{{b}}" bindinput="onInputB" placeholder="请输入数字" class="form-input" />
-    </ui-form-field>
+      <ui-form-field label="数字 B">
+        <input type="number" value="{{b}}" bindinput="onInputB" placeholder="请输入数字" class="form-input" />
+      </ui-form-field>
+    </view>
   </view>
 
-  <view class="app-exec-toggle card">
+  <view class="app-exec-toggle card lift-on-hover fade-in fade-in-2">
     <switch checked="{{triggerFail}}" bindchange="onToggleFail" />
-    <text class="form-label" style="margin-bottom:0;">模拟业务失败（测试释放积分）</text>
+    <text class="form-label" style="margin-bottom:0;">模拟业务失败(测试释放积分)</text>
   </view>
 
   <!-- 主操作区 -->
-  <ui-action-button
-    text="计算求和"
-    loading="{{loading}}"
-    disabled="{{loading}}"
-    bind:tap="onCalc"
-    extra-class="app-exec-btn"
-  />
+  <view class="fade-in fade-in-3">
+    <ui-action-button
+      text="计算求和"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bind:tap="onCalc"
+      extra-class="app-exec-btn"
+    />
+  </view>
 
   <!-- 使用记录 -->
-  <view wx:if="{{usageId}}" class="card app-exec-meta">
+  <view wx:if="{{usageId}}" class="card app-exec-meta fade-in">
     <text class="app-exec-meta__label">使用记录 ID</text>
     <text class="app-exec-meta__value">{{usageId}}</text>
-    <text wx:if="{{costPoints > 0}}" class="app-exec-meta__cost">消耗 {{costPoints}} 积分</text>
+    <text wx:if="{{costPoints > 0}}" class="app-exec-meta__cost serif-num">消耗 {{costPoints}} 积分</text>
   </view>
 
   <!-- 结果区 -->
-  <view wx:if="{{result !== null}}" class="card card--elevated app-exec-result">
+  <view wx:if="{{result !== null}}" class="card card--elevated app-exec-result fade-in">
     <text class="app-exec-result__label">计算结果</text>
-    <text class="app-exec-result__value">{{result}}</text>
+    <text class="app-exec-result__value serif-num">{{result}}</text>
   </view>
 
   <!-- 错误 -->
-  <view wx:if="{{error}}" class="app-exec-error">
+  <view wx:if="{{error}}" class="app-exec-error fade-in">
     <text>{{error}}</text>
   </view>
 </ui-page>

@@ -1,0 +1,13 @@
+{
+  "name": "nu-preview",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "snap": "tsx snap.ts"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.60.0",
+    "tsx": "^4.22.4"
+  }
+}

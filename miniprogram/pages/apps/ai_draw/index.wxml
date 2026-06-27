@@ -1,11 +1,11 @@
 <ui-page>
-  <view class="app-exec-header app-exec-header--portrait">
+  <view class="app-exec-header app-exec-header--portrait fade-in">
     <view class="app-exec-header__row">
       <view class="icon-tile icon-tile--app icon-tile--peach icon-tile--image">
         <view class="icon-tile__glyph"></view>
       </view>
       <view class="app-exec-header__info">
-        <text class="app-exec-header__name">{{appInfo ? appInfo.name : '护士职业定妆照'}}</text>
+        <text class="app-exec-header__name serif-num">{{appInfo ? appInfo.name : '护士职业定妆照'}}</text>
         <text class="app-exec-header__cost">{{costLabel}}</text>
       </view>
     </view>

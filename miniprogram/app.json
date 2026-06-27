@@ -11,10 +11,11 @@
     "pages/usage-records/usage-records"
   ],
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#F8F6F3",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F5F0E8",
     "navigationBarTitleText": "huli-tools",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F0E8"
   },
   "tabBar": {
     "custom": true,

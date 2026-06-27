@@ -1,11 +1,10 @@
-/* 我的页面 — 柔彩多巴胺账户面板 */
+/* 我的页面 v3 — 自然疗愈账户面板 */
 
-/* ── 积分卡 ── */
 .account-card {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-elevated);
 }
 
@@ -14,9 +13,8 @@
   inset: 0;
   background: var(--gradient-hero);
 }
-
 .account-card__bg::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -60rpx;
   right: -30rpx;
@@ -24,7 +22,7 @@
   height: 280rpx;
   border-radius: 50%;
   background: var(--color-on-primary);
-  opacity: 0.08;
+  opacity: 0.10;
 }
 
 .account-card__content {
@@ -37,49 +35,45 @@
 .account-card__label {
   font-size: 24rpx;
   color: var(--color-on-primary);
-  opacity: 0.8;
+  opacity: 0.85;
   display: block;
-  margin-bottom: 4rpx;
+  margin-bottom: 6rpx;
+  letter-spacing: 0.5rpx;
 }
 
 .account-card__balance {
   font-size: 80rpx;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0;
+  font-weight: 600;
+  line-height: 1.05;
   display: block;
-  margin-bottom: var(--spacing-md);
+  font-variant-numeric: tabular-nums;
 }
 
 .account-card__details {
   display: flex;
   gap: var(--spacing-lg);
-  padding-top: var(--spacing-md);
-  border-top: 1rpx solid var(--color-on-primary);
 }
 
 .account-card__detail {
   display: flex;
   flex-direction: column;
-  gap: 2rpx;
+  gap: 4rpx;
 }
-
 .account-card__detail-label {
   font-size: 20rpx;
   color: var(--color-on-primary);
-  opacity: 0.6;
+  opacity: 0.7;
 }
-
 .account-card__detail-value {
   font-size: 28rpx;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
-
 .account-card__detail-value--warning {
   color: var(--color-lemon-light);
 }
 
-/* ── 身份栏 ── */
+/* ── 身份栏(独立卡) ── */
 .id-bar {
   display: flex;
   align-items: center;
@@ -88,14 +82,13 @@
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-lg);
-  box-shadow: var(--shadow-soft);
-  border: 1rpx solid var(--color-border-soft);
+  box-shadow: var(--shadow-card);
 }
 
 .id-bar__text {
   font-size: 26rpx;
   color: var(--color-text-secondary);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .brand-logo {

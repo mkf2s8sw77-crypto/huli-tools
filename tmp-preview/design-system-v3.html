@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>huli-tools 小程序整站设计规范 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f5f0;
+  --panel: #ffffff;
+  --line: #e9e3d6;
+  --line-soft: #f0ebdf;
+  --text: #1f2533;
+  --text-2: #3a4256;
+  --muted: #7c7a72;
+  --ink: #14171e;
+
+  /* 多巴胺品牌色 — 取自 design_system */
+  --primary: #5E95C8;        /* 晴空蓝 */
+  --primary-light: #EDF4FB;
+  --teal: #5EBCB0;            /* 薄荷青 */
+  --teal-light: #EBF7F5;
+  --warm: #E8956B;            /* 珊瑚橙 */
+  --warm-light: #FDF0E8;
+  --lavender: #B6A8D8;        /* 薰衣草 */
+  --lavender-light: #F2F0F8;
+  --peach: #F0A8B2;           /* 桃粉 */
+  --lemon: #E8C84A;           /* 柠檬 */
+  --success: #4CAF82;
+  --warning: #E8A84C;
+  --danger: #E06B6B;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: 'Outfit', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(94,149,200,.05) 0%, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(232,149,107,.05) 0%, transparent 45%);
+  background-attachment: fixed;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 56px 28px 96px; }
+* { text-wrap: pretty; }
+
+header.hero {
+  padding: 56px 48px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #82B5E0 0%, #7ED1C6 50%, #F0A8B2 100%);
+  color: #fff;
+  margin-bottom: 64px;
+  box-shadow: 0 4px 24px -10px rgba(94,149,200,.4);
+  position: relative;
+  overflow: hidden;
+}
+header.hero::after {
+  content: '';
+  position: absolute;
+  right: -60px; top: -80px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.14);
+}
+header.hero::before {
+  content: '';
+  position: absolute;
+  left: -40px; bottom: -100px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+}
+header.hero .eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  font-weight: 600;
+  position: relative;
+}
+header.hero h1 {
+  font-family: 'DM Serif Display', 'Source Han Serif SC', Georgia, serif;
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 14px 0 16px;
+  position: relative;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+header.hero p {
+  font-size: 16px;
+  opacity: 0.92;
+  max-width: 720px;
+  position: relative;
+  margin: 0;
+  line-height: 1.65;
+}
+
+h2 {
+  font-family: 'DM Serif Display', 'Source Han Serif SC', Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  margin: 72px 0 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+h2 .sec-num {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), #4A85B8);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 32px 0 12px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+h3 .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+}
+p { margin: 0 0 12px; color: var(--text-2); }
+code {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 13px;
+  background: var(--line-soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--ink);
+}
+pre {
+  background: #1f2533;
+  color: #e6e8ef;
+  border-radius: 10px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 12px 0;
+}
+pre .com { color: #6b7585; }
+pre .key { color: #82B5E0; }
+pre .val { color: #F0A8B2; }
+pre .num { color: #E8C84A; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 14px -10px rgba(20,23,30,0.08);
+}
+.card + .card { margin-top: 16px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 18px 0;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border-top: 1px dashed var(--line);
+  padding: 10px 0;
+  align-items: center;
+}
+.kv:first-of-type { border-top: none; }
+.kv .k {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.kv .v {
+  color: var(--text);
+  font-size: 14px;
+}
+
+/* ── 色板 ── */
+.swatch-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.swatch {
+  flex: 1;
+  min-width: 130px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.swatch-color {
+  height: 64px;
+}
+.swatch-info {
+  padding: 10px 12px;
+}
+.swatch-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.swatch-hex {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── 页面骨架示意 ── */
+.page-skeleton {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin: 18px 0;
+}
+.page-skeleton .label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-top: 8px;
+}
+.mock-phone {
+  width: 100%;
+  max-width: 360px;
+  background: #fff;
+  border-radius: 28px;
+  border: 8px solid #14171e;
+  padding: 14px 12px;
+  box-shadow: 0 16px 40px -16px rgba(0,0,0,0.3);
+  position: relative;
+}
+.mock-phone::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 60px; height: 18px;
+  background: #14171e;
+  border-radius: 0 0 14px 14px;
+}
+.mock-phone .frame {
+  padding-top: 24px;
+}
+.mock-bar {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--line-soft);
+  margin-bottom: 8px;
+}
+.mock-bar--lg { height: 56px; border-radius: 14px; }
+.mock-bar--md { height: 22px; }
+.mock-bar--sm { height: 12px; width: 60%; }
+.mock-bar.hero {
+  background: linear-gradient(135deg, #82B5E0 0%, #7ED1C6 50%, #F0A8B2 100%);
+}
+.mock-card {
+  border-radius: 10px;
+  border: 1px solid var(--line-soft);
+  background: #fff;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.mock-status {
+  display: inline-block;
+  background: var(--teal-light);
+  color: var(--teal);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.mock-status--warm { background: var(--warm-light); color: var(--warm); }
+.mock-status--lavender { background: var(--lavender-light); color: var(--lavender); }
+.mock-status--muted { background: var(--line-soft); color: var(--muted); }
+
+/* ── 圆角/阴影对照 ── */
+.tokens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+.token-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.token-card .sample {
+  width: 100%;
+  height: 56px;
+  background: var(--primary-light);
+  border: 1px solid var(--line);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.token-card .name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.token-card .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── 组件演示 ── */
+.component-demo {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 24px;
+  border: 1px dashed var(--line);
+  margin: 14px 0;
+}
+
+/* ── 状态标签 ── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  margin: 2px;
+}
+.status-pill--success { background: #EAF6EF; color: #4CAF82; }
+.status-pill--warning { background: #FEF5E8; color: #E8A84C; }
+.status-pill--danger { background: #FDEDED; color: #E06B6B; }
+.status-pill--info { background: #EDF4FB; color: #5E95C8; }
+.status-pill--default { background: #F8F6F3; color: #5A6B7D; }
+
+/* ── 表格 ── */
+.audit {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  background: var(--panel);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.audit th, .audit td {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.audit th {
+  background: var(--line-soft);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.audit tr:last-child td { border-bottom: none; }
+
+/* ── 决策表 ── */
+.decision-table th { background: linear-gradient(135deg, var(--primary-light), #fff); }
+
+/* ── 圆点列表 ── */
+.dot-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.dot-list li {
+  position: relative;
+  padding: 6px 0 6px 24px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.dot-list li::before {
+  content: '';
+  position: absolute;
+  left: 4px; top: 14px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* ── 流程图 ── */
+.flow {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin: 18px 0;
+  flex-wrap: wrap;
+}
+.flow-node {
+  flex: 1;
+  min-width: 160px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  position: relative;
+}
+.flow-node .step-num {
+  position: absolute;
+  top: -10px; left: 14px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flow-node h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 6px 0 4px;
+}
+.flow-node p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  color: var(--primary);
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+/* ── 进度指示器 ── */
+.steps {
+  display: flex;
+  gap: 0;
+  margin: 14px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.step-cell {
+  flex: 1;
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+.step-cell:last-child { border-right: none; }
+.step-cell.active { background: var(--primary-light); color: var(--primary); }
+.step-cell.done { background: var(--teal-light); color: var(--teal); }
+
+footer {
+  margin-top: 80px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  border-top: 1px solid var(--line);
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">huli-tools 小程序 · 整站设计规范 v3</div>
+    <h1>地基之上,统一视觉语言</h1>
+    <p>把首页/demo-sum/ai_draw/nursing_undercover 已经走对的 token + 公共组件模式,系统地落到 5 个散落页面(profile/orders/recharge/transactions/usage-records),并把业务级 chip 抽到设计系统层,以后新加应用不会再"看起来奇怪"。</p>
+  </header>
+
+  <!-- ============ §01 现状盘点 ============ -->
+  <h2><span class="sec-num">01</span>现状:9 个页面,两套语言</h2>
+  <p>摸了一遍全站。代码上 <code>miniprogram/pages/</code> 下面有 9 个页面目录,但只有 4 个有自己的 <code>wxml/wxss</code>(首页 + demo-sum + ai_draw + 卧底),其他 5 个只有 <code>.js</code> 没有 wxml/wxss。</p>
+
+  <table class="audit">
+    <thead><tr><th>页面</th><th>路径</th><th>状态</th><th>评分</th></tr></thead>
+    <tbody>
+      <tr><td>首页</td><td><code>pages/index/</code></td><td>完整 token 化,hero 渐变 + 4 quick-nav + app-card</td><td>7-8/10</td></tr>
+      <tr><td>demo-sum</td><td><code>pages/tools/demo-sum/</code></td><td>应用执行页模板,form + toggle + 结果区</td><td>6-7/10</td></tr>
+      <tr><td>ai_draw</td><td><code>pages/apps/ai_draw/</code></td><td>同 demo-sum,执行页</td><td>6-7/10</td></tr>
+      <tr><td>nursing_undercover</td><td><code>pages/apps/nursing_undercover/</code></td><td><strong>本次升级,4 phase 全部美化</strong></td><td>8-9/10</td></tr>
+      <tr style="background: #FDF0F2;"><td>profile</td><td><code>pages/profile/</code></td><td>account-card 渐变做得不错,<strong>但 id-bar 带边框破坏卡片原则</strong></td><td>5/10</td></tr>
+      <tr style="background: #FDF0F2;"><td>orders</td><td><code>pages/orders/</code></td><td>用了 token,<strong>没 hero,直接列表</strong></td><td>4/10</td></tr>
+      <tr style="background: #FDF0F2;"><td>recharge</td><td><code>pages/recharge/</code></td><td>用了 token + care-divider,<strong>没 hero,业务 chip 自定义</strong></td><td>4/10</td></tr>
+      <tr style="background: #FDF0F2;"><td>transactions</td><td><code>pages/transactions/</code></td><td>用了 token,<strong>tx-delta-chip / tx-note 业务自定义未归集</strong></td><td>4/10</td></tr>
+      <tr style="background: #FDF0F2;"><td>usage-records</td><td><code>pages/usage-records/</code></td><td>同 orders,纯列表</td><td>4/10</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>核心问题不是"丑",是"散"</strong>。看起来奇怪,是因为 4 个有皮肤的页面走 token + 公共组件,5 个散落页面走业务自定义 class,两套语言混在一起,新页面不知道该跟谁对齐。</p>
+
+  <!-- ============ §02 设计原则 ============ -->
+  <h2><span class="sec-num">02</span>设计原则(已存在,只需遵守)</h2>
+  <p>这部分来自 <code>docs/design_system.md</code> + <code>miniprogram/styles/tokens.wxss</code> + <code>common.wxss</code>。<strong>不要重新发明</strong>,把它们用满就行。</p>
+
+  <h3><span class="dot" style="background: var(--primary);"></span>柔彩多巴胺色板(已存在,别动色值)</h3>
+  <div class="swatch-row">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #5E95C8;"></div>
+      <div class="swatch-info"><div class="swatch-name">晴空蓝</div><div class="swatch-hex">#5E95C8 · primary</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #5EBCB0;"></div>
+      <div class="swatch-info"><div class="swatch-name">薄荷青</div><div class="swatch-hex">#5EBCB0 · brand-soft</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #E8956B;"></div>
+      <div class="swatch-info"><div class="swatch-name">珊瑚橙</div><div class="swatch-hex">#E8956B · accent-warm</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #B6A8D8;"></div>
+      <div class="swatch-info"><div class="swatch-name">薰衣草</div><div class="swatch-hex">#B6A8D8 · lavender</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #F0A8B2;"></div>
+      <div class="swatch-info"><div class="swatch-name">桃粉</div><div class="swatch-hex">#F0A8B2 · peach</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #E8C84A;"></div>
+      <div class="swatch-info"><div class="swatch-name">柠檬</div><div class="swatch-hex">#E8C84A · lemon</div></div>
+    </div>
+  </div>
+
+  <h3><span class="dot" style="background: var(--text);"></span>圆角 + 阴影 Token</h3>
+  <div class="tokens-grid">
+    <div class="token-card"><div class="sample" style="border-radius: 4px;">8rpx</div><div class="name">--radius-sm</div><div class="val">标签/小控件</div></div>
+    <div class="token-card"><div class="sample" style="border-radius: 6px;">12rpx</div><div class="name">--radius-md</div><div class="val">按钮/输入框</div></div>
+    <div class="token-card"><div class="sample" style="border-radius: 10px;">20rpx</div><div class="name">--radius-lg</div><div class="val">卡片</div></div>
+    <div class="token-card"><div class="sample" style="border-radius: 14px;">28rpx</div><div class="name">--radius-xl</div><div class="val">积分卡/hero</div></div>
+    <div class="token-card"><div class="sample" style="border-radius: 999px;">pill</div><div class="name">--radius-pill</div><div class="val">胶囊标签/tabbar</div></div>
+  </div>
+
+  <h3><span class="dot" style="background: var(--teal);"></span>硬规则(违反就要返工)</h3>
+  <ul class="dot-list">
+    <li><strong>不硬编码色值</strong>,统一用 <code>var(--color-*)</code> 引用 token</li>
+    <li><strong>不自创按钮/卡片样式</strong>,必须用 <code>ui-action-button</code> 和 <code>.card</code> 类</li>
+    <li><strong>状态标签必须 pill 样式</strong>(<code>.status-tag</code> + <code>--radius-pill</code>)</li>
+    <li><strong>功能图标必须 <code>.icon-tile</code> CSS-only</strong>,禁用单字占位符</li>
+    <li><strong>页面级 hero 用 <code>var(--gradient-hero)</code></strong>,不要自己配色</li>
+    <li><strong>所有应用 <code>app_<key>_</code> 前缀的私有样式自由</strong>,公共样式必须走 design_system</li>
+  </ul>
+
+  <!-- ============ §03 页面骨架 ============ -->
+  <h2><span class="sec-num">03</span>页面骨架(全站统一)</h2>
+  <p>9 个页面归纳成 3 种骨架,每种骨架的槽位写死规则。</p>
+
+  <h3><span class="dot" style="background: var(--primary);"></span>骨架 A — 仪表盘(首页类)</h3>
+  <div class="page-skeleton">
+    <div class="label">骨架 A</div>
+    <div class="mock-phone">
+      <div class="frame">
+        <div class="mock-bar mock-bar--lg hero"></div>
+        <div class="mock-bar mock-bar--sm" style="margin-top: 16px;"></div>
+        <div class="mock-card" style="margin-top: 8px; display: flex; gap: 8px;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--primary-light); flex-shrink: 0;"></div>
+          <div style="flex: 1;">
+            <div class="mock-bar" style="width: 70%;"></div>
+            <div class="mock-bar mock-bar--sm" style="width: 50%;"></div>
+          </div>
+        </div>
+        <div class="mock-card" style="display: flex; gap: 8px;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--warm-light); flex-shrink: 0;"></div>
+          <div style="flex: 1;">
+            <div class="mock-bar" style="width: 70%;"></div>
+            <div class="mock-bar mock-bar--sm" style="width: 50%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 13px; color: var(--text-2); line-height: 1.65;">
+      <p><strong>适用</strong>:首页、profile(账户中心)</p>
+      <p><strong>槽位</strong>:</p>
+      <ul class="dot-list">
+        <li>顶部 hero:渐变卡 + 大号数值 + 操作按钮</li>
+        <li>快捷入口区:4 个 <code>.icon-tile</code> 横排</li>
+        <li>应用/菜单列表:<code>ui-section</code> + <code>.card</code></li>
+      </ul>
+      <p><strong>已有</strong>:<code>pages/index/</code>、<code>pages/profile/</code>(基本到位,微调 id-bar)</p>
+    </div>
+  </div>
+
+  <h3><span class="dot" style="background: var(--warm);"></span>骨架 B — 列表中心(订单/流水类)</h3>
+  <div class="page-skeleton">
+    <div class="label">骨架 B</div>
+    <div class="mock-phone">
+      <div class="frame">
+        <div class="mock-bar mock-bar--lg" style="background: var(--warm-light); border-radius: 14px; height: 80px;"></div>
+        <div class="mock-bar mock-bar--md" style="margin-top: 16px; width: 40%;"></div>
+        <div class="mock-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="mock-bar" style="width: 40%; margin-bottom: 0;"></div>
+            <span class="mock-status">已完成</span>
+          </div>
+          <div class="mock-bar mock-bar--sm"></div>
+          <div class="mock-bar mock-bar--sm" style="margin-top: 4px;"></div>
+        </div>
+        <div class="mock-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="mock-bar" style="width: 40%; margin-bottom: 0;"></div>
+            <span class="mock-status mock-status--warm">待支付</span>
+          </div>
+          <div class="mock-bar mock-bar--sm"></div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 13px; color: var(--text-2); line-height: 1.65;">
+      <p><strong>适用</strong>:orders、transactions、usage-records</p>
+      <p><strong>槽位</strong>:</p>
+      <ul class="dot-list">
+        <li>顶部 mini-hero:轻量渐变小卡(账户汇总/统计)</li>
+        <li>列表区:新公共组件 <code>ui-info-card</code> + 状态 pill</li>
+        <li>加载更多:已有的 <code>.load-more</code></li>
+      </ul>
+      <p><strong>待做</strong>:抽出 <code>ui-info-card</code>、给 3 个页面加 mini-hero</p>
+    </div>
+  </div>
+
+  <h3><span class="dot" style="background: var(--teal);"></span>骨架 C — 应用执行页(工具类)</h3>
+  <div class="page-skeleton">
+    <div class="label">骨架 C</div>
+    <div class="mock-phone">
+      <div class="frame">
+        <div class="mock-bar mock-bar--lg hero"></div>
+        <div class="mock-card" style="margin-top: 12px;">
+          <div class="mock-bar" style="width: 30%; margin-bottom: 8px;"></div>
+          <div class="mock-bar" style="height: 44px; border-radius: 6px; background: var(--line-soft);"></div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-bar" style="width: 30%; margin-bottom: 8px;"></div>
+          <div class="mock-bar" style="height: 44px; border-radius: 6px; background: var(--line-soft);"></div>
+        </div>
+        <div class="mock-bar" style="height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-bright)); margin-top: 12px;"></div>
+      </div>
+    </div>
+    <div style="font-size: 13px; color: var(--text-2); line-height: 1.65;">
+      <p><strong>适用</strong>:demo-sum、ai_draw、nursing_undercover、未来新应用</p>
+      <p><strong>槽位</strong>:</p>
+      <ul class="dot-list">
+        <li>顶部 hero:<code>app-exec-header</code> 渐变 + 应用名 + 费用 chip</li>
+        <li>表单/选项区:<code>ui-form-field</code> 包裹</li>
+        <li>主操作:<code>ui-action-button</code></li>
+        <li>结果区:业务自定义,但必须用 token 色和间距</li>
+      </ul>
+      <p><strong>已有</strong>:<code>pages/tools/demo-sum/</code>、<code>pages/apps/ai_draw/</code>、<code>pages/apps/nursing_undercover/</code></p>
+    </div>
+  </div>
+
+  <!-- ============ §04 状态机 ============ -->
+  <h2><span class="sec-num">04</span>Phase 进度指示器(状态机)</h2>
+  <p>整站状态切换用统一的状态机 + pill 进度,不要再让每个页面自己写"步骤 1/2/3"。</p>
+
+  <div class="steps">
+    <div class="step-cell done">配置</div>
+    <div class="step-cell active">游戏中</div>
+    <div class="step-cell">投票</div>
+    <div class="step-cell">结果</div>
+  </div>
+  <p style="font-size: 12px; color: var(--muted); margin-top: 6px;">4 状态:done (薄荷青) · active (浅蓝) · pending (灰)。卧底页 P1 进度条用这个 pattern,新页面复用。</p>
+
+  <h3><span class="dot" style="background: var(--lavender);"></span>Status Pill 规范</h3>
+  <p>所有"已完成/进行中/失败"状态文字用统一的 <code>.status-tag</code> 派生,业务自定义色只允许 4 个变体:</p>
+  <div style="margin: 12px 0;">
+    <span class="status-pill status-pill--success">成功 · success</span>
+    <span class="status-pill status-pill--warning">待处理 · warning</span>
+    <span class="status-pill status-pill--danger">失败 · danger</span>
+    <span class="status-pill status-pill--info">进行中 · info</span>
+    <span class="status-pill status-pill--default">默认 · default</span>
+  </div>
+
+  <!-- ============ §05 改造执行计划 ============ -->
+  <h2><span class="sec-num">05</span>改造执行(三阶段)</h2>
+
+  <h3><span class="dot" style="background: var(--primary);"></span>阶段 A — 抽 2 个公共组件,5 页面接入(~250 行 wxss)</h3>
+  <div class="flow">
+    <div class="flow-node">
+      <span class="step-num">A1</span>
+      <h4>新增 <code>ui-info-card</code></h4>
+      <p>通用列表卡:<code>__top</code>(id+status)/<code>__row</code>(label+value)/<code>__footer</code>(时间戳)。orders/transactions/usage-records 三个页面共用,各自只覆盖业务差异样式。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">A2</span>
+      <h4>新增 <code>ui-page-hero</code></h4>
+      <p>轻量版 hero(比 <code>app-exec-header</code> 小,适合详情列表页头)。变体 <code>variant</code>:primary/teal/warm/lavender,配 mini 统计数字 + 副标题。给 5 个页面各自换 hero 色。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">A3</span>
+      <h4>5 个页面 wxml/wxss 接入</h4>
+      <p>替换 <code>info-card</code> 为 <code>ui-info-card</code>;<code>pkg-card</code> / <code>tx-delta-chip</code> 改为 <code>ui-info-card</code> 的 slot 或保留;profile id-bar 改成 <code>.card</code> 风格。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">A4</span>
+      <h4>design_system.md 补</h4>
+      <p>把 <code>ui-info-card</code> 和 <code>ui-page-hero</code> 写进 §3 组件清单;<code>pkg-card</code>/<code>tx-delta-chip</code> 标"已归集到 ui-info-card"或保留并加规范。</p>
+    </div>
+  </div>
+
+  <h3><span class="dot" style="background: var(--warm);"></span>阶段 B — 整站细节润色(~150 行 wxss)</h3>
+  <div class="flow">
+    <div class="flow-node">
+      <span class="step-num">B1</span>
+      <h4>profile 账户卡升级</h4>
+      <p>合并 id-bar 进 account-card,移除 border,改成 <code>.card</code> 风格(无边框 + 柔阴影)。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">B2</span>
+      <h4>recharge mock-card 调整</h4>
+      <p>warning dashed 改成 <code>.card--soft</code>(薰衣草底)语义化变体,跟 design_system 走。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">B3</span>
+      <h4>空状态统一</h4>
+      <p>所有 "暂无 xxx" 用 <code>ui-empty</code>(已有),样式确认正确。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">B4</span>
+      <h4>care-divider 散布</h4>
+      <p>在长卡片里添加 <code>.care-divider</code>(彩虹渐变分隔符)做视觉断点。</p>
+    </div>
+  </div>
+
+  <h3><span class="dot" style="background: var(--teal);"></span>阶段 C — 验证(必须做)</h3>
+  <div class="flow">
+    <div class="flow-node">
+      <span class="step-num">C1</span>
+      <h4>边界检查</h4>
+      <p>跑 <code>bash scripts/check-boundaries.sh</code> 和 <code>bash scripts/check-js.sh</code>,必须全绿。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">C2</span>
+      <h4>Playwright 9 页全截图</h4>
+      <p>iPhone 390×844 截 9 张图,肉眼 + Read 工具验证视觉。</p>
+    </div>
+    <div class="flow-node">
+      <span class="step-num">C3</span>
+      <h4>真机体验版</h4>
+      <p>体验成员扫码走一遍:首页→应用→配置→对局→投票→结果→个人中心→订单→充值。</p>
+    </div>
+  </div>
+
+  <!-- ============ §06 决策点 ============ -->
+  <h2><span class="sec-num">06</span>决策点(动手前对齐)</h2>
+  <table class="audit decision-table">
+    <thead><tr><th>#</th><th>决策</th><th>推荐</th><th>影响</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>pkg-card</code> 是否抽到 <code>ui-info-card</code>?</td><td>部分抽:只抽 <code>__header</code>/<code>__row</code>/<code>__footer</code> 三个 slot,<code>pkg-card__btn</code> 留业务自定义</td><td>公共组件边界</td></tr>
+      <tr><td>2</td><td><code>tx-delta-chip--plus/--minus</code> 颜色</td><td>用 <code>--color-success</code> / <code>--color-danger</code>,不再加业务自定义色</td><td>色彩 token 净化</td></tr>
+      <tr><td>3</td><td>页面级 hero 色分配</td><td>profile=teal · orders=primary · recharge=warm · transactions=lavender · usage-records=primary</td><td>每页主色跟业务匹配</td></tr>
+      <tr><td>4</td><td>是 1 个 commit 还是 5 个?</td><td>A/B/C 三大阶段各 1 个 commit,共 3 个</td><td>代码评审粒度</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ============ §07 文件清单 ============ -->
+  <h2><span class="sec-num">07</span>改造涉及文件清单</h2>
+  <div class="card">
+    <div class="kv"><div class="k">新增</div><div class="v"><code>miniprogram/components/ui/ui-info-card/{index.wxml,index.js,index.wxss,index.json}</code> · <code>miniprogram/components/ui/ui-page-hero/{index.wxml,index.js,index.wxss,index.json}</code></div></div>
+    <div class="kv"><div class="k">修改 · 业务页</div><div class="v"><code>pages/profile/{index.wxml,index.wxss}</code> · <code>pages/orders/{index.wxml,index.wxss}</code> · <code>pages/recharge/{index.wxml,index.wxss}</code> · <code>pages/transactions/{index.wxml,index.wxss}</code> · <code>pages/usage-records/{index.wxml,index.wxss}</code></div></div>
+    <div class="kv"><div class="k">修改 · 全局</div><div class="v"><code>app.json</code> 注册 2 个新组件 · <code>docs/design_system.md</code> 补组件清单 · <code>docs/app_boundary_and_onboarding.md</code> 引用新组件</div></div>
+    <div class="kv"><div class="k">不动</div><div class="v"><code>tokens.wxss</code>(色值已定)· <code>common.wxss</code>(除非新增 .card 变体)· 云函数 · 业务 js 逻辑</div></div>
+    <div class="kv"><div class="k">预估代码量</div><div class="v">+~700 行 wxss(其中 ~400 行抽公共组件,~300 行改造 5 页面),+~200 行 wxml,0 行 js 业务逻辑</div></div>
+  </div>
+
+  <footer>
+    huli-tools 设计系统 v3 · 制定于 2026-06-15 · 主笔 Mavis · 配套 <code>docs/design_system.md</code> · 配套 <code>miniprogram/styles/tokens.wxss</code>
+  </footer>
+
+</div>
+
+</body>
+</html>

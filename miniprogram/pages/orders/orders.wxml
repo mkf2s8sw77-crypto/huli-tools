@@ -1,7 +1,29 @@
 <ui-page title="我的订单" subtitle="充值订单与支付状态">
+  <!-- mini-hero(骨架 B):账户汇总 -->
+  <view class="list-hero fade-in" wx:if="{{!loading && orders.length > 0}}">
+    <view class="list-hero__row">
+      <view class="list-hero__col">
+        <text class="list-hero__value serif-num">{{total}}</text>
+        <text class="list-hero__label">累计订单</text>
+      </view>
+      <view class="list-hero__divider"></view>
+      <view class="list-hero__col">
+        <text class="list-hero__value serif-num">{{orders.length}}</text>
+        <text class="list-hero__label">当前显示</text>
+      </view>
+      <view class="list-hero__divider"></view>
+      <view class="list-hero__col">
+        <text class="list-hero__value serif-num">¥{{total > 0 ? orders[0].amountYuan : '0.00'}}</text>
+        <text class="list-hero__label">最近金额</text>
+      </view>
+    </view>
+  </view>
+
   <view wx:if="{{loading && orders.length === 0}}">
     <ui-card>
-      <text class="loading-state">正在加载...</text>
+      <view class="skeleton" style="height: 60rpx; margin-bottom: 12rpx;"></view>
+      <view class="skeleton" style="height: 60rpx; margin-bottom: 12rpx;"></view>
+      <view class="skeleton" style="height: 60rpx;"></view>
     </ui-card>
   </view>
 
@@ -13,7 +35,7 @@
     <view
       wx:for="{{orders}}"
       wx:key="orderNo"
-      class="card info-card"
+      class="info-card card lift-on-hover fade-in-{{index % 4 + 1}}"
     >
       <view class="info-card__top">
         <text class="info-card__id">{{item.orderNo}}</text>
@@ -21,12 +43,13 @@
       </view>
       <view class="info-card__row">
         <text class="info-card__label">{{item.packageKey}}</text>
-        <text class="info-card__amount">¥{{item.amountYuan}}</text>
+        <text class="info-card__amount serif-num">¥{{item.amountYuan}}</text>
       </view>
       <view class="info-card__row">
         <text class="info-card__label">到账积分</text>
         <ui-price value="{{item.pointsTotal}}" type="points" size="sm" />
       </view>
+      <view class="care-divider"></view>
       <view class="info-card__footer">
         <text class="info-card__time">{{item.createdAtText}}</text>
         <text wx:if="{{item.paidAtText !== '-'}}" class="info-card__time">支付于 {{item.paidAtText}}</text>

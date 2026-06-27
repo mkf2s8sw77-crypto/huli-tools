@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>卧底 - P3 结果</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button onclick="location.href='p0-config.html'">P0 配置</button>
+  <button onclick="location.href='p1-game.html'">P1 游戏</button>
+  <button onclick="location.href='p2-vote.html'">P2 投票</button>
+  <button class="active" onclick="location.href='p3-result.html'">P3 结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar">
+    <span class="status-bar__time">9:41</span>
+    <span class="status-bar__icons"></span>
+  </div>
+  <div class="nav-bar">huli-tools</div>
+
+  <div class="scroll-content">
+    <!-- P3 应用头部 -->
+    <div class="app-exec-header app-exec-header--undercover">
+      <div class="app-exec-header__row">
+        <div class="icon-tile icon-tile--app icon-tile--lavender icon-tile--undercover">
+          <div class="icon-tile__glyph"></div>
+        </div>
+        <div class="app-exec-header__info">
+          <span class="app-exec-header__name">谁是卧底（护理版）</span>
+          <span class="app-exec-header__cost">免费</span>
+          <span class="app-exec-header__desc">看看这局你学到了什么</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 胜负结果 — 输了 -->
+    <div class="nu-result-hero nu-result-hero--lose">
+      <div class="nu-result-hero__icon">
+        <span class="nu-result-hero__icon-glyph">!</span>
+      </div>
+      <span class="nu-result-hero__title">这次卧底技高一筹</span>
+      <span class="nu-result-hero__subtitle">卧底阵营胜利 · 下次再战</span>
+      <div class="nu-result-hero__details">
+        <span>正确卧底:陈护士</span>
+        <span>被投出的人:赵护士</span>
+      </div>
+    </div>
+
+    <!-- 答案揭晓 -->
+    <div class="nu-reveal-section">
+      <span class="section-title">答案揭晓</span>
+      <div class="nu-role-list">
+        <div class="nu-role-item card nu-role-item--undercover">
+          <div class="nu-role-item__header">
+            <span class="nu-role-item__name">陈护士</span>
+            <span class="status-tag status-tag--warning">卧底</span>
+          </div>
+          <div class="nu-role-item__secret-row">
+            <span class="nu-role-item__secret-label">密令</span>
+            <span class="nu-role-item__secret">继续使用导管并加用广谱抗生素</span>
+          </div>
+        </div>
+        <div class="nu-role-item card">
+          <div class="nu-role-item__header">
+            <span class="nu-role-item__name">赵护士</span>
+            <span class="status-tag status-tag--success">平民</span>
+          </div>
+          <div class="nu-role-item__secret-row">
+            <span class="nu-role-item__secret-label">密令</span>
+            <span class="nu-role-item__secret">评估导管留置必要性、检查穿刺点、采集血培养后考虑拔管</span>
+          </div>
+        </div>
+        <div class="nu-role-item card">
+          <div class="nu-role-item__header">
+            <span class="nu-role-item__name">张护士</span>
+            <span class="status-tag status-tag--success">平民</span>
+          </div>
+          <div class="nu-role-item__secret-row">
+            <span class="nu-role-item__secret-label">密令</span>
+            <span class="nu-role-item__secret">评估导管留置必要性、检查穿刺点、采集血培养后考虑拔管</span>
+          </div>
+        </div>
+        <div class="nu-role-item card">
+          <div class="nu-role-item__header">
+            <span class="nu-role-item__name">吴护士</span>
+            <span class="status-tag status-tag--success">平民</span>
+          </div>
+          <div class="nu-role-item__secret-row">
+            <span class="nu-role-item__secret-label">密令</span>
+            <span class="nu-role-item__secret">评估导管留置必要性、检查穿刺点、采集血培养后考虑拔管</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 投票结果 -->
+    <span class="section-title">投票结果</span>
+    <div class="nu-vote-result-list card">
+      <div class="nu-vote-result-item">
+        <span class="nu-vote-result-item__voter">赵护士</span>
+        <span class="nu-vote-result-item__arrow">→</span>
+        <span class="nu-vote-result-item__target">陈护士</span>
+        <span class="nu-vote-result-item__reason">发言最摇摆,既支持拔管又倾向保守</span>
+      </div>
+      <div class="nu-vote-result-item">
+        <span class="nu-vote-result-item__voter">张护士</span>
+        <span class="nu-vote-result-item__arrow">→</span>
+        <span class="nu-vote-result-item__target">陈护士</span>
+        <span class="nu-vote-result-item__reason">支持继续导管加抗生素,跟我们的标准答案相反</span>
+      </div>
+      <div class="nu-vote-result-item">
+        <span class="nu-vote-result-item__voter">陈护士</span>
+        <span class="nu-vote-result-item__arrow">→</span>
+        <span class="nu-vote-result-item__target">赵护士</span>
+        <span class="nu-vote-result-item__reason">她太积极了,反而可疑</span>
+      </div>
+      <div class="nu-vote-result-item">
+        <span class="nu-vote-result-item__voter">吴护士</span>
+        <span class="nu-vote-result-item__arrow">→</span>
+        <span class="nu-vote-result-item__target">陈护士</span>
+        <span class="nu-vote-result-item__reason">理由同赵护士</span>
+      </div>
+    </div>
+
+    <!-- 教学复盘 -->
+    <div class="nu-debrief-section">
+      <span class="section-title">教学复盘</span>
+      <div class="card nu-debrief">
+        <span class="nu-debrief__summary">本场景考察的中心静脉导管相关血流感染(CRBSI)处理流程。卧底"陈护士"错误地主张继续使用导管加广谱抗生素,而标准做法是先评估、必要时拔除并送检。</span>
+
+        <div class="nu-debrief__block">
+          <div class="nu-debrief__label-row">
+            <div class="nu-debrief__dot nu-debrief__dot--clue"></div>
+            <span class="nu-debrief__label">关键线索</span>
+          </div>
+          <div class="nu-debrief__item">患者体温 38.5℃ 持续升高,穿刺点疑似红肿</div>
+          <div class="nu-debrief__item">卧底发言中回避"拔管"二字,反复强调"继续观察"</div>
+          <div class="nu-debrief__item">卧底的密令是"加用广谱抗生素"而非"调整方案"</div>
+        </div>
+
+        <div class="nu-debrief__block">
+          <div class="nu-debrief__label-row">
+            <div class="nu-debrief__dot nu-debrief__dot--knowledge"></div>
+            <span class="nu-debrief__label">知识点</span>
+          </div>
+          <div class="nu-debrief__item">CRBSI 诊断三联征:发热 + 穿刺点炎症 + 血培养阳性</div>
+          <div class="nu-debrief__item">怀疑 CRBSI 时,应拔除导管并送尖端培养 + 血培养</div>
+          <div class="nu-debrief__item">血培养应在使用抗生素前采集</div>
+        </div>
+
+        <div class="nu-debrief__block">
+          <div class="nu-debrief__label-row">
+            <div class="nu-debrief__dot nu-debrief__dot--safety"></div>
+            <span class="nu-debrief__label">安全提醒</span>
+          </div>
+          <div class="nu-debrief__item">不可在未明确感染源时盲目加用抗生素</div>
+          <div class="nu-debrief__item">长期留置导管应每日评估必要性</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nu-action-area">
+      <button class="nu-action-btn">再来一局</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

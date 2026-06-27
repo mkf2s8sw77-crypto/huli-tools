@@ -1,86 +1,110 @@
-/* huli-tools 设计系统 — 柔彩多巴胺 Token */
+/* huli-tools 设计系统 v3 — 自然疗愈
+   暖米黄调 · 陶土棕强调 · 衬线标题(轻量)
+   衬线字体仅在 page-title / 数值 / 应用名称使用,正文保持无衬线。
+   替代 v2 的"柔彩多巴胺"调性。 */
 
 page {
-  /* ── 主色系（晴空蓝） ── */
-  --color-primary: #5E95C8;
-  --color-primary-hover: #4E85B8;
-  --color-primary-bright: #82B5E0;
-  --color-primary-light: #EDF4FB;
-  --color-on-primary: #ffffff;
-
-  /* ── 品牌辅助色（薄荷青） ── */
-  --color-brand-soft: #5EBCB0;
-  --color-brand-soft-bright: #7ED1C6;
-  --color-brand-soft-light: #EBF7F5;
-
-  /* ── 暖调强调色（珊瑚橙） ── */
-  --color-accent-warm: #E8956B;
-  --color-accent-warm-bright: #F0B08E;
-  --color-accent-warm-light: #FDF0E8;
-
-  /* ── 多巴胺扩展色 ── */
-  --color-peach: #F0A8B2;
-  --color-peach-light: #FDF0F2;
-  --color-lemon: #E8C84A;
-  --color-lemon-light: #FEF8E6;
-  --color-lavender: #B6A8D8;
-  --color-lavender-light: #F2F0F8;
-
-  /* ── 状态色 ── */
-  --color-success: #4CAF82;
-  --color-success-light: #EAF6EF;
-  --color-warning: #E8A84C;
-  --color-warning-light: #FEF5E8;
-  --color-danger: #E06B6B;
-  --color-danger-light: #FDEDED;
-
-  /* ── 文字 ── */
-  --color-text: #2D3748;
-  --color-text-secondary: #5A6B7D;
-  --color-text-muted: #8D99A8;
-
-  /* ── 表面系统 ── */
-  --color-bg: #F5F3F0;
-  --color-surface: #F8F6F3;
+  /* ── 背景层(暖米系列) ── */
+  --color-bg: #F5F0E8;          /* 页面底色,暖米 */
+  --color-surface: #FBF8F2;     /* 输入框/卡内嵌区 */
   --color-surface-elevated: #ffffff;
   --color-bg-card: #ffffff;
-  --color-border: #E8E3DE;
-  --color-border-soft: #F0ECE8;
+  --color-border: #E0D6C2;      /* 暖陶土描边 */
+  --color-border-soft: #EDE5D3;
+
+  /* ── 主色:陶土棕(替代原晴空蓝) ── */
+  --color-primary: #8A6A3A;     /* 陶土棕,品牌/可交互元素 */
+  --color-primary-hover: #6F5329;
+  --color-primary-bright: #B8956A; /* 暖陶土亮 */
+  --color-primary-light: #F2E9D8;  /* 浅米 */
+  --color-on-primary: #ffffff;
+
+  /* ── 品牌辅色:雾绿(替代原薄荷青) ── */
+  --color-brand-soft: #7A8B6A;   /* 雾蒙绿,关怀辅色 */
+  --color-brand-soft-bright: #98A888;
+  --color-brand-soft-light: #ECEEE3;
+
+  /* ── 暖调强调:陶橙(替代原珊瑚橙) ── */
+  --color-accent-warm: #C8804A;   /* 陶土橙,价格/积分 */
+  --color-accent-warm-bright: #D69A6A;
+  --color-accent-warm-light: #F4E2D2;
+
+  /* ── 多巴胺扩展色(降饱和) ── */
+  --color-peach: #C8988A;          /* 陶桃粉,降饱和 */
+  --color-peach-light: #F2E2DC;
+  --color-lemon: #C8A24A;          /* 陶柠,降饱和 */
+  --color-lemon-light: #F4ECD2;
+  --color-lavender: #9A8AA8;      /* 雾蒙薰衣草,降饱和 */
+  --color-lavender-light: #ECE7EF;
+
+  /* ── 状态色(更柔) ── */
+  --color-success: #6F8F5A;        /* 莫兰迪绿,降饱和 */
+  --color-success-light: #E5ECDC;
+  --color-warning: #B8904A;        /* 莫兰迪琥珀 */
+  --color-warning-light: #F0E5C8;
+  --color-danger: #B66A6A;         /* 莫兰迪砖红 */
+  --color-danger-light: #F0D9D9;
+
+  /* ── 文字色(墨色,带温度) ── */
+  --color-text: #2D2418;           /* 墨褐,正文 */
+  --color-text-secondary: #5A4A38;/* 暖灰次 */
+  --color-text-muted: #8A7A66;    /* 暖灰弱 */
 
   /* ── 语义色 ── */
-  --color-price: #E8956B;
-  --color-points: #5E95C8;
+  --color-price: #C8804A;
+  --color-points: #8A6A3A;
 
-  /* ── 圆角 ── */
-  --radius-sm: 8rpx;
-  --radius-md: 12rpx;
-  --radius-lg: 20rpx;
-  --radius-xl: 28rpx;
-  --radius-pill: 999rpx;
+  /* ── 微信绿保留(仅微信登录按钮) ── */
+  --color-wechat: #07c160;
 
-  /* ── 阴影 ── */
-  --shadow-soft: 0 2rpx 16rpx rgba(0, 0, 0, 0.04), 0 1rpx 4rpx rgba(0, 0, 0, 0.02);
-  --shadow-card: 0 4rpx 24rpx rgba(0, 0, 0, 0.05), 0 1rpx 6rpx rgba(0, 0, 0, 0.02);
-  --shadow-elevated: 0 8rpx 40rpx rgba(0, 0, 0, 0.07), 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+  /* ── 圆角(更柔) ── */
+  --radius-sm: 4px;
+  --radius-md: 10px;     /* 比 v2 大 1 档,更柔 */
+  --radius-lg: 16px;     /* 卡片,v2 的 20rpx 改 16px */
+  --radius-xl: 24px;     /* hero,v2 的 28rpx 改 24px */
+  --radius-pill: 999px;
 
-  /* ── 间距 ── */
+  /* ── 阴影(更柔,带温度) ── */
+  --shadow-soft: 0 1px 2px rgba(45, 36, 24, 0.04), 0 2px 8px rgba(45, 36, 24, 0.04);
+  --shadow-card: 0 1px 1px rgba(255, 255, 255, 0.5) inset,
+                 0 2px 12px rgba(125, 98, 50, 0.08);
+  --shadow-elevated: 0 1px 1px rgba(255, 255, 255, 0.6) inset,
+                     0 8px 24px rgba(125, 98, 50, 0.1);
+
+  /* ── 间距(微调,CJK 适配更紧) ── */
   --spacing-xs: 8rpx;
   --spacing-sm: 16rpx;
   --spacing-md: 24rpx;
   --spacing-lg: 32rpx;
   --spacing-xl: 48rpx;
 
-  /* ── 页面渐变 ── */
-  --page-gradient: linear-gradient(180deg, #EDE8F5 0%, #F5F3F0 320rpx, #F8F6F3 100%);
-  --gradient-primary: linear-gradient(135deg, #5E95C8 0%, #82B5E0 100%);
-  --gradient-hero: linear-gradient(135deg, #82B5E0 0%, #7ED1C6 50%, #F0A8B2 100%);
-  --gradient-brand-soft: linear-gradient(135deg, #5EBCB0 0%, #7ED1C6 100%);
-  --gradient-warm: linear-gradient(135deg, #E8956B 0%, #F0B08E 100%);
-  --gradient-peach: linear-gradient(135deg, #F0A8B2 0%, #F5C4CB 100%);
-  --gradient-lemon: linear-gradient(135deg, #E8C84A 0%, #F0D87A 100%);
-  --gradient-lavender: linear-gradient(135deg, #B6A8D8 0%, #CDC2E6 100%);
+  /* ── 页面渐变(暖米,无多巴胺彩虹) ── */
+  --page-gradient: linear-gradient(180deg, #EFE6D2 0%, #F5F0E8 320rpx, #F8F4EB 100%);
 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* ── 渐变(只保留陶土+雾绿,删多巴胺彩虹) ── */
+  --gradient-primary: linear-gradient(135deg, #8A6A3A 0%, #B8956A 100%);
+  --gradient-hero: linear-gradient(135deg, #B8956A 0%, #98A888 100%);     /* 暖陶+雾绿 */
+  --gradient-brand-soft: linear-gradient(135deg, #7A8B6A 0%, #98A888 100%);
+  --gradient-warm: linear-gradient(135deg, #C8804A 0%, #D69A6A 100%);
+  --gradient-peach: linear-gradient(135deg, #C8988A 0%, #D6A8A0 100%);
+  --gradient-lemon: linear-gradient(135deg, #C8A24A 0%, #D6BA68 100%);
+  --gradient-lavender: linear-gradient(135deg, #9A8AA8 0%, #B0A0BC 100%);
+
+  /* ── 微动效时长(可复用) ── */
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 360ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── 字体 ── */
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC",
+                "STSong", Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC",
+               "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  font-family: var(--font-sans);
   background: var(--page-gradient);
   color: var(--color-text);
 }

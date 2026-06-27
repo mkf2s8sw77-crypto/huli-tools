@@ -39,7 +39,7 @@
             <view class="icon-tile__glyph"></view>
           </view>
           <view class="nu-mode-card__body">
-            <text class="nu-mode-card__label">{{item.label}}</text>
+            <text class="nu-mode-card__label serif-num">{{item.label}}</text>
             <text class="nu-mode-card__desc">{{item.desc}}</text>
           </view>
           <view wx:if="{{selectedMode === item.key}}" class="nu-mode-card__check">✓</view>
@@ -57,7 +57,7 @@
           bindtap="onDifficultyChange"
         >
           <view class="nu-difficulty-chip__dot {{selectedDifficulty === item.key ? 'nu-difficulty-chip__dot--' + item.key : ''}}"></view>
-          <text class="nu-difficulty-chip__label">{{item.label}}</text>
+          <text class="nu-difficulty-chip__label serif-num">{{item.label}}</text>
         </view>
       </view>
 
@@ -145,7 +145,7 @@
         <text class="nu-secret-card__eyebrow">你的密令</text>
         <text class="nu-secret-card__sub">{{isUndercover ? '让平民误以为你是同伴,别被发现' : '说出线索,投票揪出卧底'}}</text>
       </view>
-      <text class="nu-secret-card__secret">{{playerSecret}}</text>
+      <text class="nu-secret-card__secret serif-num">{{playerSecret}}</text>
       <text class="nu-secret-card__hint" wx:if="{{session.mode === 'word_undercover'}}">描述你的密令但不能直接说出来</text>
       <text class="nu-secret-card__hint" wx:else>围绕护理情境讨论,不能暴露你的具体措施</text>
     </view>
@@ -229,7 +229,7 @@
       <view class="nu-secret-card__row">
         <text class="nu-secret-card__eyebrow">你的密令</text>
       </view>
-      <text class="nu-secret-card__secret">{{playerSecret}}</text>
+      <text class="nu-secret-card__secret serif-num">{{playerSecret}}</text>
     </view>
 
     <!-- 全部发言回顾 -->
@@ -268,7 +268,7 @@
           <text>{{item.displayName[0]}}</text>
         </view>
         <view class="nu-vote-option__body">
-          <text class="nu-vote-option__name">{{item.displayName}}</text>
+          <text class="nu-vote-option__name serif-num">{{item.displayName}}</text>
           <text class="nu-vote-option__hint">本轮发言 {{item.speechCount || 0}} 次</text>
         </view>
         <view wx:if="{{selectedVoteTarget === item.roleId}}" class="nu-vote-option__check">✓</view>
@@ -296,7 +296,7 @@
       <view class="nu-result-hero__icon">
         <text class="nu-result-hero__icon-glyph">{{session.result.playerWon ? '✓' : '!'}}</text>
       </view>
-      <text class="nu-result-hero__title">{{session.result.playerWon ? '智勇双全,揪出卧底！' : '这次卧底技高一筹'}}</text>
+      <text class="nu-result-hero__title serif-num">{{session.result.playerWon ? '智勇双全,揪出卧底！' : '这次卧底技高一筹'}}</text>
       <text class="nu-result-hero__subtitle">{{session.result.winner === 'civilian' ? '平民阵营胜利' : '卧底阵营胜利'}} · {{session.result.playerWon ? '下次继续' : '下次再战'}}</text>
       <view class="nu-result-hero__details">
         <text>正确卧底:{{session.undercoverRoleId === 'player' ? '你自己' : undercoverName}}</text>
@@ -306,10 +306,10 @@
 
     <!-- 取消/失败状态 -->
     <view wx:if="{{session.status === 'cancelled'}}" class="nu-result-hero nu-result-hero--neutral">
-      <text class="nu-result-hero__title">对局已取消</text>
+      <text class="nu-result-hero__title serif-num">对局已取消</text>
     </view>
     <view wx:if="{{session.status === 'failed'}}" class="nu-result-hero nu-result-hero--neutral">
-      <text class="nu-result-hero__title">对局失败</text>
+      <text class="nu-result-hero__title serif-num">对局失败</text>
       <text wx:if="{{session.errorMessage}}" class="nu-result-hero__subtitle">{{session.errorMessage}}</text>
     </view>
 
@@ -319,7 +319,7 @@
       <view class="nu-role-list">
         <view wx:for="{{session.roles}}" wx:key="roleId" class="nu-role-item card {{item.team === 'undercover' ? 'nu-role-item--undercover' : ''}}">
           <view class="nu-role-item__header">
-            <text class="nu-role-item__name">{{item.displayName}}</text>
+            <text class="nu-role-item__name serif-num">{{item.displayName}}</text>
             <text class="status-tag {{item.team === 'undercover' ? 'status-tag--warning' : 'status-tag--success'}}">{{item.team === 'undercover' ? '卧底' : '平民'}}</text>
           </view>
           <view class="nu-role-item__secret-row">

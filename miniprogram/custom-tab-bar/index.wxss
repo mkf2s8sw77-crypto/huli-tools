@@ -9,7 +9,7 @@
   justify-content: center;
   padding: 18rpx 44rpx 22rpx;
   padding-bottom: calc(22rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(248, 246, 243, 0) 0%, rgba(248, 246, 243, 0.88) 28%, #ffffff 100%);
+  background: linear-gradient(180deg, rgba(245, 240, 232, 0) 0%, rgba(245, 240, 232, 0.88) 28%, #ffffff 100%);
   z-index: 1000;
 }
 
@@ -21,21 +21,22 @@
   background: var(--color-surface-elevated);
   border-radius: 46rpx;
   padding: 12rpx;
-  box-shadow: 0 10rpx 34rpx rgba(45, 55, 72, 0.16), 0 2rpx 8rpx rgba(45, 55, 72, 0.08);
+  box-shadow: 0 10rpx 34rpx rgba(125, 98, 50, 0.16), 0 2rpx 8rpx rgba(125, 98, 50, 0.08);
   border: 2rpx solid rgba(255, 255, 255, 0.92);
   position: relative;
   overflow: hidden;
+  transition: box-shadow var(--t-base) var(--ease-out);
 }
 
 .tab-bar__inner::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 42rpx;
   right: 42rpx;
   height: 4rpx;
   background: var(--gradient-hero);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .tab-bar-item {
@@ -51,17 +52,24 @@
   min-height: 108rpx;
   box-sizing: border-box;
   border-radius: 34rpx;
-  transition: all 0.2s ease;
+  transition: background var(--t-base) var(--ease-out),
+              transform var(--t-fast) var(--ease-out),
+              box-shadow var(--t-base) var(--ease-out);
   z-index: 1;
+}
+
+.tab-bar-item:active {
+  transform: scale(0.97);
 }
 
 .tab-bar-item.active {
   background: var(--gradient-hero);
-  box-shadow: 0 8rpx 22rpx rgba(94, 149, 200, 0.22);
+  box-shadow: 0 8rpx 22rpx rgba(184, 149, 106, 0.3);
 }
 
 .tab-bar-item__icon {
   color: var(--color-text-secondary);
+  transition: color var(--t-fast) var(--ease-out);
 }
 
 .tab-bar-item.active .tab-bar-item__icon {
@@ -73,6 +81,7 @@
   color: var(--color-text-secondary);
   font-weight: 600;
   line-height: 1;
+  transition: color var(--t-fast) var(--ease-out);
 }
 
 .tab-bar-item.active .tab-text {
@@ -88,7 +97,7 @@
 
 .tab-icon::before,
 .tab-icon::after {
-  content: '';
+  content: "";
   position: absolute;
   box-sizing: border-box;
 }

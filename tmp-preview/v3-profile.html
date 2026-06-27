@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --color-bg: #F5F0E8;
+  --color-surface: #FBF8F2;
+  --color-bg-card: #ffffff;
+  --color-border-soft: #EDE5D3;
+  --color-primary: #8A6A3A;
+  --color-on-primary: #ffffff;
+  --color-brand-soft: #7A8B6A;
+  --color-accent-warm: #C8804A;
+  --color-lavender: #9A8AA8;
+  --color-text: #2D2418;
+  --color-text-secondary: #5A4A38;
+  --color-text-muted: #8A7A66;
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --gradient-hero: linear-gradient(135deg, #B8956A 0%, #98A888 100%);
+  --gradient-warm: linear-gradient(135deg, #C8804A 0%, #D69A6A 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #7A8B6A 0%, #98A888 100%);
+  --gradient-peach: linear-gradient(135deg, #C8988A 0%, #D6A8A0 100%);
+  --gradient-lavender: linear-gradient(135deg, #9A8AA8 0%, #B0A0BC 100%);
+  --page-bg: linear-gradient(180deg, #EFE6D2 0%, #F5F0E8 160px, #F8F4EB 100%);
+  --font-serif: "Noto Serif SC", "Songti SC", Georgia, serif;
+  --font-sans: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --shadow-card: 0 1px 1px rgba(255,255,255,0.5) inset, 0 2px 12px rgba(125,98,50,0.08);
+  --shadow-elevated: 0 1px 1px rgba(255,255,255,0.6) inset, 0 8px 24px rgba(125,98,50,0.1);
+}
+html, body { margin: 0; }
+body { font-family: var(--font-sans); background: #555; color: var(--color-text); -webkit-font-smoothing: antialiased; }
+.page-frame { width: 390px; height: 844px; overflow: hidden; background: var(--page-bg); position: relative; margin: 24px auto; box-shadow: 0 12px 60px rgba(0,0,0,0.3); }
+.status-bar { position: absolute; top: 0; left: 0; right: 0; height: 44px; background: #F5F0E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 15px; font-weight: 600; color: #2D2418; z-index: 10; }
+.status-bar__time { font-variant-numeric: tabular-nums; }
+.status-bar__icons { display: flex; gap: 6px; align-items: center; }
+.status-bar__icons::after { content: ''; display: inline-block; width: 24px; height: 12px; background: #2D2418; border-radius: 3px; }
+.nav-bar { position: absolute; top: 44px; left: 0; right: 0; height: 44px; background: #F5F0E8; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #2D2418; z-index: 10; border-bottom: 0.5px solid rgba(0,0,0,0.05); }
+.scroll-content { position: absolute; top: 88px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 16px; padding-bottom: 32px; }
+.serif-num { font-family: var(--font-serif); font-variant-numeric: tabular-nums; font-weight: 600; }
+.icon-tile { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; flex-shrink: 0; box-shadow: var(--shadow-card); --icon-line: #fff; }
+.icon-tile--coral { background: var(--gradient-warm); }
+.icon-tile--lavender { background: var(--gradient-lavender); }
+.icon-tile--teal { background: var(--gradient-brand-soft); }
+.icon-tile--peach { background: var(--gradient-peach); }
+.icon-tile--recharge::before { content: ''; position: absolute; left: 10px; top: 12px; width: 21px; height: 15px; border: 2.5px solid #fff; border-radius: 4.5px; }
+.icon-tile--recharge::after { content: ''; position: absolute; right: 9px; top: 16px; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+.icon-tile--orders::before { content: ''; position: absolute; left: 11.5px; top: 8px; width: 17px; height: 24px; border-radius: 4px; background: #fff; }
+.icon-tile--orders::after { content: ''; position: absolute; left: 15.5px; top: 14.5px; width: 9px; height: 2px; border-radius: 999px; background: rgba(45,36,24,0.32); box-shadow: 0 5px 0 rgba(45,36,24,0.28), 0 10px 0 rgba(45,36,24,0.22); }
+.icon-tile--transactions::before { content: ''; position: absolute; left: 9px; top: 12px; width: 22px; height: 14px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; border-radius: 0 0 0 8px; }
+.icon-tile--transactions::after { content: ''; position: absolute; right: 7.5px; top: 9px; width: 8px; height: 8px; border-top: 2.5px solid #fff; border-right: 2.5px solid #fff; transform: rotate(45deg); }
+.icon-tile--records::before { content: ''; position: absolute; left: 11.5px; top: 8.5px; width: 17px; height: 23px; border: 2.5px solid #fff; border-radius: 4px; }
+.icon-tile--records::after { content: ''; position: absolute; left: 15.5px; top: 6px; width: 9px; height: 5px; border-radius: 3px; background: #fff; box-shadow: 0 15px 0 -1.5px #fff, 0 21px 0 -1.5px #fff; }
+
+.phase-switcher { position: fixed; top: 12px; left: 12px; z-index: 100; background: rgba(0,0,0,0.7); border-radius: 6px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 360px; }
+.phase-switcher button { background: transparent; border: none; color: #fff; padding: 6px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+.phase-switcher button.active { background: #8A6A3A; }
+</style>
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button onclick="location.href='v3-p0-config.html'">P0</button>
+  <button onclick="location.href='v3-index.html'">首页</button>
+  <button class="active" onclick="location.href='v3-profile.html'">我的</button>
+  <button onclick="location.href='v3-orders.html'">订单</button>
+  <button onclick="location.href='v3-recharge.html'">充值</button>
+  <button onclick="location.href='v3-undercover-game.html'">卧底中</button>
+  <button onclick="location.href='v3-undercover-result.html'">卧底结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar"><span class="status-bar__time">9:41</span><span class="status-bar__icons"></span></div>
+  <div class="nav-bar">我的账户</div>
+
+  <div class="scroll-content">
+    <!-- 账户卡 -->
+    <div style="position: relative; border-radius: 24px; overflow: hidden; margin-bottom: 12px; box-shadow: var(--shadow-elevated);">
+      <div style="position: absolute; inset: 0; background: var(--gradient-hero);">
+        <div style="position: absolute; top: -30px; right: -15px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.10);"></div>
+      </div>
+      <div style="position: relative; z-index: 1; padding: 24px 16px 16px; color: #fff;">
+        <div class="serif-num" style="font-size: 12px; opacity: 0.85; margin-bottom: 3px; letter-spacing: 0.5px;">可用积分</div>
+        <div class="serif-num" style="font-size: 40px; font-weight: 600; line-height: 1.05;">2,840</div>
+        <div style="height: 1px; background: rgba(255,255,255,0.32); margin: 8px 0 10px;"></div>
+        <div style="display: flex; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 10px; opacity: 0.7;">累计充值</div>
+            <div class="serif-num" style="font-size: 14px; font-weight: 600;">3,000</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 10px; opacity: 0.7;">累计消费</div>
+            <div class="serif-num" style="font-size: 14px; font-weight: 600;">160</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 身份条 -->
+    <div style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff; border-radius: 16px; margin-bottom: 16px; box-shadow: var(--shadow-card);">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: var(--color-accent-warm); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); color: #fff; font-family: var(--font-serif); font-weight: 600; font-size: 14px;">沪</div>
+      <span style="font-size: 13px; color: var(--color-text-secondary); font-family: 'JetBrains Mono', monospace;">oP****-aB12...</span>
+    </div>
+
+    <!-- 账户管理 section -->
+    <div style="display: block; font-size: 15px; font-weight: 600; color: var(--color-text); line-height: 1.35; margin: 2px 0 11px; padding-left: 13px; position: relative;">
+      <span style="position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      账户管理
+    </div>
+
+    <div style="background: #fff; border-radius: 16px; box-shadow: var(--shadow-card); border: 0.5px solid var(--color-border-soft); overflow: hidden;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 0.5px solid var(--color-border-soft);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="icon-tile icon-tile--coral icon-tile--recharge" style="width: 24px; height: 24px; border-radius: 6px;">
+            <div style="position: absolute; left: 6px; top: 7px; width: 12px; height: 9px; border: 1.5px solid #fff; border-radius: 2.5px;"></div>
+            <div style="position: absolute; right: 5.5px; top: 9.5px; width: 5px; height: 5px; border-radius: 50%; background: #fff;"></div>
+          </div>
+          <span style="font-size: 15px; color: var(--color-text);">积分充值</span>
+        </div>
+        <span style="font-size: 14px; color: var(--color-text-muted);">›</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 0.5px solid var(--color-border-soft);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="icon-tile icon-tile--lavender icon-tile--orders" style="width: 24px; height: 24px; border-radius: 6px;">
+            <div style="position: absolute; left: 7px; top: 5px; width: 10px; height: 14px; border-radius: 2.5px; background: #fff;"></div>
+            <div style="position: absolute; left: 9.5px; top: 9px; width: 5px; height: 1px; border-radius: 999px; background: rgba(45,36,24,0.4); box-shadow: 0 3px 0 rgba(45,36,24,0.32), 0 6px 0 rgba(45,36,24,0.24);"></div>
+          </div>
+          <span style="font-size: 15px; color: var(--color-text);">我的订单</span>
+        </div>
+        <span style="font-size: 14px; color: var(--color-text-muted);">›</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 0.5px solid var(--color-border-soft);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="icon-tile icon-tile--teal icon-tile--transactions" style="width: 24px; height: 24px; border-radius: 6px;">
+            <div style="position: absolute; left: 5.5px; top: 7.5px; width: 13px; height: 8px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; border-radius: 0 0 0 5px;"></div>
+            <div style="position: absolute; right: 4.5px; top: 5.5px; width: 5px; height: 5px; border-top: 1.5px solid #fff; border-right: 1.5px solid #fff; transform: rotate(45deg);"></div>
+          </div>
+          <span style="font-size: 15px; color: var(--color-text);">积分流水</span>
+        </div>
+        <span style="font-size: 14px; color: var(--color-text-muted);">›</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="icon-tile icon-tile--peach icon-tile--records" style="width: 24px; height: 24px; border-radius: 6px;">
+            <div style="position: absolute; left: 7px; top: 5.5px; width: 10px; height: 14px; border: 1.5px solid #fff; border-radius: 2.5px;"></div>
+            <div style="position: absolute; left: 9.5px; top: 4px; width: 5px; height: 3px; border-radius: 2px; background: #fff; box-shadow: 0 9px 0 -1px #fff, 0 13px 0 -1px #fff;"></div>
+          </div>
+          <span style="font-size: 15px; color: var(--color-text);">使用记录</span>
+        </div>
+        <span style="font-size: 14px; color: var(--color-text-muted);">›</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

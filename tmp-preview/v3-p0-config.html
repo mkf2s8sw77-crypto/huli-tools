@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卧底 v3 - P0 配置阶段</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  /* v3 自然疗愈 token */
+  --color-bg: #F5F0E8;
+  --color-surface: #FBF8F2;
+  --color-bg-card: #ffffff;
+  --color-border: #E0D6C2;
+  --color-border-soft: #EDE5D3;
+  --color-primary: #8A6A3A;
+  --color-primary-light: #F2E9D8;
+  --color-on-primary: #ffffff;
+  --color-brand-soft: #7A8B6A;
+  --color-accent-warm: #C8804A;
+  --color-accent-warm-light: #F4E2D2;
+  --color-lavender: #9A8AA8;
+  --color-lavender-light: #ECE7EF;
+  --color-success: #6F8F5A;
+  --color-success-light: #E5ECDC;
+  --color-warning: #B8904A;
+  --color-warning-light: #F0E5C8;
+  --color-danger: #B66A6A;
+  --color-danger-light: #F0D9D9;
+  --color-text: #2D2418;
+  --color-text-secondary: #5A4A38;
+  --color-text-muted: #8A7A66;
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --gradient-primary: linear-gradient(135deg, #8A6A3A 0%, #B8956A 100%);
+  --gradient-hero: linear-gradient(135deg, #B8956A 0%, #98A888 100%);
+  --gradient-warm: linear-gradient(135deg, #C8804A 0%, #D69A6A 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #7A8B6A 0%, #98A888 100%);
+  --gradient-peach: linear-gradient(135deg, #C8988A 0%, #D6A8A0 100%);
+  --gradient-lavender: linear-gradient(135deg, #9A8AA8 0%, #B0A0BC 100%);
+  --page-bg: linear-gradient(180deg, #EFE6D2 0%, #F5F0E8 160px, #F8F4EB 100%);
+  --font-serif: "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+  --font-sans: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-soft: 0 1px 2px rgba(45,36,24,0.04), 0 2px 8px rgba(45,36,24,0.04);
+  --shadow-card: 0 1px 1px rgba(255,255,255,0.5) inset, 0 2px 12px rgba(125,98,50,0.08);
+  --shadow-elevated: 0 1px 1px rgba(255,255,255,0.6) inset, 0 8px 24px rgba(125,98,50,0.1);
+}
+
+html, body { margin: 0; }
+body {
+  font-family: var(--font-sans);
+  background: #555;
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page-frame {
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  background: var(--page-bg);
+  position: relative;
+  margin: 24px auto;
+  box-shadow: 0 12px 60px rgba(0,0,0,0.3);
+}
+.status-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 44px; background: #F5F0E8;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  font-size: 15px; font-weight: 600; color: #2D2418;
+  z-index: 10;
+}
+.status-bar__time { font-variant-numeric: tabular-nums; }
+.status-bar__icons { display: flex; gap: 6px; align-items: center; }
+.status-bar__icons::after { content: ''; display: inline-block; width: 24px; height: 12px; background: #2D2418; border-radius: 3px; }
+
+.nav-bar {
+  position: absolute; top: 44px; left: 0; right: 0;
+  height: 44px; background: #F5F0E8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 600; color: #2D2418;
+  z-index: 10;
+  border-bottom: 0.5px solid rgba(0,0,0,0.05);
+}
+
+.scroll-content {
+  position: absolute; top: 88px; left: 0; right: 0; bottom: 0;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 32px;
+}
+
+/* === icon-tile === */
+.icon-tile {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-soft);
+  --icon-line: var(--color-on-primary);
+}
+.icon-tile--app { width: 44px; height: 44px; border-radius: 12px; }
+.icon-tile--sm  { width: 24px; height: 24px; border-radius: 6px; }
+.icon-tile--blue    { background: var(--gradient-primary); }
+.icon-tile--teal    { background: var(--gradient-brand-soft); }
+.icon-tile--coral   { background: var(--gradient-warm); }
+.icon-tile--peach   { background: var(--gradient-peach); }
+.icon-tile--lavender{ background: var(--gradient-lavender); }
+.icon-tile--lemon   { background: linear-gradient(135deg, #C8A24A 0%, #D6BA68 100%); }
+
+/* === card === */
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-card);
+  border: 0.5px solid var(--color-border-soft);
+}
+
+/* === status-tag === */
+.status-tag {
+  display: inline-flex; align-items: center;
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 999px; font-weight: 500;
+  line-height: 1.4;
+}
+.status-tag--success { background: var(--color-success-light); color: var(--color-success); }
+.status-tag--warning { background: var(--color-warning-light); color: var(--color-warning); }
+.status-tag--danger  { background: var(--color-danger-light); color: var(--color-danger); }
+.status-tag--default { background: var(--color-surface); color: var(--color-text-secondary); }
+.status-tag--info    { background: var(--color-primary-light); color: var(--color-primary); }
+
+/* === text helpers === */
+.text-muted { color: var(--color-text-muted); }
+.serif-num { font-family: var(--font-serif); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* === phase switcher === */
+.phase-switcher {
+  position: fixed; top: 12px; left: 12px;
+  z-index: 100;
+  background: rgba(0,0,0,0.7);
+  border-radius: 6px; padding: 4px;
+  display: flex; gap: 4px;
+}
+.phase-switcher button {
+  background: transparent; border: none; color: #fff;
+  padding: 6px 10px; font-size: 11px;
+  border-radius: 4px; cursor: pointer; font-weight: 500;
+}
+.phase-switcher button.active { background: #8A6A3A; }
+
+/* === icon-tile 形状 === */
+.icon-tile--undercover::before {
+  content: ''; position: absolute;
+  left: 9px; top: 8px;
+  width: 17px; height: 17px;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+}
+.icon-tile--undercover::after {
+  content: ''; position: absolute;
+  left: 24px; top: 24px;
+  width: 9px; height: 2.5px;
+  background: #fff;
+  border-radius: 999px;
+  transform: rotate(45deg);
+}
+.icon-tile--calculator::before {
+  content: ''; position: absolute;
+  left: 10px; top: 7px;
+  width: 20px; height: 26px;
+  border: 2.5px solid var(--icon-line);
+  border-radius: 5px;
+}
+.icon-tile--calculator::after {
+  content: ''; position: absolute;
+  left: 14px; top: 12px;
+  width: 11px; height: 3.5px;
+  border-radius: 2px;
+  background: var(--icon-line);
+  box-shadow: 0 8.5px 0 -0.5px var(--icon-line), 0 15px 0 -0.5px var(--icon-line);
+}
+.icon-tile--recharge::before {
+  content: ''; position: absolute;
+  left: 10px; top: 12px;
+  width: 21px; height: 15px;
+  border: 2.5px solid #fff;
+  border-radius: 4.5px;
+}
+.icon-tile--recharge::after {
+  content: ''; position: absolute;
+  right: 9px; top: 16px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #fff;
+}
+.icon-tile--orders::before {
+  content: ''; position: absolute;
+  left: 11.5px; top: 8px;
+  width: 17px; height: 24px;
+  border-radius: 4px;
+  background: #fff;
+}
+.icon-tile--orders::after {
+  content: ''; position: absolute;
+  left: 15.5px; top: 14.5px;
+  width: 9px; height: 2px;
+  border-radius: 999px;
+  background: rgba(45, 36, 24, 0.32);
+  box-shadow: 0 5px 0 rgba(45, 36, 24, 0.28), 0 10px 0 rgba(45, 36, 24, 0.22);
+}
+.icon-tile--transactions::before {
+  content: ''; position: absolute;
+  left: 9px; top: 12px;
+  width: 22px; height: 14px;
+  border-left: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  border-radius: 0 0 0 8px;
+}
+.icon-tile--transactions::after {
+  content: ''; position: absolute;
+  right: 7.5px; top: 9px;
+  width: 8px; height: 8px;
+  border-top: 2.5px solid #fff;
+  border-right: 2.5px solid #fff;
+  transform: rotate(45deg);
+}
+.icon-tile--records::before {
+  content: ''; position: absolute;
+  left: 11.5px; top: 8.5px;
+  width: 17px; height: 23px;
+  border: 2.5px solid #fff;
+  border-radius: 4px;
+}
+.icon-tile--records::after {
+  content: ''; position: absolute;
+  left: 15.5px; top: 6px;
+  width: 9px; height: 5px;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: 0 15px 0 -1.5px #fff, 0 21px 0 -1.5px #fff;
+}
+.icon-tile--image::before {
+  content: ''; position: absolute;
+  left: 8.5px; top: 9px;
+  width: 23px; height: 21px;
+  border: 2.5px solid var(--icon-line);
+  border-radius: 5px;
+}
+.icon-tile--image::after {
+  content: ''; position: absolute;
+  left: 13px; top: 21px;
+  width: 15px; height: 9px;
+  background: var(--icon-line);
+  clip-path: polygon(0 100%, 38% 26%, 58% 58%, 74% 36%, 100% 100%);
+}
+</style>
+</head>
+<body>
+
+<div class="phase-switcher">
+  <button class="active" onclick="location.href='v3-p0-config.html'">P0</button>
+  <button onclick="location.href='v3-index.html'">首页</button>
+  <button onclick="location.href='v3-profile.html'">我的</button>
+  <button onclick="location.href='v3-orders.html'">订单</button>
+  <button onclick="location.href='v3-recharge.html'">充值</button>
+  <button onclick="location.href='v3-undercover-game.html'">卧底中</button>
+  <button onclick="location.href='v3-undercover-result.html'">卧底结果</button>
+</div>
+
+<div class="page-frame">
+  <div class="status-bar">
+    <span class="status-bar__time">9:41</span>
+    <span class="status-bar__icons"></span>
+  </div>
+  <div class="nav-bar">huli-tools</div>
+
+  <div class="scroll-content">
+    <!-- P0 hero -->
+    <div class="app-exec-header app-exec-header--sum" style="position: relative; overflow: hidden; border-radius: 24px; padding: 17px; margin-bottom: 16px; background: var(--gradient-hero); box-shadow: var(--shadow-elevated);">
+      <div style="position: absolute; right: -21px; top: -27px; width: 115px; height: 115px; border-radius: 50%; background: rgba(255,255,255,0.14); pointer-events: none;"></div>
+      <div style="display: flex; align-items: center; gap: 13px; position: relative; z-index: 1;">
+        <div class="icon-tile icon-tile--app icon-tile--lavender icon-tile--undercover" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5);">
+          <div style="position: absolute; inset: 0; z-index: 1;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <span class="app-exec-header__name serif-num" style="font-family: var(--font-serif); font-size: 19px; font-weight: 600; color: #fff; line-height: 1.25;">谁是卧底（护理版）</span>
+          <span style="align-self: flex-start; font-size: 12.5px; color: var(--color-accent-warm); background: #fff; border-radius: 999px; padding: 3.5px 9px; font-weight: 600; margin-top: 5px;">免费</span>
+          <span style="display: block; font-size: 12px; color: rgba(255,255,255,0.86); margin-top: 5px; line-height: 1.45;">与 AI 护士一起，揪出那个跟标准答案不一样的"卧底"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模式选择 -->
+    <div style="display: flex; align-items: center; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin: 0 0 8px; padding-left: 9px; position: relative;">
+      <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 9px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      第一步 · 选个玩法
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+      <div class="card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-primary-light) 100%); border-color: var(--color-primary);">
+        <div class="icon-tile icon-tile--app icon-tile--lavender" style="width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;">
+          <div style="position: absolute; inset: 0; z-index: 1;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+          <span class="serif-num" style="font-size: 15px; font-weight: 600; color: var(--color-text); line-height: 1.3;">病例推理卧底</span>
+          <span style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.45;">在真实护理场景中讨论决策，发现被错误答案混淆的"卧底"</span>
+        </div>
+        <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--gradient-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">✓</div>
+      </div>
+      <div class="card" style="display: flex; align-items: center; gap: 12px; padding: 12px;">
+        <div class="icon-tile icon-tile--app icon-tile--coral" style="width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;">
+          <div style="position: absolute; inset: 0; z-index: 1;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+          <span class="serif-num" style="font-size: 15px; font-weight: 600; color: var(--color-text); line-height: 1.3;">词语卧底</span>
+          <span style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.45;">经典玩法，描述自己的词，不能直接说出来</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 难度选择 -->
+    <div style="display: flex; align-items: center; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin: 0 0 8px; padding-left: 9px; position: relative;">
+      <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 9px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      第二步 · 选个难度
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 5px; padding: 7px 12px; background: var(--color-bg-card); border: 1px solid var(--color-border-soft); border-radius: 999px;">
+        <div style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-primary);"></div>
+        <span class="serif-num" style="font-size: 13.5px; font-weight: 600; color: var(--color-text);">护理学生</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 5px; padding: 7px 12px; background: var(--gradient-primary); border: none; border-radius: 999px; box-shadow: var(--shadow-soft);">
+        <div style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent-warm);"></div>
+        <span class="serif-num" style="font-size: 13.5px; font-weight: 600; color: #fff;">新护士规培</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 5px; padding: 7px 12px; background: var(--color-bg-card); border: 1px solid var(--color-border-soft); border-radius: 999px;">
+        <div style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-brand-soft);"></div>
+        <span class="serif-num" style="font-size: 13.5px; font-weight: 600; color: var(--color-text);">专科护士</span>
+      </div>
+    </div>
+
+    <!-- 参数卡 -->
+    <div style="display: flex; align-items: center; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin: 0 0 8px; padding-left: 9px; position: relative;">
+      <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 9px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      第三步 · 调个规模
+    </div>
+    <div class="card" style="padding: 12px 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 14px; font-weight: 600; color: var(--color-text);">AI 对手</span>
+        <span class="serif-num" style="font-size: 15px; font-weight: 600; color: var(--color-primary);">5 人</span>
+      </div>
+      <input type="range" min="4" max="6" value="5" style="-webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: var(--color-border-soft); border-radius: 999px; margin: 8px 0; outline: none;">
+      <div style="height: 1px; margin: 6px 0; background: var(--color-border-soft);"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 14px; font-weight: 600; color: var(--color-text);">发言轮数</span>
+        <span class="serif-num" style="font-size: 15px; font-weight: 600; color: var(--color-primary);">3 轮</span>
+      </div>
+      <input type="range" min="2" max="3" value="3" style="-webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: var(--color-border-soft); border-radius: 999px; margin: 8px 0; outline: none;">
+    </div>
+
+    <!-- 开始按钮 -->
+    <div style="margin: 16px 0;">
+      <button style="display: block; width: 100%; padding: 14px; background: var(--gradient-primary); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-soft); text-align: center; font-family: var(--font-sans);">开始对局</button>
+    </div>
+
+    <!-- 最近对局 -->
+    <div style="display: flex; align-items: center; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin: 0 0 8px; padding-left: 9px; position: relative;">
+      <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 9px; border-radius: 999px; background: var(--color-accent-warm);"></span>
+      最近对局
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="card" style="padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: 600; color: var(--color-text); flex: 1; min-width: 0; margin-right: 8px;">导管相关血流感染处理</span>
+          <span class="status-tag status-tag--success">胜利</span>
+        </div>
+        <div style="margin-top: 4px; font-size: 12px;"><span class="text-muted">病例推理卧底 · 新护士规培</span></div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: 600; color: var(--color-text); flex: 1; min-width: 0; margin-right: 8px;">术后早期下床活动</span>
+          <span class="status-tag status-tag--warning">失败</span>
+        </div>
+        <div style="margin-top: 4px; font-size: 12px;"><span class="text-muted">词语卧底 · 护理学生</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

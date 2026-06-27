@@ -1,6 +1,6 @@
-/* 首页 — 柔彩多巴胺仪表盘 */
+/* 首页 v3 — 自然疗愈仪表盘 */
 
-/* ── 积分摘要卡 ── */
+/* ── 积分摘要卡(骨架 A hero) ── */
 .points-hero {
   display: flex;
   align-items: center;
@@ -12,10 +12,10 @@
   box-shadow: var(--shadow-elevated);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
-
 .points-hero::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -40rpx;
   right: -40rpx;
@@ -23,83 +23,86 @@
   height: 200rpx;
   border-radius: 50%;
   background: var(--color-on-primary);
-  opacity: 0.1;
+  opacity: 0.10;
 }
-
 .points-hero__main {
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
-
 .points-hero__label {
   font-size: 24rpx;
   color: var(--color-on-primary);
-  opacity: 0.8;
-  margin-bottom: 4rpx;
+  opacity: 0.85;
+  margin-bottom: 6rpx;
+  letter-spacing: 0.5rpx;
 }
-
 .points-hero__value {
   font-size: 64rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-on-primary);
-  letter-spacing: 0;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
-
 .points-hero__action {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.22);
   border: 1rpx solid rgba(255, 255, 255, 0.4);
   border-radius: var(--radius-pill);
-  padding: 12rpx 32rpx;
-  backdrop-filter: blur(10px);
+  padding: 14rpx 32rpx;
+  position: relative;
+  z-index: 1;
+  transition: background var(--t-fast) var(--ease-out);
 }
-
+.points-hero__action:active {
+  background: rgba(255, 255, 255, 0.32);
+}
 .points-hero__action-text {
   font-size: 26rpx;
   color: var(--color-on-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* ── 快捷入口 ── */
+/* ── 快捷入口(骨架 A) ── */
 .quick-nav {
   display: flex;
   justify-content: space-between;
   margin-bottom: 40rpx;
   padding: 0 8rpx;
 }
-
 .quick-nav__item {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10rpx;
   min-width: 112rpx;
-  padding: 6rpx 0;
+  padding: 6rpx 12rpx;
   border-radius: var(--radius-lg);
+  cursor: pointer;
 }
-
 .quick-nav__icon {
   width: 84rpx;
   height: 84rpx;
 }
-
 .quick-nav__text {
   font-size: 24rpx;
   color: var(--color-text-secondary);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
 }
 
-/* ── 应用卡片 ── */
+/* ── 应用卡片(骨架 A) ── */
 .app-card {
   display: flex;
   align-items: center;
-  padding: 28rpx 26rpx !important;
-  margin-bottom: 28rpx;
-  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-primary-light) 100%);
+  padding: 28rpx 26rpx;
+  margin-bottom: 20rpx;
+  background: var(--color-bg-card);
   border-color: var(--color-border-soft);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
 }
+.app-card:last-child { margin-bottom: 0; }
 
 .app-card__body {
   display: flex;
@@ -108,32 +111,25 @@
   flex: 1;
   min-width: 0;
 }
-
-.app-card__icon {
-  flex-shrink: 0;
-}
-
+.app-card__icon { flex-shrink: 0; }
 .app-card__info {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
 }
-
 .app-card__title-row {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   margin-bottom: 6rpx;
 }
-
 .app-card__name {
   font-size: 32rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
   line-height: 1.25;
 }
-
 .app-card__desc {
   display: block;
   font-size: 25rpx;
@@ -143,52 +139,52 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .app-card__cost {
   display: flex;
   align-self: flex-start;
   align-items: center;
   justify-content: center;
-  min-height: 50rpx;
+  min-height: 44rpx;
   box-sizing: border-box;
   background: var(--color-accent-warm-light);
   border-radius: var(--radius-pill);
   padding: 0 18rpx;
-  margin-top: 12rpx;
+  margin-top: 10rpx;
 }
-
 .app-card__cost-text {
   display: block;
   font-size: 23rpx;
   color: var(--color-accent-warm);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 }
 
 .app-card__arrow {
-  width: 50rpx;
-  height: 50rpx;
+  width: 44rpx;
+  height: 44rpx;
   margin-left: var(--spacing-sm);
   border-radius: 50%;
-  background: var(--color-bg-card);
+  background: var(--color-surface);
   border: 1rpx solid var(--color-border-soft);
-  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
+  transition: background var(--t-fast) var(--ease-out);
 }
-
+.app-card:active .app-card__arrow {
+  background: var(--color-primary-light);
+}
 .app-card__arrow::before {
-  content: '';
+  content: "";
   position: absolute;
-  left: 17rpx;
-  top: 15rpx;
-  width: 14rpx;
-  height: 14rpx;
-  border-top: 5rpx solid var(--color-primary);
-  border-right: 5rpx solid var(--color-primary);
+  left: 14rpx;
+  top: 12rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border-top: 4rpx solid var(--color-primary);
+  border-right: 4rpx solid var(--color-primary);
   border-radius: 2rpx;
   transform: rotate(45deg);
 }
