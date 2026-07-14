@@ -25,12 +25,9 @@ Page({
     activeUsageId: "",
   },
 
-  onLoad() {
-    this.loadAppInfo();
-  },
-
   onShow() {
     this.setData({ activeUsageId: wx.getStorageSync(ACTIVE_TASK_KEY) || "" });
+    this.loadAppInfo();
     this.loadCourses();
   },
 

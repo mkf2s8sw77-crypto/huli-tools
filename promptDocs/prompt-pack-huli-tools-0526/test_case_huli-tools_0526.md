@@ -315,7 +315,7 @@ git diff --check
 ### TC-23 MAIC 异步课程、协议执行与 usage 幂等闭环
 
 - 目标：验证 `maic` 的 HMAC 异步任务、后台恢复、原生播放器、用户隔离和 usage 闭环。
-- 前置条件：5 个 `app_maic_*` 集合均为 PRIVATE；`app_maic`、`app_maic_reconcile` 已部署；MAIC dev 开关、Worker 和 MiniMax M3 已启用；验收期间临时把应用设为 `active`。
+- 前置条件：5 个 `app_maic_*` 集合均为 PRIVATE；`app_maic`、`app_maic_reconcile` 已部署；MAIC dev 开关、Worker 和 MiniMax M3 已启用；应用注册状态为 `active` 且 `costPoints=0`。
 - 步骤：
   1. 创建 0 积分 usage 并提交包含 slide、quiz、interaction、PBL 的最小课程。
   2. 退出小程序并等待 `app_maic_reconcile` 推进，再返回查看结果。

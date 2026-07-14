@@ -960,7 +960,7 @@ async function initSchema(event, context) {
       appKey: "maic", name: "MAIC 智慧课堂",
       description: "用 AI 生成可在微信小程序中原生阅读和互动的智慧课程",
       entryPage: "/pages/apps/maic/index", cloudFunctionName: "app_maic",
-      status: "inactive", pricing: { mode: "fixed", costPoints: 0 },
+      status: "active", pricing: { mode: "fixed", costPoints: 0 },
       sortOrder: 4, createdAt: now, updatedAt: now,
     },
   ];

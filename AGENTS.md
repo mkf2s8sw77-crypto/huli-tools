@@ -68,7 +68,7 @@
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
 - AI 生图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
 - AI 生图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
-- MAIC 课程任务以 `usageId` 贯穿 usage、外部任务、课程导入和结算；当前定价为 0 积分，但仍必须创建并正确结束 usage。`app_maic_reconcile` 必须能在无人轮询时继续推进，45 分钟超时必须取消任务；仅在 `costPoints > 0` 时结算或释放冻结积分。
+- MAIC 当前注册状态为 `active`、定价为 0 积分；课程任务仍以 `usageId` 贯穿 usage、外部任务、课程导入和结算，并正确结束 usage。`app_maic_reconcile` 必须能在无人轮询时继续推进，45 分钟超时必须取消任务；仅在 `costPoints > 0` 时结算或释放冻结积分。
 - 用户媒体上传必须先由云函数签发受控 `cloudPath`，客户端只上传到该路径；业务云函数校验 `fileID/cloudPath` 归属后换取短期临时 URL 调上游，源素材默认私有短期保留并设置 `expiresAt`。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
