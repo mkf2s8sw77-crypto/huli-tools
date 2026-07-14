@@ -92,6 +92,7 @@
 - 新应用竖切模板见 `templates/app_vertical_slice/`，已预配置设计系统。
 - 应用不得绕过 `coreApp.createUsage` / `finishUsage` / `failUsage` 直接操作积分；应用云函数仅允许只读当前 `app_usage_records` 做执行校验，不得直接写公共集合。
 - `maic` 是平台垂直应用：小程序课程只存 CloudBase，不与 MAIC Web 账号/课程同步；客户端不得直连 MAIC/MiniMax，不得使用 WebView 或执行服务端内容。
+- MAIC 原生播放器负责翻页和互动门控：旧协议中的 `navigate` 必须忽略；quiz、interaction、PBL 完成前不得进入下一幕。舞台布局和门控规则集中在 `player-view-model.js`，不要退回通用纵向白卡。
 - 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。
 
 ## 11. 测试与交付

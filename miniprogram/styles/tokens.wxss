@@ -66,9 +66,12 @@ page {
   --color-maic-soft: #E0F2FE;
   --color-maic-overlay: rgba(255, 255, 255, 0.14);
   --color-maic-overlay-strong: rgba(255, 255, 255, 0.90);
+  --color-maic-spotlight-mask: rgba(15, 23, 42, 0.34);
+  --color-maic-danger-ring: rgba(182, 106, 106, 0.20);
   --shadow-maic-soft: 0 10rpx 30rpx rgba(15, 23, 42, 0.15);
   --shadow-maic: 0 26rpx 60rpx rgba(15, 23, 42, 0.20);
   --shadow-maic-blue: 0 10rpx 26rpx rgba(37, 99, 235, 0.22);
+  --shadow-maic-nav: 0 -12rpx 36rpx rgba(15, 23, 42, 0.10);
 
   /* ── 微信绿保留(仅微信登录按钮) ── */
   --color-wechat: #07c160;

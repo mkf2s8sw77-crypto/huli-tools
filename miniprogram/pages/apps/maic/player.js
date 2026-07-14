@@ -1,4 +1,5 @@
 const api = require("../../../services/api");
+const playerViewModel = require("./player-view-model");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,19 +32,42 @@ Page({
     pblNode: null,
     pblScore: 0,
     pblFinished: false,
+    sceneMeta: {},
+    canContinue: true,
+    continueHint: "",
+    continueLabel: "继续下一幕",
+    actionStep: 0,
+    actionCount: 0,
   },
 
   onLoad(options) {
     this.setData({ courseId: decodeURIComponent(options.courseId || "") });
     this.progressState = { quizAnswers: {}, interactions: {}, pbl: {} };
-    this.executedActionScenes = {};
     this.loadCourse();
   },
 
+  onShow() {
+    if (this.wasHidden && this.data.currentScene) {
+      this.wasHidden = false;
+      this.runSceneActions(this.data.currentScene);
+    }
+  },
+
+  onHide() {
+    this.wasHidden = true;
+    this.cancelSceneActions();
+    this.scheduleSave(true);
+  },
+
   onUnload() {
-    this.actionRunToken = (this.actionRunToken || 0) + 1;
+    this.cancelSceneActions();
     if (this.saveTimer) clearTimeout(this.saveTimer);
     this.persistProgress();
+  },
+
+  cancelSceneActions() {
+    this.actionRunToken = (this.actionRunToken || 0) + 1;
+    this.setData({ activeTargetId: "", activeAction: "", laserVisible: false });
   },
 
   async loadCourse() {
@@ -73,8 +97,9 @@ Page({
     const scenes = this.data.scenes;
     if (!scenes.length || index < 0 || index >= scenes.length) return;
     const scene = scenes[index];
-    this.actionRunToken = (this.actionRunToken || 0) + 1;
+    this.cancelSceneActions();
     const savedQuiz = this.progressState.quizAnswers[scene.id] || null;
+    const sceneMeta = playerViewModel.buildSceneMeta(scene, index, scenes.length);
     const nextData = {
       currentScene: scene,
       currentIndex: index,
@@ -89,7 +114,14 @@ Page({
       quizCorrect: savedQuiz ? Boolean(savedQuiz.correct) : false,
       interactionState: this.buildInteractionState(scene),
       ...this.buildPblState(scene),
+      sceneMeta,
+      actionStep: 0,
+      actionCount: sceneMeta.actionCount,
     };
+    const gate = playerViewModel.getSceneGate(scene, nextData, index === scenes.length - 1);
+    nextData.canContinue = gate.canContinue;
+    nextData.continueHint = gate.hint;
+    nextData.continueLabel = gate.label;
     await new Promise((resolve) => this.setData(nextData, resolve));
     this.scheduleSave();
     if (!(options && options.skipActions)) this.runSceneActions(scene);
@@ -109,7 +141,8 @@ Page({
     const saved = this.progressState.interactions[scene.id] || {};
     const config = scene.config || {};
     if (scene.interactionType === "tabs") {
-      return { selectedTab: Number(saved.selectedTab || 0) };
+      const selectedTab = Number(saved.selectedTab || 0);
+      return { selectedTab, visitedTabs: saved.visitedTabs || [selectedTab] };
     }
     if (scene.interactionType === "matching") {
       const matches = saved.matches || [];
@@ -141,16 +174,18 @@ Page({
   },
 
   async runSceneActions(scene) {
-    if (!scene || this.executedActionScenes[scene.id]) return;
-    this.executedActionScenes[scene.id] = true;
+    if (!scene) return;
     const token = this.actionRunToken;
-    const actions = (scene.actions || []).slice(0, 24);
+    const actions = playerViewModel.playableActions(scene.actions).slice(0, 24);
+    this.setData({ actionCount: actions.length, actionStep: 0 });
     for (let i = 0; i < actions.length; i += 1) {
       if (token !== this.actionRunToken) return;
       const action = actions[i];
+      this.setData({ actionStep: i + 1 });
       if (action.type === "speech") {
         this.setData({ narration: action.text, activeAction: "speech" });
-        await delay(900);
+        await delay(playerViewModel.estimateSpeechDuration(action.text));
+        if (token === this.actionRunToken) this.setData({ activeAction: "" });
       } else if (action.type === "highlight" || action.type === "spotlight") {
         this.setData({ activeTargetId: action.targetId, activeAction: action.type });
         await delay(action.durationMs || 900);
@@ -163,14 +198,9 @@ Page({
         this.setData({ activeAction: "pause" });
         await delay(action.durationMs);
         if (token === this.actionRunToken) this.setData({ activeAction: "" });
-      } else if (action.type === "navigate") {
-        const targetIndex = this.data.scenes.findIndex((item) => item.id === action.sceneId);
-        if (targetIndex >= 0 && targetIndex !== this.data.currentIndex) {
-          await this.openScene(targetIndex);
-          return;
-        }
       }
     }
+    if (token === this.actionRunToken) this.setData({ activeAction: "", actionStep: actions.length });
   },
 
   prevScene() {
@@ -178,6 +208,10 @@ Page({
   },
 
   nextScene() {
+    if (!this.data.canContinue) {
+      wx.showToast({ title: this.data.continueHint || "请先完成当前内容", icon: "none" });
+      return;
+    }
     if (this.data.currentIndex >= this.data.total - 1) {
       this.progressState.completed = true;
       this.scheduleSave(true);
@@ -211,13 +245,17 @@ Page({
     const correct = actual === expected;
     this.setData({ quizSubmitted: true, quizCorrect: correct, quizOptions: this.decorateQuizOptions(scene, this.data.quizSelected, true) });
     this.progressState.quizAnswers[scene.id] = { selected: this.data.quizSelected, submitted: true, correct };
+    this.syncGate({ quizSubmitted: true });
     this.scheduleSave(true);
   },
 
   selectTab(e) {
     const selectedTab = Number(e.currentTarget.dataset.index || 0);
-    this.setData({ "interactionState.selectedTab": selectedTab });
-    this.saveInteraction({ selectedTab });
+    const visitedTabs = Array.from(new Set((this.data.interactionState.visitedTabs || []).concat(selectedTab)));
+    const state = { selectedTab, visitedTabs };
+    this.setData({ interactionState: state });
+    this.saveInteraction(state);
+    this.syncGate({ interactionState: state });
   },
 
   selectMatchLeft(e) {
@@ -236,8 +274,10 @@ Page({
     matches.push({ leftId, leftText: left ? left.text : leftId, rightId, rightText: right ? right.text : rightId, correct });
     const matchedRightIds = matches.map((item) => item.rightId);
     const rightOptions = (config.right || []).map((item) => ({ ...item, matched: matchedRightIds.includes(item.id) }));
-    this.setData({ interactionState: { pendingLeftId: "", matches, rightOptions } });
+    const state = { pendingLeftId: "", matches, rightOptions };
+    this.setData({ interactionState: state });
     this.saveInteraction({ matches });
+    this.syncGate({ interactionState: state });
   },
 
   moveSortItem(e) {
@@ -251,6 +291,7 @@ Page({
     items[target] = temp;
     this.setData({ interactionState: { items, checked: false, correct: false } });
     this.saveInteraction({ items, checked: false, correct: false });
+    this.syncGate({ interactionState: { items, checked: false, correct: false } });
   },
 
   checkSort() {
@@ -259,6 +300,7 @@ Page({
     const state = { ...this.data.interactionState, checked: true, correct: ids === expected };
     this.setData({ interactionState: state });
     this.saveInteraction(state);
+    this.syncGate({ interactionState: state });
   },
 
   selectHotspot(e) {
@@ -267,6 +309,7 @@ Page({
     const state = { selectedPointId: id, feedback: point ? point.feedback : "" };
     this.setData({ interactionState: state });
     this.saveInteraction(state);
+    this.syncGate({ interactionState: state });
   },
 
   revealStep() {
@@ -274,6 +317,7 @@ Page({
     const revealed = Math.min(max, Number(this.data.interactionState.revealed || 1) + 1);
     this.setData({ "interactionState.revealed": revealed });
     this.saveInteraction({ revealed });
+    this.syncGate({ interactionState: { ...this.data.interactionState, revealed } });
   },
 
   saveInteraction(state) {
@@ -297,7 +341,21 @@ Page({
       score,
       finished,
     };
+    this.syncGate({ pblFinished: finished });
     this.scheduleSave(true);
+  },
+
+  syncGate(overrides) {
+    const scene = this.data.currentScene;
+    if (!scene) return;
+    const state = {
+      quizSubmitted: this.data.quizSubmitted,
+      interactionState: this.data.interactionState,
+      pblFinished: this.data.pblFinished,
+      ...(overrides || {}),
+    };
+    const gate = playerViewModel.getSceneGate(scene, state, this.data.currentIndex === this.data.total - 1);
+    this.setData({ canContinue: gate.canContinue, continueHint: gate.hint, continueLabel: gate.label });
   },
 
   scheduleSave(immediate) {

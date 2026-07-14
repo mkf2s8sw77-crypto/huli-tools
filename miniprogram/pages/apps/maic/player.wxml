@@ -1,93 +1,158 @@
 <view class="maic-player">
-  <view wx:if="{{loading}}" class="maic-player__loading">正在准备课程…</view>
+  <view wx:if="{{loading}}" class="maic-player__loading">
+    <view class="maic-player__loading-mark"><view></view></view>
+    <text>正在布置课堂舞台…</text>
+  </view>
+
   <block wx:elif="{{currentScene}}">
     <view class="maic-player__topbar">
-      <text>{{currentIndex + 1}} / {{total}}</text>
-      <view class="maic-player__progress"><view style="width: {{progressPercent}}%;"></view></view>
-      <text>{{progressPercent}}%</text>
+      <view class="maic-player__chapter">
+        <text>{{sceneMeta.kindLabel}}</text>
+        <text>{{sceneMeta.pageLabel}}</text>
+      </view>
+      <view class="maic-player__progress">
+        <view style="width: {{progressPercent}}%;"></view>
+      </view>
     </view>
 
-    <view class="maic-scene">
-      <text class="maic-scene__kind">{{currentScene.kind}}</text>
-      <text class="maic-scene__title">{{currentScene.title}}</text>
+    <view class="maic-stage maic-stage--{{sceneMeta.layout}} maic-stage--{{currentScene.kind}}">
+      <view class="maic-stage__grid"></view>
+      <view class="maic-stage__orb maic-stage__orb--one"></view>
+      <view class="maic-stage__orb maic-stage__orb--two"></view>
 
-      <view wx:if="{{narration}}" class="maic-narration {{activeAction === 'speech' ? 'maic-narration--speaking' : ''}}">{{narration}}</view>
-
-      <block wx:if="{{currentScene.kind === 'slide'}}">
-        <view
-          wx:for="{{currentScene.blocks}}"
-          wx:key="id"
-          class="maic-block maic-block--{{item.type}} {{activeTargetId === item.id ? 'maic-block--' + activeAction : ''}}"
-        >
-          <text wx:if="{{item.type === 'paragraph'}}" class="maic-paragraph">{{item.text}}</text>
-          <view wx:elif="{{item.type === 'list'}}" class="maic-list">
-            <view wx:for="{{item.items}}" wx:for-item="listItem" wx:for-index="listIndex" wx:key="*this"><text>{{item.ordered ? (listIndex + 1) + '.' : '•'}}</text><text>{{listItem}}</text></view>
+      <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="maic-stage__viewport">
+        <view class="maic-stage__header">
+          <view class="maic-stage__eyebrow">
+            <text>{{sceneMeta.eyebrow}}</text>
+            <text>MAIC NATIVE CLASSROOM</text>
           </view>
-          <view wx:elif="{{item.type === 'callout'}}" class="maic-callout maic-callout--{{item.tone}}"><text wx:if="{{item.title}}" class="maic-callout__title">{{item.title}}</text><text>{{item.text}}</text></view>
-          <image wx:elif="{{item.type === 'image'}}" class="maic-image" mode="widthFix" src="{{assetUrls[item.assetId]}}" />
-          <scroll-view wx:elif="{{item.type === 'table'}}" scroll-x class="maic-table-wrap">
-            <view class="maic-table">
-              <view class="maic-table__row maic-table__head"><text wx:for="{{item.headers}}" wx:key="*this">{{item}}</text></view>
-              <view class="maic-table__row" wx:for="{{item.rows}}" wx:for-item="row" wx:key="index"><text wx:for="{{row}}" wx:for-item="cell" wx:key="index">{{cell}}</text></view>
+          <text class="maic-stage__title">{{currentScene.title}}</text>
+          <text class="maic-stage__guide">{{sceneMeta.guide}}</text>
+        </view>
+
+        <view class="maic-stage__body">
+          <block wx:if="{{currentScene.kind === 'slide'}}">
+            <view
+              wx:for="{{currentScene.blocks}}"
+              wx:key="id"
+              class="maic-block maic-block--{{item.type}} {{index === 0 ? 'maic-block--lead' : ''}} {{activeTargetId === item.id ? 'maic-block--' + activeAction : ''}}"
+            >
+              <view class="maic-block__index"><text>{{index + 1}}</text></view>
+              <text wx:if="{{item.type === 'paragraph'}}" class="maic-paragraph">{{item.text}}</text>
+              <view wx:elif="{{item.type === 'list'}}" class="maic-list">
+                <view wx:for="{{item.items}}" wx:for-item="listItem" wx:for-index="listIndex" wx:key="*this">
+                  <text>{{item.ordered ? (listIndex + 1) : '·'}}</text><text>{{listItem}}</text>
+                </view>
+              </view>
+              <view wx:elif="{{item.type === 'callout'}}" class="maic-callout maic-callout--{{item.tone}}">
+                <text wx:if="{{item.title}}" class="maic-callout__title">{{item.title}}</text>
+                <text>{{item.text}}</text>
+              </view>
+              <view wx:elif="{{item.type === 'image'}}">
+                <image class="maic-image" mode="widthFix" src="{{assetUrls[item.assetId]}}" />
+                <text wx:if="{{item.caption}}" class="maic-image__caption">{{item.caption}}</text>
+              </view>
+              <scroll-view wx:elif="{{item.type === 'table'}}" scroll-x class="maic-table-wrap">
+                <view class="maic-table">
+                  <view class="maic-table__row maic-table__head"><text wx:for="{{item.headers}}" wx:key="*this">{{item}}</text></view>
+                  <view class="maic-table__row" wx:for="{{item.rows}}" wx:for-item="row" wx:key="index"><text wx:for="{{row}}" wx:for-item="cell" wx:key="index">{{cell}}</text></view>
+                </view>
+              </scroll-view>
+              <view wx:elif="{{item.type === 'steps'}}" class="maic-step-list">
+                <view wx:for="{{item.items}}" wx:for-item="step" wx:key="title">
+                  <text class="maic-step-list__num">{{index + 1}}</text>
+                  <view><text class="maic-step-list__title">{{step.title}}</text><text>{{step.detail}}</text></view>
+                </view>
+              </view>
+              <view wx:elif="{{item.type === 'diagram'}}" class="maic-diagram">
+                <view wx:for="{{item.nodes}}" wx:for-item="node" wx:key="id" class="maic-diagram__node">{{node.label}}</view>
+                <view wx:for="{{item.edges}}" wx:for-item="edge" wx:key="index" class="maic-diagram__edge">{{edge.from}} → {{edge.to}} {{edge.label}}</view>
+              </view>
             </view>
-          </scroll-view>
-          <view wx:elif="{{item.type === 'steps'}}" class="maic-step-list"><view wx:for="{{item.items}}" wx:for-item="step" wx:key="title"><text class="maic-step-list__num">{{index + 1}}</text><view><text class="maic-step-list__title">{{step.title}}</text><text>{{step.detail}}</text></view></view></view>
-          <view wx:elif="{{item.type === 'diagram'}}" class="maic-diagram"><view wx:for="{{item.nodes}}" wx:for-item="node" wx:key="id" class="maic-diagram__node">{{node.label}}</view><view wx:for="{{item.edges}}" wx:for-item="edge" wx:key="index" class="maic-diagram__edge">{{edge.from}} → {{edge.to}} {{edge.label}}</view></view>
+          </block>
+
+          <block wx:elif="{{currentScene.kind === 'quiz'}}">
+            <view class="maic-challenge-heading"><text>QUESTION</text><text>{{currentIndex + 1}}</text></view>
+            <text class="maic-question">{{currentScene.prompt}}</text>
+            <view
+              class="maic-option {{item.selected ? 'maic-option--selected' : ''}} {{item.correctAnswer ? 'maic-option--correct' : ''}}"
+              wx:for="{{quizOptions}}"
+              wx:key="id"
+              data-id="{{item.id}}"
+              bindtap="selectQuizOption"
+            ><text class="maic-option__index">{{index + 1}}</text><text>{{item.text}}</text></view>
+            <button wx:if="{{!quizSubmitted}}" class="maic-primary-btn" bindtap="submitQuiz">提交答案</button>
+            <view wx:else class="maic-feedback {{quizCorrect ? 'maic-feedback--correct' : 'maic-feedback--wrong'}}">
+              <text class="maic-feedback__title">{{quizCorrect ? '判断准确' : '重新校准判断'}}</text><text>{{currentScene.explanation}}</text>
+            </view>
+          </block>
+
+          <block wx:elif="{{currentScene.kind === 'interaction'}}">
+            <view class="maic-challenge-heading"><text>WORKSHOP</text><text>{{currentScene.interactionType}}</text></view>
+            <text class="maic-question">{{currentScene.prompt}}</text>
+            <block wx:if="{{currentScene.interactionType === 'tabs'}}">
+              <scroll-view scroll-x class="maic-tabs"><view class="maic-tabs__inner"><text wx:for="{{currentScene.config.tabs}}" wx:key="id" class="maic-tab {{interactionState.selectedTab === index ? 'maic-tab--active' : ''}}" data-index="{{index}}" bindtap="selectTab">{{item.label}}</text></view></scroll-view>
+              <view wx:for="{{currentScene.config.tabs}}" wx:key="id"><text wx:if="{{interactionState.selectedTab === index}}" class="maic-tab-content">{{item.content}}</text></view>
+              <text class="maic-interaction-hint">已查看 {{interactionState.visitedTabs.length}} / {{currentScene.config.tabs.length}} 个主题</text>
+            </block>
+            <block wx:elif="{{currentScene.interactionType === 'matching'}}">
+              <text class="maic-interaction-hint">先选择左侧项目，再选择对应答案</text>
+              <view class="maic-match-grid">
+                <view><text wx:for="{{currentScene.config.left}}" wx:key="id" class="maic-match-item {{interactionState.pendingLeftId === item.id ? 'maic-match-item--active' : ''}}" data-id="{{item.id}}" bindtap="selectMatchLeft">{{item.text}}</text></view>
+                <view><text wx:for="{{interactionState.rightOptions}}" wx:key="id" class="maic-match-item {{item.matched ? 'maic-match-item--used' : ''}}" data-id="{{item.id}}" data-matched="{{item.matched}}" bindtap="selectMatchRight">{{item.text}}</text></view>
+              </view>
+              <view wx:for="{{interactionState.matches}}" wx:key="leftId" class="maic-match-result {{item.correct ? 'maic-match-result--correct' : ''}}">{{item.leftText}} ↔ {{item.rightText}}</view>
+            </block>
+            <block wx:elif="{{currentScene.interactionType === 'sorting'}}">
+              <view wx:for="{{interactionState.items}}" wx:key="id" class="maic-sort-item"><text class="maic-sort-item__number">{{index + 1}}</text><text>{{item.text}}</text><view><button size="mini" data-index="{{index}}" data-direction="-1" bindtap="moveSortItem">上移</button><button size="mini" data-index="{{index}}" data-direction="1" bindtap="moveSortItem">下移</button></view></view>
+              <button class="maic-primary-btn" bindtap="checkSort">检查顺序</button>
+              <text wx:if="{{interactionState.checked}}" class="maic-result-text">{{interactionState.correct ? '顺序正确，可以继续' : '顺序还不对，可以继续调整'}}</text>
+            </block>
+            <block wx:elif="{{currentScene.interactionType === 'hotspot'}}">
+              <view class="maic-hotspot"><image wx:if="{{currentScene.config.assetId}}" mode="aspectFit" src="{{assetUrls[currentScene.config.assetId]}}" /><view wx:for="{{currentScene.config.points}}" wx:key="id" class="maic-hotspot__point {{interactionState.selectedPointId === item.id ? 'maic-hotspot__point--active' : ''}}" style="left:{{item.x}}%;top:{{item.y}}%;" data-id="{{item.id}}" bindtap="selectHotspot">{{index + 1}}</view></view>
+              <text wx:if="{{interactionState.feedback}}" class="maic-tab-content">{{interactionState.feedback}}</text>
+            </block>
+            <block wx:else>
+              <view wx:for="{{currentScene.config.steps}}" wx:key="id" wx:if="{{index < interactionState.revealed}}" class="maic-reveal-step"><text>{{index + 1}}</text><view><text class="maic-reveal-step__title">{{item.title}}</text><text>{{item.detail}}</text></view></view>
+              <button wx:if="{{interactionState.revealed < currentScene.config.steps.length}}" class="maic-primary-btn" bindtap="revealStep">展开下一步</button>
+            </block>
+          </block>
+
+          <block wx:else>
+            <view class="maic-case-file"><text>CASE FILE</text><text>{{currentScene.caseSummary}}</text></view>
+            <view wx:if="{{pblNode}}" class="maic-pbl-node">
+              <view class="maic-pbl-node__meta"><text>{{pblNode.title}}</text><text>决策得分 {{pblScore}}</text></view>
+              <text class="maic-pbl-node__narrative">{{pblNode.narrative}}</text>
+              <view wx:if="{{!pblFinished}}"><view wx:for="{{pblNode.choices}}" wx:key="id" class="maic-option" data-id="{{item.id}}" bindtap="choosePbl"><text class="maic-option__index">{{index + 1}}</text><text>{{item.label}}</text></view></view>
+              <view wx:else class="maic-feedback maic-feedback--correct"><text class="maic-feedback__title">病例复盘</text><text>{{currentScene.review}}</text></view>
+            </view>
+          </block>
+
+          <view class="maic-stage__body-spacer"></view>
         </view>
-      </block>
+      </scroll-view>
 
-      <block wx:elif="{{currentScene.kind === 'quiz'}}">
-        <text class="maic-question">{{currentScene.prompt}}</text>
-        <view class="maic-option {{item.selected ? 'maic-option--selected' : ''}} {{item.correctAnswer ? 'maic-option--correct' : ''}}" wx:for="{{quizOptions}}" wx:key="id" data-id="{{item.id}}" bindtap="selectQuizOption">{{item.text}}</view>
-        <button wx:if="{{!quizSubmitted}}" class="maic-primary-btn" bindtap="submitQuiz">提交答案</button>
-        <view wx:else class="maic-feedback {{quizCorrect ? 'maic-feedback--correct' : 'maic-feedback--wrong'}}"><text class="maic-feedback__title">{{quizCorrect ? '回答正确' : '再想一想'}}</text><text>{{currentScene.explanation}}</text></view>
-      </block>
-
-      <block wx:elif="{{currentScene.kind === 'interaction'}}">
-        <text class="maic-question">{{currentScene.prompt}}</text>
-        <block wx:if="{{currentScene.interactionType === 'tabs'}}">
-          <scroll-view scroll-x class="maic-tabs"><view class="maic-tabs__inner"><text wx:for="{{currentScene.config.tabs}}" wx:key="id" class="maic-tab {{interactionState.selectedTab === index ? 'maic-tab--active' : ''}}" data-index="{{index}}" bindtap="selectTab">{{item.label}}</text></view></scroll-view>
-          <view wx:for="{{currentScene.config.tabs}}" wx:key="id"><text wx:if="{{interactionState.selectedTab === index}}" class="maic-tab-content">{{item.content}}</text></view>
-        </block>
-        <block wx:elif="{{currentScene.interactionType === 'matching'}}">
-          <text class="maic-interaction-hint">先选择左侧项目，再选择对应答案</text>
-          <view class="maic-match-grid">
-            <view><text wx:for="{{currentScene.config.left}}" wx:key="id" class="maic-match-item {{interactionState.pendingLeftId === item.id ? 'maic-match-item--active' : ''}}" data-id="{{item.id}}" bindtap="selectMatchLeft">{{item.text}}</text></view>
-            <view><text wx:for="{{interactionState.rightOptions}}" wx:key="id" class="maic-match-item {{item.matched ? 'maic-match-item--used' : ''}}" data-id="{{item.id}}" data-matched="{{item.matched}}" bindtap="selectMatchRight">{{item.text}}</text></view>
+      <view class="maic-teacher">
+        <view class="maic-teacher__avatar"><view class="maic-teacher__head"></view><view class="maic-teacher__body"></view></view>
+        <view class="maic-teacher__content">
+          <view class="maic-teacher__meta">
+            <text>MAIC 教师</text>
+            <text>{{activeAction === 'speech' ? '正在讲解' : (activeAction ? '正在演示' : '等待你的操作')}}</text>
           </view>
-          <view wx:for="{{interactionState.matches}}" wx:key="leftId" class="maic-match-result {{item.correct ? 'maic-match-result--correct' : ''}}">{{item.leftText}} ↔ {{item.rightText}}</view>
-        </block>
-        <block wx:elif="{{currentScene.interactionType === 'sorting'}}">
-          <view wx:for="{{interactionState.items}}" wx:key="id" class="maic-sort-item"><text>{{index + 1}}. {{item.text}}</text><view><button size="mini" data-index="{{index}}" data-direction="-1" bindtap="moveSortItem">上移</button><button size="mini" data-index="{{index}}" data-direction="1" bindtap="moveSortItem">下移</button></view></view>
-          <button class="maic-primary-btn" bindtap="checkSort">检查顺序</button>
-          <text wx:if="{{interactionState.checked}}" class="maic-result-text">{{interactionState.correct ? '顺序正确' : '顺序还不对，可以继续调整'}}</text>
-        </block>
-        <block wx:elif="{{currentScene.interactionType === 'hotspot'}}">
-          <view class="maic-hotspot"><image wx:if="{{currentScene.config.assetId}}" mode="aspectFit" src="{{assetUrls[currentScene.config.assetId]}}" /><view wx:for="{{currentScene.config.points}}" wx:key="id" class="maic-hotspot__point {{interactionState.selectedPointId === item.id ? 'maic-hotspot__point--active' : ''}}" style="left:{{item.x}}%;top:{{item.y}}%;" data-id="{{item.id}}" bindtap="selectHotspot">{{index + 1}}</view></view>
-          <text wx:if="{{interactionState.feedback}}" class="maic-tab-content">{{interactionState.feedback}}</text>
-        </block>
-        <block wx:else>
-          <view wx:for="{{currentScene.config.steps}}" wx:key="id" wx:if="{{index < interactionState.revealed}}" class="maic-reveal-step"><text>{{index + 1}}</text><view><text class="maic-reveal-step__title">{{item.title}}</text><text>{{item.detail}}</text></view></view>
-          <button wx:if="{{interactionState.revealed < currentScene.config.steps.length}}" class="maic-primary-btn" bindtap="revealStep">展开下一步</button>
-        </block>
-      </block>
-
-      <block wx:else>
-        <text class="maic-case">{{currentScene.caseSummary}}</text>
-        <view wx:if="{{pblNode}}" class="maic-pbl-node">
-          <view class="maic-pbl-node__meta"><text>{{pblNode.title}}</text><text>得分 {{pblScore}}</text></view>
-          <text class="maic-pbl-node__narrative">{{pblNode.narrative}}</text>
-          <view wx:if="{{!pblFinished}}"><view wx:for="{{pblNode.choices}}" wx:key="id" class="maic-option" data-id="{{item.id}}" bindtap="choosePbl">{{item.label}}</view></view>
-          <view wx:else class="maic-feedback maic-feedback--correct"><text class="maic-feedback__title">病例复盘</text><text>{{currentScene.review}}</text></view>
+          <text class="maic-teacher__speech">{{narration || sceneMeta.guide}}</text>
+          <view wx:if="{{actionCount}}" class="maic-teacher__timeline"><view style="width: {{actionCount ? (actionStep / actionCount * 100) : 0}}%;"></view></view>
         </view>
-      </block>
+      </view>
 
       <view wx:if="{{laserVisible}}" class="maic-laser" style="{{laserStyle}}"></view>
     </view>
 
     <view class="maic-player__nav">
-      <button disabled="{{currentIndex === 0}}" bindtap="prevScene">上一页</button>
-      <button class="maic-player__next" bindtap="nextScene">{{currentIndex === total - 1 ? '完成课程' : '下一页'}}</button>
+      <view class="maic-player__nav-copy"><text>{{continueHint}}</text><text>{{progressPercent}}% 已学习</text></view>
+      <view class="maic-player__nav-actions">
+        <button class="maic-player__prev" disabled="{{currentIndex === 0}}" bindtap="prevScene">上一幕</button>
+        <button class="maic-player__next" disabled="{{!canContinue}}" bindtap="nextScene">{{continueLabel}}</button>
+      </view>
     </view>
   </block>
 </view>

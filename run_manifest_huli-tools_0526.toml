@@ -82,7 +82,7 @@ actions = [
   "新增 app_maic 与 app_maic_reconcile 异步课程链路",
   "创建 5 个 app_maic_* 私有集合并设置私有权限和查询索引",
   "新增课程列表、创建、进度、详情和原生播放器页面",
-  "验证 usageId 幂等、HMAC、四类场景、六类动作、成功结算和失败释放",
+  "验证 usageId 幂等、HMAC、四类场景、五类运行时动作、忽略旧 navigate、互动门控和失败释放",
 ]
 
 [env.required]

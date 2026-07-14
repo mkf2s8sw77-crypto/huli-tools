@@ -52,6 +52,7 @@ prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools
 gate_commands = [
   "bash scripts/check-js.sh",
   "bash scripts/check-boundaries.sh",
+  "node --test tests/maic-player-view-model.test.js",
   "git diff --check"
 ]
 

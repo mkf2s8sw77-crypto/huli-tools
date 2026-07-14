@@ -319,13 +319,15 @@ git diff --check
 - 步骤：
   1. 创建 0 积分 usage 并提交包含 slide、quiz、interaction、PBL 的最小课程。
   2. 退出小程序并等待 `app_maic_reconcile` 推进，再返回查看结果。
-  3. 在播放器依次触发 speech、highlight、spotlight、laser、pause、navigate，并完成测验、互动和 PBL。
+  3. 在播放器依次触发 speech、highlight、spotlight、laser、pause，并完成测验、互动和 PBL；另用旧 fixture 注入 `navigate`。
   4. 重复提交同一 `usageId`；再分别验证取消、上游失败和 45 分钟超时。
   5. 使用另一微信用户尝试读取任务、课程、进度和媒体。
 - 断言：
   - 日志显示 `model=minimax:MiniMax-M3`，且任务可在退出、网络中断和 Worker 重启后恢复。
   - 同一 `usageId` 只产生一个外部 job；免费模式不产生积分冻结、结算或释放流水。
-  - 四类场景与六类动作均由原生组件执行，无 WebView、HTML 或脚本。
+  - 四类场景与五类运行时动作均由原生舞台执行，无 WebView、HTML 或脚本；旧 `navigate` 被忽略且不会翻页。
+  - quiz、interaction、PBL 完成前“继续”不可用；页面隐藏、退出或手动切页后，旧动作不会继续执行。
+  - 课程呈现包含章节轨道、舞台标题、教师旁白层和场景模板，不退化为单一纵向白卡。
   - 课程、场景和媒体全部导入后才完成 usage；失败、取消和超时均正确结束 usage。
   - 跨用户访问均返回 `FORBIDDEN`，无法获取临时媒体 URL。
 
