@@ -1,15 +1,54 @@
-<ui-page title="MAIC 智慧课堂" eyebrow="原生微信课程" subtitle="输入一个主题，生成可阅读、可互动、可续学的移动课程">
-  <view class="maic-hero fade-in">
-    <text class="maic-hero__title">把知识变成一段清晰的学习旅程</text>
-    <text class="maic-hero__desc">课程由 MiniMax M3 编排，生成后独立保存在云开发中。</text>
-    <text class="maic-hero__price">每次生成 1 积分</text>
+<ui-page variant="dashboard">
+  <view class="maic-brand fade-in">
+    <view class="maic-brand__identity">
+      <view class="maic-brand__mark"><text>M</text></view>
+      <view>
+        <text class="maic-brand__name">MAIC</text>
+        <text class="maic-brand__caption">智慧课堂</text>
+      </view>
+    </view>
+    <text class="maic-free-badge">免费生成</text>
+  </view>
+
+  <view class="maic-workbench fade-in fade-in-1">
+    <view class="maic-workbench__glow maic-workbench__glow--one"></view>
+    <view class="maic-workbench__glow maic-workbench__glow--two"></view>
+    <view class="maic-workbench__content">
+      <text class="maic-workbench__eyebrow">AI 课程工作台</text>
+      <text class="maic-workbench__title">今天想创建什么课程？</text>
+      <text class="maic-workbench__desc">描述课堂主题和目标，MAIC 会把它编排成原生互动课程。</text>
+
+      <view class="maic-composer">
+        <textarea class="maic-composer__topic" value="{{topic}}" maxlength="500" auto-height placeholder="例如：为护理实习生设计一门输液反应识别课……" bindinput="onTopicInput" />
+
+        <view class="maic-toolbar">
+          <view class="maic-toolbar__field maic-toolbar__field--grow">
+            <text class="maic-toolbar__label">学习对象</text>
+            <input class="maic-toolbar__input" value="{{audience}}" maxlength="200" placeholder="选填，如护理实习生" bindinput="onAudienceInput" />
+          </view>
+          <picker class="maic-toolbar__picker" range="{{durationOptions}}" value="{{durationIndex}}" bindchange="onDurationPickerChange">
+            <view class="maic-toolbar__field">
+              <text class="maic-toolbar__label">课程时长</text>
+              <text class="maic-toolbar__value">{{durationMinutes}} 分钟 ›</text>
+            </view>
+          </picker>
+        </view>
+
+        <textarea class="maic-composer__requirements" value="{{requirements}}" maxlength="3000" auto-height placeholder="补充要求（选填）：案例、难度、教学重点……" bindinput="onRequirementsInput" />
+
+        <view class="maic-composer__footer">
+          <text class="maic-composer__meta">MiniMax M3 · 原生互动 · 云端续学</text>
+          <ui-action-button extra-class="maic-submit" text="{{loading ? '正在提交…' : '进入智慧课堂'}}" loading="{{loading}}" disabled="{{loading || topic.length < 2 || (appInfo && appInfo.status !== 'active')}}" bind:tap="createCourse" />
+        </view>
+      </view>
+    </view>
   </view>
 
   <view wx:if="{{appInfo && appInfo.status !== 'active'}}" class="maic-notice">
-    当前应用仍处于开发验收状态，激活前无法正式扣积分生成。
+    当前应用仍处于开发验收状态；免费策略已生效，激活后即可生成课程。
   </view>
 
-  <view wx:if="{{activeUsageId}}" class="card maic-active-task tap-feedback" bindtap="resumeTask">
+  <view wx:if="{{activeUsageId}}" class="maic-active-task tap-feedback" bindtap="resumeTask">
     <view>
       <text class="maic-active-task__title">有一门课程正在生成</text>
       <text class="maic-active-task__desc">点此查看进度，退出小程序也不会中断</text>
@@ -17,36 +56,26 @@
     <text class="maic-link">查看</text>
   </view>
 
-  <ui-section title="创建课程">
-    <view class="card card--elevated maic-form">
-      <ui-form-field label="课程主题">
-        <textarea class="maic-textarea maic-textarea--topic" value="{{topic}}" maxlength="500" auto-height placeholder="例如：新入职护士如何识别输液反应" bindinput="onTopicInput" />
-      </ui-form-field>
-      <ui-form-field label="学习对象（选填）">
-        <input class="form-input" value="{{audience}}" maxlength="200" placeholder="例如：护理实习生" bindinput="onAudienceInput" />
-      </ui-form-field>
-      <ui-form-field label="建议时长：{{durationMinutes}} 分钟">
-        <slider min="3" max="45" step="1" value="{{durationMinutes}}" activeColor="#8A6A3A" backgroundColor="#E0D6C2" bindchange="onDurationChange" />
-      </ui-form-field>
-      <ui-form-field label="补充要求（选填）">
-        <textarea class="maic-textarea" value="{{requirements}}" maxlength="3000" auto-height placeholder="希望包含的案例、难度或教学重点" bindinput="onRequirementsInput" />
-      </ui-form-field>
-      <ui-action-button text="{{loading ? '正在提交…' : '生成智慧课程'}}" loading="{{loading}}" disabled="{{loading || topic.length < 2 || (appInfo && appInfo.status !== 'active')}}" bind:tap="createCourse" />
+  <view class="maic-recent fade-in fade-in-2">
+    <view class="maic-recent__heading">
+      <view class="maic-recent__line"></view>
+      <text>最近课堂</text>
+      <text class="maic-recent__count">{{courses.length}}</text>
+      <view class="maic-recent__line"></view>
     </view>
-  </ui-section>
-
-  <ui-section title="我的课程">
-    <view wx:if="{{coursesLoading}}" class="card card--soft maic-loading">正在加载课程…</view>
+    <view wx:if="{{coursesLoading}}" class="maic-loading">正在加载课程…</view>
     <ui-empty wx:elif="{{empty}}" text="还没有课程，生成后会保存在这里" />
-    <view wx:else>
-      <view wx:for="{{courses}}" wx:key="courseId" class="card maic-course-card tap-feedback" data-id="{{item.courseId}}" bindtap="openCourse">
-        <view class="maic-course-card__meta">
-          <text class="status-tag status-tag--info">{{item.sceneCount}} 个场景</text>
-          <text class="maic-course-card__date">{{item.protocol}}</text>
+    <view wx:else class="maic-course-grid">
+      <view wx:for="{{courses}}" wx:key="courseId" class="maic-course-card tap-feedback" data-id="{{item.courseId}}" bindtap="openCourse">
+        <view class="maic-course-card__cover">
+          <text class="maic-course-card__index">{{item.displayIndex}}</text>
+          <view class="maic-course-card__orbit"></view>
+          <text class="maic-course-card__scenes">{{item.sceneCount}} 个场景</text>
         </view>
         <text class="maic-course-card__title">{{item.title}}</text>
         <text class="maic-course-card__summary">{{item.summary}}</text>
+        <text class="maic-course-card__date">{{item.displayDate}}</text>
       </view>
     </view>
-  </ui-section>
+  </view>
 </ui-page>

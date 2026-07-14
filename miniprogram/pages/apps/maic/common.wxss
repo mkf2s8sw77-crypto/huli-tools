@@ -1,14 +1,12 @@
-.maic-hero,
 .maic-course-cover {
   padding: 40rpx;
   margin-bottom: 32rpx;
   border-radius: var(--radius-xl);
   color: var(--color-on-primary);
-  background: linear-gradient(145deg, #7A8B6A 0%, #8A6A3A 100%);
+  background: var(--color-maic-ink);
   box-shadow: var(--shadow-elevated);
 }
 
-.maic-hero__title,
 .maic-course-cover__title {
   display: block;
   font-family: var(--font-serif);
@@ -17,7 +15,6 @@
   line-height: 1.45;
 }
 
-.maic-hero__desc,
 .maic-course-cover__summary {
   display: block;
   margin-top: 16rpx;
@@ -26,14 +23,13 @@
   opacity: 0.86;
 }
 
-.maic-hero__price,
 .maic-course-cover__protocol {
   display: inline-block;
   margin-top: 24rpx;
   padding: 8rpx 18rpx;
   border-radius: var(--radius-pill);
-  color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-maic-blue);
+  background: var(--color-maic-overlay-strong);
   font-size: 23rpx;
   font-weight: 600;
 }
@@ -57,7 +53,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-left: 8rpx solid var(--color-accent-warm);
+  margin-bottom: 28rpx;
+  padding: 24rpx 26rpx;
+  border: 1rpx solid var(--color-maic-border);
+  border-left: 8rpx solid var(--color-maic-cyan);
+  border-radius: var(--radius-lg);
+  background: var(--color-maic-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .maic-active-task__title,
@@ -77,41 +79,14 @@
 }
 
 .maic-link {
-  color: var(--color-primary);
+  color: var(--color-maic-blue);
   font-weight: 600;
 }
 
-.maic-form ui-form-field {
-  display: block;
-  margin-bottom: 30rpx;
-}
-
-.maic-textarea {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 150rpx;
-  padding: 22rpx 24rpx;
-  border: 1rpx solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  font-size: 28rpx;
-  line-height: 1.65;
-}
-
-.maic-textarea--topic {
-  min-height: 110rpx;
-  font-size: 30rpx;
-}
-
 .maic-loading {
+  padding: 28rpx;
   color: var(--color-text-muted);
   text-align: center;
-}
-
-.maic-course-card__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .maic-course-card__date {
@@ -166,7 +141,7 @@
   width: 18rpx;
   height: 18rpx;
   border-radius: 50%;
-  background: var(--color-accent-warm);
+  background: var(--color-maic-cyan);
 }
 
 .maic-orbit--active { animation: maic-spin 2.4s linear infinite; }
@@ -177,8 +152,8 @@
   position: absolute;
   inset: 34rpx;
   border-radius: 50%;
-  background: var(--gradient-brand-soft);
-  box-shadow: 0 0 0 14rpx var(--color-brand-soft-light);
+  background: var(--color-maic-ink);
+  box-shadow: 0 0 0 14rpx var(--color-maic-soft);
 }
 
 .maic-generation__status {
@@ -206,7 +181,7 @@
 .maic-progress__bar {
   height: 100%;
   border-radius: inherit;
-  background: var(--gradient-primary);
+  background: var(--color-maic-blue);
   transition: width 360ms ease;
 }
 
@@ -237,7 +212,7 @@
   background: var(--color-border-soft);
 }
 
-.maic-step--done > text { color: white; background: var(--color-brand-soft); }
+.maic-step--done > text { color: var(--color-on-primary); background: var(--color-maic-cyan); }
 .maic-step__title, .maic-step__desc { display: block; }
 .maic-step__title { color: var(--color-text); font-size: 27rpx; font-weight: 600; }
 .maic-step__desc { margin-top: 6rpx; font-size: 22rpx; }
@@ -262,7 +237,7 @@
 .maic-course-cover__stats view {
   padding: 18rpx;
   border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.14);
+  background: var(--color-maic-overlay);
   text-align: center;
 }
 

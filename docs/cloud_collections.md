@@ -164,7 +164,7 @@
     "entryPage": "/pages/apps/maic/index",
     "cloudFunctionName": "app_maic",
     "status": "inactive",
-    "pricing": { "mode": "fixed", "costPoints": 1 },
+    "pricing": { "mode": "fixed", "costPoints": 0 },
     "sortOrder": 4
   }
 ]

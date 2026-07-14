@@ -1,6 +1,13 @@
 const api = require("../../../services/api");
 
 const ACTIVE_TASK_KEY = "maic_active_usage_id";
+const DURATION_OPTIONS = [5, 10, 15, 20, 30, 45];
+
+function formatDate(value) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "最近创建";
+  return `${date.getMonth() + 1}月${date.getDate()}日`;
+}
 
 Page({
   data: {
@@ -8,6 +15,8 @@ Page({
     topic: "",
     audience: "",
     durationMinutes: 10,
+    durationOptions: DURATION_OPTIONS.map((item) => `${item} 分钟`),
+    durationIndex: 1,
     requirements: "",
     loading: false,
     coursesLoading: true,
@@ -38,7 +47,11 @@ Page({
     this.setData({ coursesLoading: true });
     try {
       const data = await api.listMaicCourses(1, 20);
-      const courses = data.list || [];
+      const courses = (data.list || []).map((item, index) => ({
+        ...item,
+        displayIndex: String(index + 1).padStart(2, "0"),
+        displayDate: formatDate(item.updatedAt || item.createdAt),
+      }));
       this.setData({ courses, empty: courses.length === 0 });
     } catch (err) {
       this.setData({ empty: true });
@@ -60,8 +73,12 @@ Page({
     this.setData({ requirements: e.detail.value });
   },
 
-  onDurationChange(e) {
-    this.setData({ durationMinutes: Number(e.detail.value) || 10 });
+  onDurationPickerChange(e) {
+    const durationIndex = Number(e.detail.value) || 0;
+    this.setData({
+      durationIndex,
+      durationMinutes: DURATION_OPTIONS[durationIndex] || 10,
+    });
   },
 
   resumeTask() {

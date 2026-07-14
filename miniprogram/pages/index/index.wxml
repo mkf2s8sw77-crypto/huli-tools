@@ -72,7 +72,8 @@
               </view>
               <text class="app-card__desc">{{item.description || ''}}</text>
               <view wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-card__cost">
-                <text class="app-card__cost-text serif-num">{{item.pricing.costPoints}} 积分/次</text>
+                <text wx:if="{{item.pricing.costPoints > 0}}" class="app-card__cost-text serif-num">{{item.pricing.costPoints}} 积分/次</text>
+                <text wx:else class="app-card__cost-text serif-num">免费</text>
               </view>
             </view>
           </view>

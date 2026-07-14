@@ -14,11 +14,11 @@
   <view wx:if="{{errorMsg}}" class="maic-notice maic-notice--error">{{errorMsg}}</view>
 
   <view class="maic-generation__steps">
-    <view class="maic-step {{progress >= 5 ? 'maic-step--done' : ''}}"><text>1</text><view><text class="maic-step__title">提交生成</text><text class="maic-step__desc">usageId 保证只生成和扣费一次</text></view></view>
+    <view class="maic-step {{progress >= 5 ? 'maic-step--done' : ''}}"><text>1</text><view><text class="maic-step__title">提交生成</text><text class="maic-step__desc">usageId 保证同一任务只生成一次</text></view></view>
     <view class="maic-step {{progress >= 40 ? 'maic-step--done' : ''}}"><text>2</text><view><text class="maic-step__title">课程编排</text><text class="maic-step__desc">生成四类原生场景和课堂动作</text></view></view>
     <view class="maic-step {{progress >= 80 ? 'maic-step--done' : ''}}"><text>3</text><view><text class="maic-step__title">导入云开发</text><text class="maic-step__desc">课程、场景和媒体按用户隔离保存</text></view></view>
   </view>
 
-  <button wx:if="{{status !== 'succeeded' && status !== 'failed' && status !== 'cancelled' && status !== 'timed_out'}}" class="maic-secondary-btn" loading="{{cancelling}}" bindtap="cancelTask">取消并释放积分</button>
+  <button wx:if="{{status !== 'succeeded' && status !== 'failed' && status !== 'cancelled' && status !== 'timed_out'}}" class="maic-secondary-btn" loading="{{cancelling}}" bindtap="cancelTask">取消生成</button>
   <button wx:else class="maic-secondary-btn" bindtap="backToCourses">返回课程列表</button>
 </ui-page>

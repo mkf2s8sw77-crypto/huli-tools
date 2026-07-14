@@ -54,6 +54,22 @@ page {
   --color-price: #C8804A;
   --color-points: #8A6A3A;
 
+  /* ── MAIC 业务品牌色(仅 MAIC 内容区使用) ── */
+  --color-maic-bg: #F4F7FB;
+  --color-maic-surface: #FFFFFF;
+  --color-maic-ink: #0F172A;
+  --color-maic-ink-soft: #1E293B;
+  --color-maic-blue: #2563EB;
+  --color-maic-cyan: #0891B2;
+  --color-maic-muted: #64748B;
+  --color-maic-border: #CBD5E1;
+  --color-maic-soft: #E0F2FE;
+  --color-maic-overlay: rgba(255, 255, 255, 0.14);
+  --color-maic-overlay-strong: rgba(255, 255, 255, 0.90);
+  --shadow-maic-soft: 0 10rpx 30rpx rgba(15, 23, 42, 0.15);
+  --shadow-maic: 0 26rpx 60rpx rgba(15, 23, 42, 0.20);
+  --shadow-maic-blue: 0 10rpx 26rpx rgba(37, 99, 235, 0.22);
+
   /* ── 微信绿保留(仅微信登录按钮) ── */
   --color-wechat: #07c160;
 
