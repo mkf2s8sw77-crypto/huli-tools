@@ -18,6 +18,11 @@
 | `system_configs` | 系统配置（开关、白名单等） | 是 |
 | `app_ai_draw_tasks` | 护士职业定妆照任务与 usage/job 绑定 | 是（护士定妆照应用启用时） |
 | `app_nursing_undercover_sessions` | 谁是卧底（护理版）对局数据 | 是（谁是卧底应用启用时） |
+| `app_maic_tasks` | MAIC usage、外部 job、状态与结算协调 | 是（MAIC 应用启用时） |
+| `app_maic_courses` | MAIC 小程序课程元数据与协议版本 | 是（MAIC 应用启用时） |
+| `app_maic_scenes` | MAIC 原生场景，按场景独立存储 | 是（MAIC 应用启用时） |
+| `app_maic_progress` | 用户答题、互动、PBL 与播放位置 | 是（MAIC 应用启用时） |
+| `app_maic_assets` | CloudBase 媒体资产、归属与校验和 | 是（MAIC 应用启用时） |
 
 ## 1. users
 
@@ -106,7 +111,7 @@
 | `description` | string | 应用描述 |
 | `entryPage` | string | 入口页面路径，如 `/pages/tools/demo-sum/index` |
 | `cloudFunctionName` | string | 业务云函数名 |
-| `status` | string | `active` / `disabled` / `coming_soon` |
+| `status` | string | `active` / `inactive` / `disabled` / `coming_soon` |
 | `pricing` | Object | `{ mode: "fixed", costPoints: number }` |
 | `sortOrder` | number | 排序权重，越小越靠前 |
 | `icon` | string | 图标 URL 或类名（可选） |
@@ -151,6 +156,16 @@
     "status": "active",
     "pricing": { "mode": "fixed", "costPoints": 0 },
     "sortOrder": 3
+  },
+  {
+    "appKey": "maic",
+    "name": "MAIC 智慧课堂",
+    "description": "用 AI 生成可在微信小程序中原生阅读和互动的智慧课程",
+    "entryPage": "/pages/apps/maic/index",
+    "cloudFunctionName": "app_maic",
+    "status": "inactive",
+    "pricing": { "mode": "fixed", "costPoints": 1 },
+    "sortOrder": 4
   }
 ]
 ```
@@ -392,15 +407,30 @@
 - 客户端：无直接读写权限。
 - 云函数：仅 `app_nursing_undercover` 读写。
 
+## 12. MAIC 私有集合
+
+五个集合均设置为「仅管理端可读写」，客户端只能通过 `app_maic` action 访问。
+
+| 集合 | 关键字段 | 推荐索引 |
+|---|---|---|
+| `app_maic_tasks` | `_id=usageId`、`userId`、`jobId`、`status`、`deadlineAt`、`reconcileAfter`、`courseId`、错误与导入次数 | `status + reconcileAfter` |
+| `app_maic_courses` | `_id=usageId`、`userId`、`protocol`、标题摘要、`sceneCount`、`assetMap`、`status` | `userId + status + updatedAt(desc)` |
+| `app_maic_scenes` | `userId`、`courseId`、`sceneId`、`order`、`kind`、完整 `scene` | `userId + courseId + order` |
+| `app_maic_progress` | `userId`、`courseId`、`data`、`updatedAt` | `userId + courseId` |
+| `app_maic_assets` | `userId`、`courseId`、`assetId`、`fileID`、`checksumSha256`、`mimeType` | `userId + courseId` |
+
+`usageId` 是端到端幂等键。只有课程、场景和媒体全部导入完成后才能
+`finishUsage`；失败、取消、协议错误或超过 45 分钟必须 `failUsage`。
+
 ## 手工创建步骤
 
 若当前环境无法通过脚本自动创建集合，请按以下步骤操作：
 
 1. 打开微信开发者工具，进入「云开发」控制台。
 2. 在「数据库」面板中，依次点击「添加集合」。
-3. 按上表创建 11 个集合。
+3. 按上表创建 16 个集合。
 4. 为每个集合设置权限：
    - `apps`、`recharge_packages`：可设置「所有用户可读，仅创建者可写」或「所有用户可读，仅管理端可写」。
-   - 其余集合（`users`、`point_accounts`、`point_transactions`、`app_usage_records`、`payment_orders`、`admin_audit_logs`、`system_configs`、`app_ai_draw_tasks`、`app_nursing_undercover_sessions`）：建议设置为「仅管理端可读写」，所有客户端写操作必须走云函数。
-5. 创建完成后，部署 `coreUser`、`coreApp`、`adminCore`、`app_ai_draw`、`app_nursing_undercover` 云函数。
+   - 其余集合（含全部 `app_maic_*`）：建议设置为「仅管理端可读写」，所有客户端写操作必须走云函数。
+5. 创建完成后，部署公共函数及 `app_ai_draw`、`app_nursing_undercover`、`app_maic`、`app_maic_reconcile`。
 6. 调用 `adminCore.initSchema` 写入 seed 数据。

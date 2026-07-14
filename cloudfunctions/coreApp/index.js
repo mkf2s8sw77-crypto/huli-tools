@@ -320,7 +320,7 @@ async function finishUsage(event, context) {
       await db.collection("app_usage_records").doc(usageId).update({
         data: {
           status: "succeeded",
-          resultRef: resultRef || null,
+          resultRef: _.set(resultRef || null),
           updatedAt: now,
           finishedAt: now,
         },
@@ -364,7 +364,7 @@ async function finishUsage(event, context) {
       data: {
         status: "succeeded",
         settleTransactionId,
-        resultRef: resultRef || null,
+        resultRef: _.set(resultRef || null),
         updatedAt: now,
         finishedAt: now,
       },

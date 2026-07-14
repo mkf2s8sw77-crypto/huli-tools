@@ -30,7 +30,9 @@
 6. 右键 `cloudfunctions/demoSum` → 「创建并部署：云端安装依赖」
 7. 右键 `cloudfunctions/app_ai_draw` → 「创建并部署：云端安装依赖」
 8. 右键 `cloudfunctions/app_nursing_undercover` → 「创建并部署：云端安装依赖」
-9. 保留的示例函数同理：`getOpenId`、`sum`
+9. 右键 `cloudfunctions/app_maic` → 「创建并部署：云端安装依赖」
+10. 右键 `cloudfunctions/app_maic_reconcile` → 「创建并部署：云端安装依赖」，并确认每 5 分钟 timer 已创建
+11. 保留的示例函数同理：`getOpenId`、`sum`
 
 也可以用 CloudBase CLI 首次创建和更新云函数。仓库已提交 `cloudbaserc.json`，仅保存环境 ID、函数名、runtime、handler、超时等非敏感部署元数据，确认其中不写入敏感环境变量后执行：
 
@@ -38,6 +40,8 @@
 npx -y -p @cloudbase/cli@3.5.0 cloudbase login
 npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_ai_draw --force --deployMode zip
 npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_nursing_undercover --force --deployMode zip
+npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic --force --deployMode zip
+npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic_reconcile --force --deployMode zip
 ```
 
 若要配置 `INTERNAL_API_SECRET` 等敏感环境变量，必须只保存在本地文件或云开发控制台中，不能写入 `cloudbaserc.json`。
@@ -54,8 +58,10 @@ npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_nursing_undercover --forc
 | `INTERNAL_API_SECRET` | 云函数间内部调用凭据 | 必须显式配置为随机字符串；未配置时扣费、到账、管理调分会失败 |
 | `CLOUDBASE_AI_MODEL` | 谁是卧底 AI NPC 使用的 CloudBase 模型 ID | 按 CloudBase AI preflight 后实际启用模型填写；未配置时应用使用模板 fallback |
 | `CLOUDBASE_AI_ENV_ID` | 可选，谁是卧底 AI SDK 初始化环境 ID | 默认 `cloudbase-3gphz7fk0fe1b760` |
+| `MAIC_API_BASE_URL` | `app_maic` 调用的 MAIC 服务端入口 | 首次仅 `https://dev.huli.sh.cn/maic` |
+| `MAIC_INTEGRATION_SECRET` | huli-tools → MAIC HMAC 密钥 | 至少 32 字节，只配置在 `app_maic` 与 MAIC 服务端 |
 
-`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`。
+`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_maic`、`app_maic_reconcile` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`。
 
 `CLOUDBASE_AI_MODEL` 只配置在 `app_nursing_undercover` 等需要 AI 的业务云函数中。配置前必须在当前环境完成 Token Credits 与模型启用检查，不要把 SecretId、SecretKey 或临时凭据写入仓库。
 

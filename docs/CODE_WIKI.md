@@ -364,6 +364,14 @@ huli-tools/
   5. 投票成功必须先完成 `coreApp.finishUsage`，再把 session 标记为 `finished`；取消对局必须先 `failUsage`，再标记 `cancelled`。
   6. CloudBase AI 模型 ID 通过 `CLOUDBASE_AI_MODEL` 环境变量配置，未配置或不可用时使用模板 fallback，不在代码中猜测模型 ID。
 
+#### app_maic / app_maic_reconcile — MAIC 智慧课堂
+
+- **职责**：把 `coreApp.createUsage("maic")` 创建的 usage 作为幂等键，通过 HMAC 调用 MAIC dev 异步任务接口，将 `maic-miniapp/1` 课程导入 CloudBase。
+- **边界**：客户端不直连 MAIC/MiniMax；课程不与 MAIC Web 用户或课程库同步；播放器不使用 WebView、HTML 或脚本。
+- **状态机**：`submit_pending → queued → processing → importing → succeeded`；失败、取消、协议错误或 45 分钟超时调用 `failUsage`。
+- **恢复**：页面轮询可推动单任务，`app_maic_reconcile` 每 5 分钟处理无人轮询任务；所有导入写入均以 `usageId/courseId/sceneId` 幂等覆盖。
+- **私有数据**：`app_maic_tasks`、`app_maic_courses`、`app_maic_scenes`、`app_maic_progress`、`app_maic_assets`。
+
 ### 4.4 遗留/示例云函数
 
 | 云函数 | 说明 |
@@ -388,6 +396,11 @@ huli-tools/
 | `payment_orders` | 支付订单 | 无写，只读自己 |
 | `admin_audit_logs` | 管理员操作审计 | 无权限 |
 | `system_configs` | 系统配置 | 无权限 |
+| `app_maic_tasks` | MAIC 异步任务与结算协调 | 无直接读写 |
+| `app_maic_courses` | MAIC 课程元数据 | 无直接读写 |
+| `app_maic_scenes` | MAIC 原生场景 | 无直接读写 |
+| `app_maic_progress` | MAIC 学习进度 | 无直接读写 |
+| `app_maic_assets` | MAIC 云存储资产 | 无直接读写 |
 
 ### 5.2 关键字段速查
 

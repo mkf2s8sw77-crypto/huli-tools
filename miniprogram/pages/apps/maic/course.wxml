@@ -1,0 +1,23 @@
+<ui-page title="课程详情" eyebrow="MAIC 智慧课堂" subtitle="课程采用原生纵向阅读，不依赖网页运行时">
+  <view wx:if="{{loading}}" class="card card--soft maic-loading">正在读取课程…</view>
+  <block wx:elif="{{course}}">
+    <view class="maic-course-cover">
+      <text class="maic-course-cover__protocol">{{course.protocol}}</text>
+      <text class="maic-course-cover__title">{{course.title}}</text>
+      <text class="maic-course-cover__summary">{{course.summary}}</text>
+      <view class="maic-course-cover__stats">
+        <view><text class="serif-num">{{course.sceneCount}}</text><text>场景</text></view>
+        <view><text class="serif-num">{{progress.percent || 0}}%</text><text>进度</text></view>
+      </view>
+    </view>
+
+    <view class="card maic-course-info">
+      <view><text>课程语言</text><text>{{course.language}}</text></view>
+      <view><text>媒体资产</text><text>{{course.assetCount || 0}} 项</text></view>
+      <view><text>保存位置</text><text>CloudBase 私有课程库</text></view>
+    </view>
+
+    <ui-action-button text="{{progress.sceneIndex ? '继续学习' : '开始学习'}}" bind:tap="startLearning" />
+    <button class="maic-danger-btn" loading="{{deleting}}" bindtap="deleteCourse">删除课程</button>
+  </block>
+</ui-page>

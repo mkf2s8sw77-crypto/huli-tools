@@ -660,7 +660,8 @@ async function checkCollectionsExist() {
     "users", "point_accounts", "point_transactions", "apps",
     "app_usage_records", "recharge_packages", "payment_orders",
     "admin_audit_logs", "system_configs", "app_ai_draw_tasks",
-    "app_nursing_undercover_sessions",
+    "app_nursing_undercover_sessions", "app_maic_tasks", "app_maic_courses",
+    "app_maic_scenes", "app_maic_progress", "app_maic_assets",
   ];
   const missing = [];
   for (const name of required) {
@@ -954,6 +955,13 @@ async function initSchema(event, context) {
       entryPage: "/pages/apps/nursing_undercover/index", cloudFunctionName: "app_nursing_undercover",
       status: "active", pricing: { mode: "fixed", costPoints: 0 },
       sortOrder: 3, createdAt: now, updatedAt: now,
+    },
+    {
+      appKey: "maic", name: "MAIC 智慧课堂",
+      description: "用 AI 生成可在微信小程序中原生阅读和互动的智慧课程",
+      entryPage: "/pages/apps/maic/index", cloudFunctionName: "app_maic",
+      status: "inactive", pricing: { mode: "fixed", costPoints: 1 },
+      sortOrder: 4, createdAt: now, updatedAt: now,
     },
   ];
 

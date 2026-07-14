@@ -1,0 +1,9 @@
+{
+  "name": "app_maic",
+  "version": "1.0.0",
+  "description": "MAIC 智慧课堂原生小程序应用云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

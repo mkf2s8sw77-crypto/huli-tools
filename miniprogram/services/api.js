@@ -82,4 +82,33 @@ module.exports = {
   listUsageRecords(page, pageSize) {
     return callCloud("coreApp", { action: "listUsageRecords", page, pageSize });
   },
+
+  // MAIC 智慧课堂
+  createMaicTask(input) {
+    return callCloud("app_maic", { action: "createTask", ...(input || {}) });
+  },
+  getMaicTask(usageId) {
+    return callCloud("app_maic", { action: "getTask", usageId });
+  },
+  cancelMaicTask(usageId) {
+    return callCloud("app_maic", { action: "cancelTask", usageId });
+  },
+  listMaicCourses(page, pageSize) {
+    return callCloud("app_maic", { action: "listCourses", page, pageSize });
+  },
+  getMaicCourse(courseId) {
+    return callCloud("app_maic", { action: "getCourse", courseId });
+  },
+  listMaicScenes(courseId) {
+    return callCloud("app_maic", { action: "listScenes", courseId });
+  },
+  getMaicProgress(courseId) {
+    return callCloud("app_maic", { action: "getProgress", courseId });
+  },
+  saveMaicProgress(courseId, progress) {
+    return callCloud("app_maic", { action: "saveProgress", courseId, progress });
+  },
+  deleteMaicCourse(courseId) {
+    return callCloud("app_maic", { action: "deleteCourse", courseId });
+  },
 };

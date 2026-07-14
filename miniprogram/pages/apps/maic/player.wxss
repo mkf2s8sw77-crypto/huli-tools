@@ -1,0 +1,143 @@
+@import "./common.wxss";
+
+page { background: #F5F0E8; }
+
+.maic-player {
+  min-height: 100vh;
+  padding: 24rpx 28rpx 180rpx;
+  box-sizing: border-box;
+}
+
+.maic-player__loading { padding-top: 160rpx; color: var(--color-text-muted); text-align: center; }
+
+.maic-player__topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 26rpx;
+  color: var(--color-text-muted);
+  font-size: 21rpx;
+}
+
+.maic-player__progress { height: 8rpx; overflow: hidden; border-radius: 999px; background: var(--color-border-soft); }
+.maic-player__progress view { height: 100%; border-radius: inherit; background: var(--color-brand-soft); }
+
+.maic-scene {
+  position: relative;
+  min-height: 820rpx;
+  padding: 38rpx 34rpx 46rpx;
+  overflow: hidden;
+  border: 1rpx solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: white;
+  box-shadow: var(--shadow-card);
+}
+
+.maic-scene__kind {
+  display: inline-block;
+  padding: 6rpx 14rpx;
+  border-radius: var(--radius-pill);
+  color: var(--color-brand-soft);
+  background: var(--color-brand-soft-light);
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  text-transform: uppercase;
+}
+
+.maic-scene__title {
+  display: block;
+  margin: 20rpx 0 30rpx;
+  font-family: var(--font-serif);
+  font-size: 40rpx;
+  font-weight: 600;
+  line-height: 1.42;
+}
+
+.maic-narration {
+  margin-bottom: 24rpx;
+  padding: 20rpx 22rpx;
+  border-left: 6rpx solid var(--color-accent-warm);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--color-text-secondary);
+  background: var(--color-accent-warm-light);
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+.maic-narration--speaking { animation: maic-pulse 900ms ease-in-out infinite alternate; }
+@keyframes maic-pulse { to { opacity: .72; } }
+
+.maic-block { margin-bottom: 24rpx; transition: all 200ms ease; }
+.maic-block--highlight { padding: 18rpx; border-radius: var(--radius-md); background: var(--color-warning-light); }
+.maic-block--spotlight { padding: 18rpx; border-radius: var(--radius-md); box-shadow: 0 0 0 4000rpx rgba(45,36,24,.18); z-index: 2; position: relative; }
+
+.maic-paragraph, .maic-question, .maic-case { display: block; color: var(--color-text-secondary); font-size: 28rpx; line-height: 1.85; }
+.maic-question { margin-bottom: 28rpx; color: var(--color-text); font-weight: 600; }
+.maic-case { margin-bottom: 26rpx; padding: 22rpx; border-radius: var(--radius-md); background: var(--color-surface); }
+
+.maic-list view { display: grid; grid-template-columns: 32rpx 1fr; gap: 10rpx; margin-bottom: 14rpx; font-size: 27rpx; line-height: 1.7; }
+.maic-list view text:first-child { color: var(--color-accent-warm); font-weight: 700; }
+
+.maic-callout { padding: 24rpx; border-radius: var(--radius-md); color: var(--color-text-secondary); background: var(--color-primary-light); font-size: 25rpx; line-height: 1.7; }
+.maic-callout--success { background: var(--color-success-light); }
+.maic-callout--warning { background: var(--color-warning-light); }
+.maic-callout__title { display: block; margin-bottom: 8rpx; color: var(--color-text); font-weight: 600; }
+.maic-image { width: 100%; border-radius: var(--radius-md); }
+
+.maic-table-wrap { width: 100%; }
+.maic-table { min-width: 620rpx; border: 1rpx solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+.maic-table__row { display: flex; }
+.maic-table__row text { flex: 1; min-width: 160rpx; padding: 16rpx; border-right: 1rpx solid var(--color-border-soft); border-bottom: 1rpx solid var(--color-border-soft); font-size: 22rpx; }
+.maic-table__head { color: var(--color-primary); background: var(--color-primary-light); font-weight: 600; }
+
+.maic-step-list > view, .maic-reveal-step { display: grid; grid-template-columns: 50rpx 1fr; gap: 16rpx; margin-bottom: 20rpx; }
+.maic-step-list text, .maic-reveal-step text { display: block; color: var(--color-text-secondary); font-size: 24rpx; line-height: 1.6; }
+.maic-step-list__num, .maic-reveal-step > text { display: flex !important; align-items: center; justify-content: center; width: 46rpx; height: 46rpx; border-radius: 50%; color: white !important; background: var(--color-brand-soft); }
+.maic-step-list__title, .maic-reveal-step__title { margin-bottom: 5rpx; color: var(--color-text) !important; font-weight: 600; }
+
+.maic-diagram { display: flex; flex-wrap: wrap; gap: 14rpx; }
+.maic-diagram__node { padding: 16rpx 20rpx; border: 1rpx solid var(--color-brand-soft); border-radius: var(--radius-md); color: var(--color-brand-soft); background: var(--color-brand-soft-light); }
+.maic-diagram__edge { width: 100%; color: var(--color-text-muted); font-size: 22rpx; }
+
+.maic-option { margin-bottom: 16rpx; padding: 24rpx; border: 1rpx solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-secondary); background: var(--color-surface); font-size: 26rpx; line-height: 1.55; }
+.maic-option--selected { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-light); }
+.maic-option--correct { border-color: var(--color-success); background: var(--color-success-light); }
+
+.maic-primary-btn { margin-top: 26rpx; color: white; background: var(--gradient-primary); }
+.maic-feedback { margin-top: 24rpx; padding: 24rpx; border-radius: var(--radius-md); font-size: 25rpx; line-height: 1.7; }
+.maic-feedback--correct { color: var(--color-success); background: var(--color-success-light); }
+.maic-feedback--wrong { color: var(--color-danger); background: var(--color-danger-light); }
+.maic-feedback__title { display: block; margin-bottom: 8rpx; font-weight: 600; }
+
+.maic-tabs { width: 100%; margin-bottom: 20rpx; }
+.maic-tabs__inner { display: flex; gap: 12rpx; white-space: nowrap; }
+.maic-tab { padding: 14rpx 22rpx; border-radius: var(--radius-pill); color: var(--color-text-secondary); background: var(--color-surface); }
+.maic-tab--active { color: white; background: var(--color-primary); }
+.maic-tab-content { display: block; padding: 24rpx; border-radius: var(--radius-md); color: var(--color-text-secondary); background: var(--color-primary-light); font-size: 26rpx; line-height: 1.75; }
+.maic-interaction-hint, .maic-result-text { display: block; margin-bottom: 20rpx; color: var(--color-text-muted); font-size: 23rpx; }
+
+.maic-match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; }
+.maic-match-item { display: block; margin-bottom: 14rpx; padding: 18rpx; border: 1rpx solid var(--color-border); border-radius: var(--radius-md); font-size: 23rpx; }
+.maic-match-item--active { border-color: var(--color-primary); background: var(--color-primary-light); }
+.maic-match-item--used { opacity: .4; }
+.maic-match-result { margin-top: 12rpx; padding: 14rpx 18rpx; border-radius: var(--radius-sm); color: var(--color-danger); background: var(--color-danger-light); font-size: 22rpx; }
+.maic-match-result--correct { color: var(--color-success); background: var(--color-success-light); }
+
+.maic-sort-item { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; margin-bottom: 12rpx; padding: 18rpx; border-radius: var(--radius-md); background: var(--color-surface); }
+.maic-sort-item > text { flex: 1; font-size: 24rpx; }
+.maic-sort-item button { display: inline-block; margin-left: 6rpx; padding: 0 12rpx; }
+
+.maic-hotspot { position: relative; height: 480rpx; margin-bottom: 18rpx; border-radius: var(--radius-md); background: var(--color-surface); }
+.maic-hotspot image { width: 100%; height: 100%; }
+.maic-hotspot__point { position: absolute; display: flex; align-items: center; justify-content: center; width: 48rpx; height: 48rpx; transform: translate(-50%, -50%); border: 4rpx solid white; border-radius: 50%; color: white; background: var(--color-accent-warm); box-shadow: var(--shadow-elevated); }
+.maic-hotspot__point--active { background: var(--color-success); }
+
+.maic-pbl-node { padding: 24rpx; border-radius: var(--radius-lg); background: var(--color-surface); }
+.maic-pbl-node__meta { display: flex; justify-content: space-between; margin-bottom: 18rpx; color: var(--color-primary); font-weight: 600; }
+.maic-pbl-node__narrative { display: block; margin-bottom: 22rpx; color: var(--color-text-secondary); font-size: 26rpx; line-height: 1.75; }
+
+.maic-laser { position: absolute; z-index: 10; width: 26rpx; height: 26rpx; transform: translate(-50%, -50%); border: 5rpx solid rgba(255,255,255,.9); border-radius: 50%; background: #D84A3A; box-shadow: 0 0 0 12rpx rgba(216,74,58,.18); pointer-events: none; }
+
+.maic-player__nav { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 2fr; gap: 18rpx; padding: 20rpx 28rpx calc(20rpx + env(safe-area-inset-bottom)); border-top: 1rpx solid var(--color-border-soft); background: rgba(251,248,242,.96); }
+.maic-player__nav button { margin: 0; }
+.maic-player__next { color: white; background: var(--gradient-primary); }

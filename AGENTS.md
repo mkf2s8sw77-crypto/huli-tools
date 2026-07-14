@@ -14,15 +14,15 @@
 - 云函数代码风格保持 CommonJS，两空格缩进。
 - 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。
 
-## 3. 设计系统（柔彩多巴胺）
+## 3. 设计系统（v3 自然疗愈）
 
-- 详见 `docs/design_system.md`。视觉方向：柔彩多巴胺工具平台。
-- **色板**：晴空蓝主色 `#5E95C8` + 薄荷青 `#5EBCB0` + 珊瑚橙 `#E8956B` + 桃粉/薰衣草/柠檬扩展。微信绿仅用于微信登录按钮。不得回退到旧深蓝青 `#1e5a8c`。
-- **表面**：页面使用淡紫灰暖渐变背景，卡片带描边 + 柔阴影 + 顶部彩虹高光线。
+- 详见 `docs/design_system.md`。视觉方向：暖米底色、陶土棕主色、雾绿辅色的自然疗愈工具平台。
+- **色板**：背景 `#F5F0E8`、主色 `#8A6A3A`、雾绿 `#7A8B6A`、陶橙 `#C8804A`、正文 `#2D2418`。微信绿仅用于微信登录按钮。
+- **表面**：暖米渐变背景、白色卡片、暖陶描边与轻柔阴影；禁止重新引入彩虹高光和高饱和多巴胺配色。
 - **Logo**：两端使用 `https://media.huli.sh.cn/huli-tech-logo.png` 的本地化资产；展示时必须圆角裁切，不得使用方角原图。
 - **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部大号浮动胶囊导航在 `miniprogram/custom-tab-bar/`。
 - **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。柔蓝灰侧栏 `#3B4A6B`。通用组件在 `admin-web/src/components/`。
-- 新页面和新应用必须使用柔彩多巴胺 token 和公共组件，采用"应用执行页"模式。功能图标使用 `.icon-tile` CSS-only 图标，不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
+- 新页面和新应用必须使用 v3 token 和公共组件，采用"应用执行页"模式。功能图标使用 `.icon-tile` CSS-only 图标，不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
 ## 4. 安全铁律
@@ -68,6 +68,7 @@
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
 - AI 生图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
 - AI 生图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
+- MAIC 课程任务以 `usageId` 贯穿 usage、外部任务、课程导入和结算；`app_maic_reconcile` 必须能在无人轮询时继续推进，45 分钟超时必须取消并释放积分。
 - 用户媒体上传必须先由云函数签发受控 `cloudPath`，客户端只上传到该路径；业务云函数校验 `fileID/cloudPath` 归属后换取短期临时 URL 调上游，源素材默认私有短期保留并设置 `expiresAt`。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
@@ -79,6 +80,7 @@
 - `PAYMENT_PROVIDER` — `mock` 或 `wechat`
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
 - `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
+- `MAIC_API_BASE_URL`、`MAIC_INTEGRATION_SECRET` — 仅配置于 `app_maic`；前者指向 MAIC dev 集成入口，后者与 MAIC HMAC 密钥一致，禁止下发客户端
 
 真实微信支付额外需要：
 - `WX_PAY_MCH_ID`、`WX_PAY_APPID`、`WX_PAY_API_V3_KEY`、`WX_PAY_SERIAL_NO`、`WX_PAY_PRIVATE_KEY`、`WX_PAY_NOTIFY_URL`
@@ -89,6 +91,7 @@
 - 新应用 `appKey` 使用小写 snake_case；页面放 `miniprogram/pages/apps/<appKey>/`；云函数命名 `app_<appKey>`；私有集合 `app_<appKey>_*`。
 - 新应用竖切模板见 `templates/app_vertical_slice/`，已预配置设计系统。
 - 应用不得绕过 `coreApp.createUsage` / `finishUsage` / `failUsage` 直接操作积分；应用云函数仅允许只读当前 `app_usage_records` 做执行校验，不得直接写公共集合。
+- `maic` 是平台垂直应用：小程序课程只存 CloudBase，不与 MAIC Web 账号/课程同步；客户端不得直连 MAIC/MiniMax，不得使用 WebView 或执行服务端内容。
 - 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。
 
 ## 11. 测试与交付

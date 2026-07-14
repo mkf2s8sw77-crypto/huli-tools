@@ -312,15 +312,32 @@ git diff --check
   - 历史回看只返回当前用户自己的对局。
   - 取消对局后 usage 状态为 `failed` 或 `released`，session 状态为 `cancelled`。
 
+### TC-23 MAIC 异步课程、协议执行与积分闭环
+
+- 目标：验证 `maic` 的 HMAC 异步任务、后台恢复、原生播放器、用户隔离和积分结算。
+- 前置条件：5 个 `app_maic_*` 集合均为 PRIVATE；`app_maic`、`app_maic_reconcile` 已部署；MAIC dev 开关、Worker 和 MiniMax M3 已启用；验收期间临时把应用设为 `active`。
+- 步骤：
+  1. 创建 1 积分 usage 并提交包含 slide、quiz、interaction、PBL 的最小课程。
+  2. 退出小程序并等待 `app_maic_reconcile` 推进，再返回查看结果。
+  3. 在播放器依次触发 speech、highlight、spotlight、laser、pause、navigate，并完成测验、互动和 PBL。
+  4. 重复提交同一 `usageId`；再分别验证取消、上游失败和 45 分钟超时。
+  5. 使用另一微信用户尝试读取任务、课程、进度和媒体。
+- 断言：
+  - 日志显示 `model=minimax:MiniMax-M3`，且任务可在退出、网络中断和 Worker 重启后恢复。
+  - 同一 `usageId` 只产生一个外部 job，只冻结并结算一次积分。
+  - 四类场景与六类动作均由原生组件执行，无 WebView、HTML 或脚本。
+  - 课程、场景和媒体全部导入后才结算；失败、取消和超时均释放积分。
+  - 跨用户访问均返回 `FORBIDDEN`，无法获取临时媒体 URL。
+
 ## 4. 设计系统视觉一致性验收
 
 - 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw`、`nursing_undercover` 页面无白屏。
 - 所有页面使用 `ui-page` 组件统一页面壳，标题样式一致。
 - 卡片使用 `card` class 或 `ui-card` 组件，圆角 16rpx、阴影一致。
 - 状态标签颜色统一：成功绿、警告黄、危险红、默认灰。
-- 积分数值使用 `--color-points`（蓝青），价格使用 `--color-price`（黄），不使用旧的微信绿。
+- 积分数值使用陶土棕 `--color-points`，价格使用陶橙 `--color-price`，不使用旧的微信绿。
 - 空状态（`ui-empty`）和错误态（`ui-error`）布局一致。
-- Tab bar 选中色为平台蓝青（`--color-primary`），非微信绿。
+- Tab bar 选中色为平台陶土棕（`--color-primary`），非微信绿。
 - 页面内无硬编码的 `#07c160`、`#1890ff`、`#52c41a` 等非 Token 颜色值。
 - 模板 `templates/app_vertical_slice/` 复制新应用后，页面默认使用设计系统组件。
 

@@ -72,6 +72,20 @@
       "handler": "index.main",
       "timeout": 60,
       "installDependency": true
+    },
+    {
+      "name": "app_maic",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 60,
+      "installDependency": true
+    },
+    {
+      "name": "app_maic_reconcile",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 60,
+      "installDependency": true
     }
   ]
 }

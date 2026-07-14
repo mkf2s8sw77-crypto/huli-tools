@@ -1,0 +1,52 @@
+<ui-page title="MAIC 智慧课堂" eyebrow="原生微信课程" subtitle="输入一个主题，生成可阅读、可互动、可续学的移动课程">
+  <view class="maic-hero fade-in">
+    <text class="maic-hero__title">把知识变成一段清晰的学习旅程</text>
+    <text class="maic-hero__desc">课程由 MiniMax M3 编排，生成后独立保存在云开发中。</text>
+    <text class="maic-hero__price">每次生成 1 积分</text>
+  </view>
+
+  <view wx:if="{{appInfo && appInfo.status !== 'active'}}" class="maic-notice">
+    当前应用仍处于开发验收状态，激活前无法正式扣积分生成。
+  </view>
+
+  <view wx:if="{{activeUsageId}}" class="card maic-active-task tap-feedback" bindtap="resumeTask">
+    <view>
+      <text class="maic-active-task__title">有一门课程正在生成</text>
+      <text class="maic-active-task__desc">点此查看进度，退出小程序也不会中断</text>
+    </view>
+    <text class="maic-link">查看</text>
+  </view>
+
+  <ui-section title="创建课程">
+    <view class="card card--elevated maic-form">
+      <ui-form-field label="课程主题">
+        <textarea class="maic-textarea maic-textarea--topic" value="{{topic}}" maxlength="500" auto-height placeholder="例如：新入职护士如何识别输液反应" bindinput="onTopicInput" />
+      </ui-form-field>
+      <ui-form-field label="学习对象（选填）">
+        <input class="form-input" value="{{audience}}" maxlength="200" placeholder="例如：护理实习生" bindinput="onAudienceInput" />
+      </ui-form-field>
+      <ui-form-field label="建议时长：{{durationMinutes}} 分钟">
+        <slider min="3" max="45" step="1" value="{{durationMinutes}}" activeColor="#8A6A3A" backgroundColor="#E0D6C2" bindchange="onDurationChange" />
+      </ui-form-field>
+      <ui-form-field label="补充要求（选填）">
+        <textarea class="maic-textarea" value="{{requirements}}" maxlength="3000" auto-height placeholder="希望包含的案例、难度或教学重点" bindinput="onRequirementsInput" />
+      </ui-form-field>
+      <ui-action-button text="{{loading ? '正在提交…' : '生成智慧课程'}}" loading="{{loading}}" disabled="{{loading || topic.length < 2 || (appInfo && appInfo.status !== 'active')}}" bind:tap="createCourse" />
+    </view>
+  </ui-section>
+
+  <ui-section title="我的课程">
+    <view wx:if="{{coursesLoading}}" class="card card--soft maic-loading">正在加载课程…</view>
+    <ui-empty wx:elif="{{empty}}" text="还没有课程，生成后会保存在这里" />
+    <view wx:else>
+      <view wx:for="{{courses}}" wx:key="courseId" class="card maic-course-card tap-feedback" data-id="{{item.courseId}}" bindtap="openCourse">
+        <view class="maic-course-card__meta">
+          <text class="status-tag status-tag--info">{{item.sceneCount}} 个场景</text>
+          <text class="maic-course-card__date">{{item.protocol}}</text>
+        </view>
+        <text class="maic-course-card__title">{{item.title}}</text>
+        <text class="maic-course-card__summary">{{item.summary}}</text>
+      </view>
+    </view>
+  </ui-section>
+</ui-page>
