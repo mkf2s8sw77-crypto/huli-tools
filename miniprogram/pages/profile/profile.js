@@ -10,12 +10,6 @@ Page({
     loading: false,
     user: null,
     maskedOpenid: "",
-    points: {
-      availablePoints: 0,
-      frozenPoints: 0,
-      totalRechargedPoints: 0,
-      totalConsumedPoints: 0,
-    },
   },
 
   onLoad() {
@@ -38,30 +32,12 @@ Page({
       this.setData({
         user,
         maskedOpenid: maskOpenid(user ? user.openid : ""),
-        points: data.points || {
-          availablePoints: 0,
-          frozenPoints: 0,
-          totalRechargedPoints: 0,
-          totalConsumedPoints: 0,
-        },
         loading: false,
       });
     } catch (err) {
       api.toastError(err);
       this.setData({ loading: false });
     }
-  },
-
-  onGoRecharge() {
-    wx.navigateTo({ url: "/pages/recharge/recharge" });
-  },
-
-  onGoOrders() {
-    wx.navigateTo({ url: "/pages/orders/orders" });
-  },
-
-  onGoTransactions() {
-    wx.navigateTo({ url: "/pages/transactions/transactions" });
   },
 
   onGoUsageRecords() {

@@ -1,7 +1,7 @@
 /* 首页 v3 — 自然疗愈仪表盘 */
 
-/* ── 积分摘要卡(骨架 A hero) ── */
-.points-hero {
+/* ── 免费开放提示 ── */
+.free-hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -12,9 +12,8 @@
   box-shadow: var(--shadow-elevated);
   position: relative;
   overflow: hidden;
-  cursor: pointer;
 }
-.points-hero::after {
+.free-hero::after {
   content: "";
   position: absolute;
   top: -40rpx;
@@ -25,70 +24,52 @@
   background: var(--color-on-primary);
   opacity: 0.10;
 }
-.points-hero__main {
+.free-hero__main {
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 1;
 }
-.points-hero__label {
+.free-hero__eyebrow {
   font-size: 24rpx;
   color: var(--color-on-primary);
   opacity: 0.85;
-  margin-bottom: 6rpx;
+  margin-bottom: 10rpx;
   letter-spacing: 0.5rpx;
 }
-.points-hero__value {
-  font-size: 64rpx;
+.free-hero__title {
+  font-size: 42rpx;
   font-weight: 600;
   color: var(--color-on-primary);
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  display: block;
 }
-.points-hero__action {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1rpx solid rgba(255, 255, 255, 0.4);
-  border-radius: var(--radius-pill);
-  padding: 14rpx 32rpx;
+.free-hero__desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: var(--color-on-primary);
+  opacity: 0.82;
+}
+.free-hero__mark {
+  width: 76rpx;
+  height: 76rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.54);
+  border-radius: 50%;
   position: relative;
   z-index: 1;
-  transition: background var(--t-fast) var(--ease-out);
+  flex-shrink: 0;
 }
-.points-hero__action:active {
-  background: rgba(255, 255, 255, 0.32);
-}
-.points-hero__action-text {
-  font-size: 26rpx;
-  color: var(--color-on-primary);
-  font-weight: 600;
-}
-
-/* ── 快捷入口(骨架 A) ── */
-.quick-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 40rpx;
-  padding: 0 8rpx;
-}
-.quick-nav__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10rpx;
-  min-width: 112rpx;
-  padding: 6rpx 12rpx;
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-}
-.quick-nav__icon {
-  width: 84rpx;
-  height: 84rpx;
-}
-.quick-nav__text {
-  font-size: 24rpx;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  line-height: 1.2;
+.free-hero__mark::before {
+  content: "";
+  position: absolute;
+  left: 22rpx;
+  top: 17rpx;
+  width: 24rpx;
+  height: 14rpx;
+  border-left: 5rpx solid var(--color-on-primary);
+  border-bottom: 5rpx solid var(--color-on-primary);
+  transform: rotate(-45deg);
 }
 
 /* ── 应用卡片(骨架 A) ── */

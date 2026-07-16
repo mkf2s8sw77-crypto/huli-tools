@@ -35,7 +35,7 @@ Page({
     error: null,
 
     appInfo: null,
-    costLabel: "免费",
+    costLabel: "免费使用",
 
     modes: [],
     difficulties: [],
@@ -87,10 +87,9 @@ Page({
   async loadAppInfo() {
     try {
       const detail = await api.getAppDetail("nursing_undercover");
-      const cost = detail && detail.pricing ? detail.pricing.costPoints : 0;
       this.setData({
         appInfo: detail,
-        costLabel: cost > 0 ? cost + " 积分" : "免费",
+        costLabel: "免费使用",
       });
     } catch (err) {
       // non-blocking

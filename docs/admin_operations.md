@@ -1,5 +1,11 @@
 # 管理员操作说明
 
+## 正式入口
+
+- Web 管理端：<https://huli-tools-admin-cloudbase-3gphz7fk0fe1b760.webapps.tcloudbase.com/>
+- CloudBase Web 应用服务名：`huli-tools-admin`
+- 当前启用用户名/密码登录；管理员仍须满足下方 `ADMIN_WEB_UIDS` 或首次自动准入规则。
+
 ## 前置条件
 
 ### 小程序管理员

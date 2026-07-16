@@ -52,6 +52,7 @@
 
 ## 7. Web 管理端边界
 
+- 生产管理端固定复用 CloudBase Web 应用服务 `huli-tools-admin`，正式入口为 `https://huli-tools-admin-cloudbase-3gphz7fk0fe1b760.webapps.tcloudbase.com/`；后续部署不得新建同用途服务名。
 - `admin-web/src` 中不得出现对业务集合的 `collection(...)` 直连。
 - `admin-web/src` 中不得出现 `INTERNAL_API_SECRET`、支付私钥等敏感标识。
 - Web 管理端通过 `@cloudbase/js-sdk` 调用 `adminCore` 云函数，不得绕过云函数直接读写集合。
@@ -97,6 +98,7 @@
 
 ## 11. 测试与交付
 
+- 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。该流程使用 Node.js 20，避免 Node.js 25 与 `miniprogram-ci` 不兼容。
 - 每次提交前运行 `bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。
 - 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。

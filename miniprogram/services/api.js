@@ -56,28 +56,6 @@ module.exports = {
     return callCloud("coreApp", { action: "createUsage", appKey, inputSummary });
   },
 
-  // 积分
-  getBalance() {
-    return callCloud("corePoints", { action: "getBalance" });
-  },
-  listTransactions(page, pageSize) {
-    return callCloud("corePoints", { action: "listTransactions", page, pageSize });
-  },
-
-  // 支付
-  listPackages() {
-    return callCloud("corePayment", { action: "listPackages" });
-  },
-  createOrder(packageKey) {
-    return callCloud("corePayment", { action: "createOrder", packageKey });
-  },
-  listOrders(page, pageSize) {
-    return callCloud("corePayment", { action: "listOrders", page, pageSize });
-  },
-  mockPayOrder(orderNo) {
-    return callCloud("corePayment", { action: "mockPayOrder", orderNo });
-  },
-
   // 使用记录
   listUsageRecords(page, pageSize) {
     return callCloud("coreApp", { action: "listUsageRecords", page, pageSize });

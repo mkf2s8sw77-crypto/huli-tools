@@ -10,43 +10,13 @@
   </view>
 
   <view wx:else>
-    <!-- 积分摘要卡(骨架 A hero) -->
-    <view wx:if="{{userSummary}}" class="points-hero lift-on-hover fade-in" bindtap="onGoRecharge">
-      <view class="points-hero__main">
-        <text class="points-hero__label serif-num">可用积分</text>
-        <text class="points-hero__value serif-num">{{userSummary.points.availablePoints}}</text>
+    <view class="free-hero fade-in">
+      <view class="free-hero__main">
+        <text class="free-hero__eyebrow">huli 工具箱</text>
+        <text class="free-hero__title serif-num">全部工具免费开放</text>
+        <text class="free-hero__desc">选择下方工具即可直接使用</text>
       </view>
-      <view class="points-hero__action tap-feedback">
-        <text class="points-hero__action-text">充值</text>
-      </view>
-    </view>
-
-    <!-- 快捷入口(骨架 A) -->
-    <view class="quick-nav fade-in fade-in-1">
-      <view class="quick-nav__item tap-feedback" bindtap="onGoRecharge">
-        <view class="quick-nav__icon icon-tile icon-tile--coral icon-tile--recharge">
-          <view class="icon-tile__glyph"></view>
-        </view>
-        <text class="quick-nav__text">充值</text>
-      </view>
-      <view class="quick-nav__item tap-feedback" bindtap="onGoOrders">
-        <view class="quick-nav__icon icon-tile icon-tile--lavender icon-tile--orders">
-          <view class="icon-tile__glyph"></view>
-        </view>
-        <text class="quick-nav__text">订单</text>
-      </view>
-      <view class="quick-nav__item tap-feedback" bindtap="onGoTransactions">
-        <view class="quick-nav__icon icon-tile icon-tile--teal icon-tile--transactions">
-          <view class="icon-tile__glyph"></view>
-        </view>
-        <text class="quick-nav__text">流水</text>
-      </view>
-      <view class="quick-nav__item tap-feedback" bindtap="onGoUsageRecords">
-        <view class="quick-nav__icon icon-tile icon-tile--peach icon-tile--records">
-          <view class="icon-tile__glyph"></view>
-        </view>
-        <text class="quick-nav__text">记录</text>
-      </view>
+      <view class="free-hero__mark" aria-hidden="true"></view>
     </view>
 
     <!-- 应用目录(骨架 A 列表) -->
@@ -71,9 +41,8 @@
                 <ui-status wx:if="{{item.status === 'coming_soon'}}" text="即将上线" type="warning" />
               </view>
               <text class="app-card__desc">{{item.description || ''}}</text>
-              <view wx:if="{{item.pricing && item.pricing.mode === 'fixed'}}" class="app-card__cost">
-                <text wx:if="{{item.pricing.costPoints > 0}}" class="app-card__cost-text serif-num">{{item.pricing.costPoints}} 积分/次</text>
-                <text wx:else class="app-card__cost-text serif-num">免费</text>
+              <view class="app-card__cost">
+                <text class="app-card__cost-text serif-num">免费使用</text>
               </view>
             </view>
           </view>

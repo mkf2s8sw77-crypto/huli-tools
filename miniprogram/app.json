@@ -2,16 +2,12 @@
   "pages": [
     "pages/index/index",
     "pages/profile/profile",
-    "pages/tools/demo-sum/index",
     "pages/apps/ai_draw/index",
     "pages/apps/nursing_undercover/index",
     "pages/apps/maic/index",
     "pages/apps/maic/generating",
     "pages/apps/maic/course",
     "pages/apps/maic/player",
-    "pages/recharge/recharge",
-    "pages/orders/orders",
-    "pages/transactions/transactions",
     "pages/usage-records/usage-records"
   ],
   "window": {
@@ -32,7 +28,6 @@
     "ui-page": "/components/ui/ui-page/index",
     "ui-card": "/components/ui/ui-card/index",
     "ui-section": "/components/ui/ui-section/index",
-    "ui-price": "/components/ui/ui-price/index",
     "ui-status": "/components/ui/ui-status/index",
     "ui-empty": "/components/ui/ui-empty/index",
     "ui-error": "/components/ui/ui-error/index",

@@ -1,19 +1,14 @@
-/* 我的页面 v3 — 自然疗愈账户面板 */
+/* 我的页面 v3 — 自然疗愈服务面板 */
 
-.account-card {
+.service-card {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-elevated);
-}
-
-.account-card__bg {
-  position: absolute;
-  inset: 0;
   background: var(--gradient-hero);
 }
-.account-card__bg::after {
+.service-card::after {
   content: "";
   position: absolute;
   top: -60rpx;
@@ -25,14 +20,14 @@
   opacity: 0.10;
 }
 
-.account-card__content {
+.service-card__content {
   position: relative;
   z-index: 1;
   padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
   color: var(--color-on-primary);
 }
 
-.account-card__label {
+.service-card__eyebrow {
   font-size: 24rpx;
   color: var(--color-on-primary);
   opacity: 0.85;
@@ -41,36 +36,20 @@
   letter-spacing: 0.5rpx;
 }
 
-.account-card__balance {
-  font-size: 80rpx;
+.service-card__title {
+  font-size: 48rpx;
   font-weight: 600;
   line-height: 1.05;
   display: block;
-  font-variant-numeric: tabular-nums;
+  margin-top: 8rpx;
 }
-
-.account-card__details {
-  display: flex;
-  gap: var(--spacing-lg);
-}
-
-.account-card__detail {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-.account-card__detail-label {
-  font-size: 20rpx;
+.service-card__desc {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 25rpx;
+  line-height: 1.5;
   color: var(--color-on-primary);
-  opacity: 0.7;
-}
-.account-card__detail-value {
-  font-size: 28rpx;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.account-card__detail-value--warning {
-  color: var(--color-lemon-light);
+  opacity: 0.82;
 }
 
 /* ── 身份栏(独立卡) ── */

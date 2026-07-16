@@ -100,7 +100,7 @@ Page({
   async cancelTask() {
     if (this.data.cancelling || this.isTerminal(this.data.status)) return;
     const confirmed = await new Promise((resolve) => {
-      wx.showModal({ title: "取消生成", content: "取消后会释放本次冻结的积分。", success: (res) => resolve(res.confirm) });
+      wx.showModal({ title: "取消生成", content: "取消后本次生成将停止，已生成内容不会保留。", success: (res) => resolve(res.confirm) });
     });
     if (!confirmed) return;
     this.setData({ cancelling: true });

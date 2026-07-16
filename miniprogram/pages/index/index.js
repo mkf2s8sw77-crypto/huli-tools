@@ -1,7 +1,6 @@
 const api = require("../../services/api");
 
 const APP_ICON_CLASS_MAP = {
-  demo_sum: "icon-tile--lavender icon-tile--calculator",
   ai_draw: "icon-tile--peach icon-tile--image",
   nursing_undercover: "icon-tile--lavender icon-tile--undercover",
   maic: "icon-tile--teal icon-tile--toolbox",
@@ -18,7 +17,6 @@ Page({
   data: {
     loading: true,
     error: null,
-    userSummary: null,
     apps: [],
   },
 
@@ -37,13 +35,12 @@ Page({
     this.setData({ loading: true, error: null });
 
     try {
-      const [userData, appsData] = await Promise.all([
+      const [, appsData] = await Promise.all([
         api.bootstrapUser(),
         api.listApps(),
       ]);
 
       this.setData({
-        userSummary: userData || null,
         apps: (appsData.apps || []).map(decorateApp),
         loading: false,
       });
@@ -74,19 +71,4 @@ Page({
     });
   },
 
-  onGoRecharge() {
-    wx.navigateTo({ url: "/pages/recharge/recharge" });
-  },
-
-  onGoOrders() {
-    wx.navigateTo({ url: "/pages/orders/orders" });
-  },
-
-  onGoTransactions() {
-    wx.navigateTo({ url: "/pages/transactions/transactions" });
-  },
-
-  onGoUsageRecords() {
-    wx.navigateTo({ url: "/pages/usage-records/usage-records" });
-  },
 });

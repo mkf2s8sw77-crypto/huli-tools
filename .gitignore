@@ -36,3 +36,4 @@ private.*.key
 # 临时预览产物
 tmp-preview/
 preview-qr.png
+.playwright-mcp/

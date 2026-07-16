@@ -18,6 +18,16 @@
 2. `project.config.json` 当前已配置 APPID：`wx1654159e6e3bb334`。如复制为其他小程序项目，再替换为对应 APPID。
 3. 确保「云开发」已初始化，且环境 ID 匹配。
 
+## 小程序上传
+
+使用仓库发布脚本上传开发版本。脚本会固定体验版启动页为 `pages/index/index`，避免微信后台沿用过期的 `pages/home/home` 等路径：
+
+```bash
+bash scripts/upload-miniprogram.sh 1.0.1 "修复体验版启动路径"
+```
+
+上传私钥必须位于项目根目录 `private.<appid>.key`，且不纳入 Git。脚本优先使用 Homebrew Node.js 20；`miniprogram-ci` 当前不兼容 Node.js 25。
+
 ## 云函数部署
 
 在微信开发者工具中：
@@ -138,12 +148,13 @@ npm --prefix admin-web run build    # 产物输出到 admin-web/dist
 
 ### 部署
 
-推荐 CloudBase 静态托管：
+生产环境使用 CloudBase Web 应用，固定复用服务名 `huli-tools-admin`：
 
 1. 构建 `npm --prefix admin-web run build`
-2. 将 `admin-web/dist` 部署到 CloudBase 静态托管
-3. 在 CloudBase 安全来源中添加托管域名
-4. 在 `adminCore` 配置 `ADMIN_WEB_UIDS`
+2. 将 `admin-web/dist` 部署为 `huli-tools-admin` 的新版本
+3. 使用正式入口 `https://huli-tools-admin-cloudbase-3gphz7fk0fe1b760.webapps.tcloudbase.com/`
+4. `*.webapps.tcloudbase.com` 已由 CloudBase 默认加入 Web 安全域名，无需重复添加
+5. 在 `adminCore` 配置 `ADMIN_WEB_UIDS`
 
 也可部署到任意静态站点（Nginx、CDN），需确保：
 - CloudBase 安全来源包含该域名

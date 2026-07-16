@@ -1,4 +1,4 @@
-<ui-page title="使用记录" subtitle="应用调用历史与积分消耗">
+<ui-page title="使用记录" subtitle="应用调用历史">
   <!-- mini-hero(骨架 B):使用汇总 -->
   <view class="list-hero fade-in" wx:if="{{!loading && list.length > 0}}">
     <view class="list-hero__row">
@@ -35,11 +35,6 @@
       <view class="info-card__top">
         <text class="info-card__app">{{item.appKey}}</text>
         <ui-status text="{{item.statusText}}" type="{{item.statusType}}" />
-      </view>
-      <view class="info-card__row">
-        <text class="info-card__label">积分消耗</text>
-        <text wx:if="{{item.costPoints > 0}}" class="info-card__cost">{{item.costPoints}} 积分</text>
-        <text wx:else class="info-card__cost info-card__cost--free">免费</text>
       </view>
       <view wx:if="{{item.errorMessage}}" class="info-card__error">
         <text>{{item.errorMessage}}</text>

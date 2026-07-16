@@ -29,6 +29,14 @@ npm run dev
 
 默认开发地址：`http://localhost:60530`。管理端使用 hash 路由，静态部署后无需额外配置 SPA fallback。
 
+## 线上部署
+
+- CloudBase Web 应用服务：`huli-tools-admin`
+- 正式入口：<https://huli-tools-admin-cloudbase-3gphz7fk0fe1b760.webapps.tcloudbase.com/>
+- 首次上线版本：`huli-tools-admin-001`（2026-07-15）
+
+后续发布必须复用 `huli-tools-admin` 服务名，以新增版本方式更新，避免生成新的管理端域名。发布前先运行下方检查与构建命令，再部署 `dist/`。
+
 ## 环境变量
 
 ```bash
