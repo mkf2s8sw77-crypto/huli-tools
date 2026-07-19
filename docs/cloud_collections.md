@@ -18,11 +18,13 @@
 | `system_configs` | 系统配置（开关、白名单等） | 是 |
 | `app_ai_draw_tasks` | 护士职业定妆照任务与 usage/job 绑定 | 是（护士定妆照应用启用时） |
 | `app_nursing_undercover_sessions` | 谁是卧底（护理版）对局数据 | 是（谁是卧底应用启用时） |
-| `app_maic_tasks` | MAIC usage、外部 job、状态与结算协调 | 是（MAIC 应用启用时） |
+| `app_maic_tasks` | MAIC usage、队列状态、租约与结算协调 | 是（MAIC 应用启用时） |
 | `app_maic_courses` | MAIC 小程序课程元数据与协议版本 | 是（MAIC 应用启用时） |
 | `app_maic_scenes` | MAIC 原生场景，按场景独立存储 | 是（MAIC 应用启用时） |
 | `app_maic_progress` | 用户答题、互动、PBL 与播放位置 | 是（MAIC 应用启用时） |
-| `app_maic_assets` | CloudBase 媒体资产、归属与校验和 | 是（MAIC 应用启用时） |
+| `app_maic_assets` | 既有课程 CloudBase 媒体资产、归属与校验和 | 是（兼容既有课程） |
+| `app_maic_runtime` | Worker 全局单例租约 | 是（MAIC 应用启用时） |
+| `app_maic_artifacts` | 已校验课程的短期导入暂存 | 是（MAIC 应用启用时） |
 
 ## 1. users
 
@@ -410,18 +412,19 @@
 
 ## 12. MAIC 私有集合
 
-五个集合均设置为「仅管理端可读写」，客户端只能通过 `app_maic` action 访问。
+七个集合均设置为「仅管理端可读写」，客户端只能通过 `app_maic` action 访问。
 
 | 集合 | 关键字段 | 推荐索引 |
 |---|---|---|
-| `app_maic_tasks` | `_id=usageId`、`userId`、`jobId`、`status`、`deadlineAt`、`reconcileAfter`、`courseId`、错误与导入次数 | `status + reconcileAfter` |
+| `app_maic_tasks` | `_id=usageId`、`userId`、废弃兼容字段 `jobId=""`、`status`、`nextAttemptAt`、`deadlineAt`、租约、`courseId` 与重试次数 | `status + nextAttemptAt`；`userId + createdAt(desc)` |
 | `app_maic_courses` | `_id=usageId`、`userId`、`protocol`、标题摘要、`sceneCount`、`assetMap`、`status` | `userId + status + updatedAt(desc)` |
 | `app_maic_scenes` | `userId`、`courseId`、`sceneId`、`order`、`kind`、完整 `scene` | `userId + courseId + order` |
 | `app_maic_progress` | `userId`、`courseId`、`data`、`updatedAt` | `userId + courseId` |
-| `app_maic_assets` | `userId`、`courseId`、`assetId`、`fileID`、`checksumSha256`、`mimeType` | `userId + courseId` |
+| `app_maic_assets` | 既有资产的 `userId`、`courseId`、`assetId`、`fileID`、`checksumSha256`、`mimeType`；新课程首版不新增资产 | `userId + courseId` |
+| `app_maic_runtime` | `_id=worker`、`leaseOwner`、`leaseExpiresAt`、`currentUsageId`、`requestId` | `_id` 单例即可 |
+| `app_maic_artifacts` | `_id=usageId`、`userId`、已校验 `course`、模型、token 用量、纠错/兜底标记 | `_id`；终态及时删除 |
 
-`usageId` 是端到端幂等键。只有课程、场景和媒体全部导入完成后才能
-`finishUsage`；失败、取消、协议错误或超过 45 分钟必须 `failUsage`。
+`usageId` 是端到端幂等键。新任务状态固定为 `queued → processing → importing → succeeded`，终态为 `failed`、`cancelled`、`timed_out`；`submit_pending` 只用于迁移旧任务。只有课程和场景全部导入完成后才能 `finishUsage`；失败、取消或超过 45 分钟必须 `failUsage`。
 
 ## 手工创建步骤
 
@@ -429,9 +432,9 @@
 
 1. 打开微信开发者工具，进入「云开发」控制台。
 2. 在「数据库」面板中，依次点击「添加集合」。
-3. 按上表创建 16 个集合。
+3. 按上表创建全部集合。
 4. 为每个集合设置权限：
    - `apps`、`recharge_packages`：可设置「所有用户可读，仅创建者可写」或「所有用户可读，仅管理端可写」。
    - 其余集合（含全部 `app_maic_*`）：建议设置为「仅管理端可读写」，所有客户端写操作必须走云函数。
-5. 创建完成后，部署公共函数及 `app_ai_draw`、`app_nursing_undercover`、`app_maic`、`app_maic_reconcile`。
+5. 创建完成后，部署公共函数及 `app_ai_draw`、`app_nursing_undercover`、`app_maic_worker`、`app_maic`、`app_maic_reconcile`；Worker 首次先不启用 timer，模型 smoke 成功后再创建每分钟触发器。
 6. 调用 `adminCore.initSchema` 写入 seed 数据。

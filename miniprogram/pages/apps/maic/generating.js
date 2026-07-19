@@ -4,9 +4,9 @@ const ACTIVE_TASK_KEY = "maic_active_usage_id";
 const POLL_INTERVAL = 5000;
 
 const STATUS_TEXT = {
-  submit_pending: "正在连接 MAIC 生成服务",
+  submit_pending: "正在迁移旧任务",
   queued: "任务已排队",
-  processing: "MiniMax M3 正在编排课程",
+  processing: "MiniMax M2.7 正在编排课程",
   importing: "正在把课程导入云开发",
   succeeded: "课程已生成",
   failed: "生成失败",
@@ -17,7 +17,7 @@ const STATUS_TEXT = {
 Page({
   data: {
     usageId: "",
-    status: "submit_pending",
+    status: "queued",
     statusText: "正在提交任务",
     progress: 1,
     errorMsg: "",

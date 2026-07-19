@@ -364,13 +364,14 @@ huli-tools/
   5. 投票成功必须先完成 `coreApp.finishUsage`，再把 session 标记为 `finished`；取消对局必须先 `failUsage`，再标记 `cancelled`。
   6. CloudBase AI 模型 ID 通过 `CLOUDBASE_AI_MODEL` 环境变量配置，未配置或不可用时使用模板 fallback，不在代码中猜测模型 ID。
 
-#### app_maic / app_maic_reconcile — MAIC 智慧课堂
+#### app_maic / app_maic_worker / app_maic_reconcile — MAIC 智慧课堂
 
-- **职责**：把 `coreApp.createUsage("maic")` 创建的 usage 作为幂等键，通过 HMAC 调用 MAIC dev 异步任务接口，将 `maic-miniapp/1` 课程导入 CloudBase。
-- **边界**：客户端不直连 MAIC/MiniMax；课程不与 MAIC Web 用户或课程库同步；播放器不使用 WebView、HTML 或脚本。
-- **状态机**：`submit_pending → queued → processing → importing → succeeded`；失败、取消、协议错误或 45 分钟超时调用 `failUsage`。
-- **恢复**：页面轮询可推动单任务，`app_maic_reconcile` 每 5 分钟处理无人轮询任务；所有导入写入均以 `usageId/courseId/sceneId` 幂等覆盖。
-- **私有数据**：`app_maic_tasks`、`app_maic_courses`、`app_maic_scenes`、`app_maic_progress`、`app_maic_assets`。
+- **职责**：`app_maic` 只创建、查询、取消任务并读取课程；`app_maic_worker` 每分钟从 CloudBase 队列认领一项，通过 MiniMax M2.7 生成、校验和导入 `maic-miniapp/1` 课程；`app_maic_reconcile` 每 5 分钟恢复租约、迁移旧任务并处理超时/失败结算。
+- **边界**：客户端不直连 MiniMax；仓库不再依赖 MAIC Web、SQLite、PM2、HMAC 或独立 Worker；播放器不使用 WebView、HTML 或脚本，新课程首版 `assets=[]`，既有资产继续兼容。
+- **状态机**：`queued → processing → importing → succeeded`；终态为 `failed`、`cancelled`、`timed_out`，`submit_pending` 只在 reconcile 中迁移。
+- **生成策略**：协议错误最多纠错一次，仍失败时使用确定性精简课程；网络/限流最多三次任务尝试；`app_maic_runtime/worker` 保证全局并发 1，单用户每天最多 3 门。
+- **幂等**：`usageId` 同时作为任务、artifact 和课程 ID，场景使用 `courseId_sceneId` 确定性覆盖；成功才 `finishUsage`，失败/取消/超时调用 `failUsage`。
+- **私有数据**：`app_maic_tasks`、`app_maic_runtime`、`app_maic_artifacts`、`app_maic_courses`、`app_maic_scenes`、`app_maic_progress`、`app_maic_assets`。
 
 ### 4.4 遗留/示例云函数
 
@@ -401,6 +402,8 @@ huli-tools/
 | `app_maic_scenes` | MAIC 原生场景 | 无直接读写 |
 | `app_maic_progress` | MAIC 学习进度 | 无直接读写 |
 | `app_maic_assets` | MAIC 云存储资产 | 无直接读写 |
+| `app_maic_runtime` | MAIC Worker 全局租约 | 无直接读写 |
+| `app_maic_artifacts` | MAIC 已校验课程短期暂存 | 无直接读写 |
 
 ### 5.2 关键字段速查
 

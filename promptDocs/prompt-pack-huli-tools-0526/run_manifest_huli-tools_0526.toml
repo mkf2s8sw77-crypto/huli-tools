@@ -31,7 +31,10 @@ preflight = [
   "test -d cloudfunctions"
 ]
 post_phase = [
+  "node --test tests/*.test.js",
+  "bash scripts/check-js.sh",
   "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
   "git diff --check"
 ]
 
@@ -52,7 +55,8 @@ prompt = "/Users/huli-dev/Documents/huli-tools/promptDocs/prompt-pack-huli-tools
 gate_commands = [
   "bash scripts/check-js.sh",
   "bash scripts/check-boundaries.sh",
-  "node --test tests/maic-player-view-model.test.js",
+  "node --test tests/*.test.js",
+  "bash scripts/check-admin-web-boundaries.sh",
   "git diff --check"
 ]
 

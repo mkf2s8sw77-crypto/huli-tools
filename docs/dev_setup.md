@@ -40,9 +40,11 @@ bash scripts/upload-miniprogram.sh 1.0.1 "修复体验版启动路径"
 6. 右键 `cloudfunctions/demoSum` → 「创建并部署：云端安装依赖」
 7. 右键 `cloudfunctions/app_ai_draw` → 「创建并部署：云端安装依赖」
 8. 右键 `cloudfunctions/app_nursing_undercover` → 「创建并部署：云端安装依赖」
-9. 右键 `cloudfunctions/app_maic` → 「创建并部署：云端安装依赖」
-10. 右键 `cloudfunctions/app_maic_reconcile` → 「创建并部署：云端安装依赖」，并确认每 5 分钟 timer 已创建
-11. 保留的示例函数同理：`getOpenId`、`sum`
+9. 右键 `cloudfunctions/app_maic_worker` → 「创建并部署：云端安装依赖」，首次不要创建 timer；函数超时为 300 秒
+10. 用内部凭据人工调用 `app_maic_worker.modelSmoke`，成功后创建每分钟 timer `0 * * * * * *`
+11. 右键 `cloudfunctions/app_maic` → 「创建并部署：云端安装依赖」
+12. 右键 `cloudfunctions/app_maic_reconcile` → 「创建并部署：云端安装依赖」，并确认每 5 分钟 timer 已创建
+13. 保留的示例函数同理：`getOpenId`、`sum`
 
 也可以用 CloudBase CLI 首次创建和更新云函数。仓库已提交 `cloudbaserc.json`，仅保存环境 ID、函数名、runtime、handler、超时等非敏感部署元数据，确认其中不写入敏感环境变量后执行：
 
@@ -50,6 +52,7 @@ bash scripts/upload-miniprogram.sh 1.0.1 "修复体验版启动路径"
 npx -y -p @cloudbase/cli@3.5.0 cloudbase login
 npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_ai_draw --force --deployMode zip
 npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_nursing_undercover --force --deployMode zip
+npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic_worker --force --deployMode zip
 npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic --force --deployMode zip
 npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic_reconcile --force --deployMode zip
 ```
@@ -68,10 +71,15 @@ npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic_reconcile --force --
 | `INTERNAL_API_SECRET` | 云函数间内部调用凭据 | 必须显式配置为随机字符串；未配置时扣费、到账、管理调分会失败 |
 | `CLOUDBASE_AI_MODEL` | 谁是卧底 AI NPC 使用的 CloudBase 模型 ID | 按 CloudBase AI preflight 后实际启用模型填写；未配置时应用使用模板 fallback |
 | `CLOUDBASE_AI_ENV_ID` | 可选，谁是卧底 AI SDK 初始化环境 ID | 默认 `cloudbase-3gphz7fk0fe1b760` |
-| `MAIC_API_BASE_URL` | `app_maic` 调用的 MAIC 服务端入口 | 首次仅 `https://dev.huli.sh.cn/maic` |
-| `MAIC_INTEGRATION_SECRET` | huli-tools → MAIC HMAC 密钥 | 至少 32 字节，只配置在 `app_maic` 与 MAIC 服务端 |
+| `MAIC_AI_MODE` | MAIC Worker 模型通道 | 当前环境固定 `direct_minimax`，不做运行时双路重试 |
+| `MAIC_AI_MODEL` | MiniMax 模型 | `MiniMax-M2.7` |
+| `MINIMAX_BASE_URL` | MiniMax OpenAI 兼容入口 | `https://api.minimaxi.com/v1` |
+| `MINIMAX_API_KEY` | MiniMax 文本模型密钥 | 仅配置于 `app_maic_worker`，禁止写入仓库或日志 |
+| `MAIC_DAILY_LIMIT` | 单用户每日课程上限 | `3`；可降低，代码限制最大为 3 |
 
-`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_maic`、`app_maic_reconcile` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`。
+`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_maic_worker`、`app_maic`、`app_maic_reconcile` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`。
+
+当前个人版套餐不支持 CloudBase 自定义模型 Provider，因此 MAIC 明确使用 Worker 服务端直连 MiniMax；不要自动升级套餐，也不要在运行时同时尝试两条模型链路。
 
 `CLOUDBASE_AI_MODEL` 只配置在 `app_nursing_undercover` 等需要 AI 的业务云函数中。配置前必须在当前环境完成 Token Credits 与模型启用检查，不要把 SecretId、SecretKey 或临时凭据写入仓库。
 

@@ -1,0 +1,10 @@
+{
+  "timeout": 300,
+  "triggers": [
+    {
+      "name": "maic-worker-every-minute",
+      "type": "timer",
+      "config": "0 * * * * * *"
+    }
+  ]
+}

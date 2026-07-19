@@ -28,8 +28,7 @@ flowchart LR
 
 ## 生成与错误策略
 
-- 默认 `MAIC_AI_MODE=cloudbase_custom`，GroupName `custom-minimax`，模型 `MiniMax-M2.7`。
-- 若目标套餐不支持自定义模型，部署时明确切换为 `direct_minimax`，仅 Worker 环境保存 `MINIMAX_API_KEY`，BaseURL 为 `https://api.minimaxi.com/v1`；运行时不做双路重试。
+- 预检已确认目标个人版套餐不支持 CloudBase 自定义模型 Provider，因此固定 `MAIC_AI_MODE=direct_minimax`，仅 Worker 环境保存 `MINIMAX_API_KEY`，BaseURL 为 `https://api.minimaxi.com/v1`，模型为 `MiniMax-M2.7`；运行时不做双路重试，也不自动升级套餐。
 - 协议错误：初次生成 + 最多一次纠错；仍失败则生成确定性兜底课程，不消耗额外模型请求。
 - 网络、限流、上游 5xx：按 `nextAttemptAt` 最多三次；耗尽后 fail usage。
 - 日志只记录 requestId、usageId、状态、重试次数和 token 用量，不记录密钥、完整 Prompt 或完整课程。

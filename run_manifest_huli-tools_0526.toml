@@ -11,16 +11,18 @@ env_id = "cloudbase-3gphz7fk0fe1b760"
 description = "每次提交前必须通过的静态检查"
 commands = [
   "git status --short --branch",
+  "node --test tests/*.test.js",
   "bash scripts/check-js.sh",
   "bash scripts/check-boundaries.sh",
+  "bash scripts/check-admin-web-boundaries.sh",
   "git diff --check",
 ]
 
 [gate.deploy]
 description = "云函数部署后人工/半自动验收步骤"
 steps = [
-  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 app_ai_draw、app_nursing_undercover、app_maic、app_maic_reconcile）",
-  "2. 创建数据库集合（见 docs/cloud_collections.md，含 5 个 app_maic_* 私有集合）",
+  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 app_ai_draw、app_nursing_undercover、app_maic_worker、app_maic、app_maic_reconcile）",
+  "2. 创建数据库集合（见 docs/cloud_collections.md，含 7 个 app_maic_* 私有集合）",
   "3. 配置云函数环境变量（见 docs/dev_setup.md）",
   "4. 调用 adminCore.initSchema 写入 seed 数据",
 ]
@@ -89,10 +91,10 @@ actions = [
 [phase.10]
 description = "MAIC 智慧课堂原生小程序应用"
 actions = [
-  "新增 app_maic 与 app_maic_reconcile 异步课程链路",
-  "创建 5 个 app_maic_* 私有集合并设置私有权限和查询索引",
+  "新增 app_maic 队列 API、app_maic_worker 单并发生成器与 app_maic_reconcile 收口链路",
+  "创建 7 个 app_maic_* 私有集合并设置私有权限和查询索引",
   "新增课程列表、创建、进度、详情和原生播放器页面",
-  "验证 usageId 幂等、HMAC、四类场景、五类运行时动作、忽略旧 navigate、互动门控和失败释放",
+  "验证 usageId 幂等、M2.7、协议纠错与兜底、四类场景、忽略旧 navigate、互动门控和失败结算",
 ]
 
 [env.required]
@@ -104,8 +106,11 @@ vars = [
   { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，必须显式配置且所有公共云函数保持一致" },
   { name = "CLOUDBASE_AI_MODEL", example = "按 DescribeAIModels 启用结果填写", note = "app_nursing_undercover AI NPC 使用；未配置时走模板 fallback" },
   { name = "CLOUDBASE_AI_ENV_ID", example = "cloudbase-3gphz7fk0fe1b760", note = "可选，CloudBase AI SDK 初始化环境" },
-  { name = "MAIC_API_BASE_URL", example = "https://dev.huli.sh.cn/maic", note = "仅 app_maic 使用的服务端地址" },
-  { name = "MAIC_INTEGRATION_SECRET", example = "至少32字节随机字符串", note = "仅 app_maic 与 MAIC 服务端共享，禁止下发客户端" },
+  { name = "MAIC_AI_MODE", example = "direct_minimax", note = "当前环境固定使用 Worker 服务端直连" },
+  { name = "MAIC_AI_MODEL", example = "MiniMax-M2.7", note = "仅 app_maic_worker 使用" },
+  { name = "MINIMAX_BASE_URL", example = "https://api.minimaxi.com/v1", note = "仅 app_maic_worker 使用" },
+  { name = "MINIMAX_API_KEY", example = "仅云函数环境变量", note = "仅 app_maic_worker 使用，禁止写入仓库和日志" },
+  { name = "MAIC_DAILY_LIMIT", example = "3", note = "仅 app_maic 使用，最大为3" },
 ]
 
 [env.virtual_payment]

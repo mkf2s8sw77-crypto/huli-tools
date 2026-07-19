@@ -1,0 +1,11 @@
+{
+  "name": "app_maic_worker",
+  "version": "1.0.0",
+  "description": "MAIC CloudBase 原生课程生成 Worker",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": ">=3.16.0",
+    "wx-server-sdk": "latest",
+    "zod": "^4.3.5"
+  }
+}

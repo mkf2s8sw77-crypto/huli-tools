@@ -341,23 +341,25 @@ git diff --check
   - 历史回看只返回当前用户自己的对局。
   - 取消对局后 usage 状态为 `failed` 或 `released`，session 状态为 `cancelled`。
 
-### TC-23 MAIC 异步课程、协议执行与 usage 幂等闭环
+### TC-23 MAIC CloudBase 原生课程、协议执行与 usage 幂等闭环
 
-- 目标：验证 `maic` 的 HMAC 异步任务、后台恢复、原生播放器、用户隔离和 usage 闭环。
-- 前置条件：5 个 `app_maic_*` 集合均为 PRIVATE；`app_maic`、`app_maic_reconcile` 已部署；MAIC dev 开关、Worker 和 MiniMax M3 已启用；应用注册状态为 `active` 且 `costPoints=0`。
+- 目标：验证 `maic` 的 CloudBase 队列、单并发 Worker、后台恢复、原生播放器、用户隔离和 usage 闭环。
+- 前置条件：7 个 `app_maic_*` 集合均为 PRIVATE；任务索引已创建；`app_maic_worker.modelSmoke` 使用 `MiniMax-M2.7` 成功；每分钟 Worker 与每 5 分钟 reconcile timer 已启用；应用注册状态为 `active` 且 `costPoints=0`。
 - 步骤：
-  1. 创建 0 积分 usage 并提交包含 slide、quiz、interaction、PBL 的最小课程。
-  2. 退出小程序并等待 `app_maic_reconcile` 推进，再返回查看结果。
+  1. 创建 0 积分 usage 并提交课程主题，确认任务立即进入 `queued` 且兼容字段 `jobId=""`。
+  2. 退出小程序并等待 `app_maic_worker` 推进，再返回查看结果；停止页面轮询期间任务仍应完成。
   3. 在播放器依次触发 speech、highlight、spotlight、laser、pause，并完成测验、互动和 PBL；另用旧 fixture 注入 `navigate`。
-  4. 重复提交同一 `usageId`；再分别验证取消、上游失败和 45 分钟超时。
-  5. 使用另一微信用户尝试读取任务、课程、进度和媒体。
+  4. 重复提交同一 `usageId`；再分别验证显式取消、MiniMax 限流/网络失败三次、协议错误纠错/兜底、租约恢复和 45 分钟超时。
+  5. 同一用户当天创建 3 门后尝试第 4 门；使用另一微信用户尝试读取任务、课程、进度和既有媒体。
 - 断言：
-  - 日志显示 `model=minimax:MiniMax-M3`，且任务可在退出、网络中断和 Worker 重启后恢复。
-  - 同一 `usageId` 只产生一个外部 job；免费模式不产生积分冻结、结算或释放流水。
+  - 日志只记录 requestId、状态、重试次数和 token 用量，模型为 `MiniMax-M2.7`，不包含 Key、完整 Prompt 或完整课程。
+  - `app_maic_runtime/worker` 保证全局同时最多一个任务进入执行窗口，任务可在退出、网络中断和 Worker 租约过期后恢复。
+  - 同一 `usageId` 只产生一个任务和课程；免费模式不产生积分冻结、结算或释放流水，但 usage 必须进入明确终态。
   - 四类场景与五类运行时动作均由原生舞台执行，无 WebView、HTML 或脚本；旧 `navigate` 被忽略且不会翻页。
   - quiz、interaction、PBL 完成前“继续”不可用；页面隐藏、退出或手动切页后，旧动作不会继续执行。
   - 课程呈现包含章节轨道、舞台标题、教师旁白层和场景模板，不退化为单一纵向白卡。
-  - 课程、场景和媒体全部导入后才完成 usage；失败、取消和超时均正确结束 usage。
+  - 新课程 `assets=[]`，课程和场景全部导入后才完成 usage；既有课程资产仍可播放、删除；失败、取消和超时均正确结束 usage。
+  - 第 4 门返回 `DAILY_LIMIT_REACHED`，不留下可继续执行的 usage 或任务。
   - 跨用户访问均返回 `FORBIDDEN`，无法获取临时媒体 URL。
 
 ## 4. 设计系统视觉一致性验收

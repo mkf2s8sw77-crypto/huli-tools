@@ -69,7 +69,7 @@
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
 - AI 生图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
 - AI 生图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
-- MAIC 当前注册状态为 `active`、定价为 0 积分；课程任务仍以 `usageId` 贯穿 usage、外部任务、课程导入和结算，并正确结束 usage。`app_maic_reconcile` 必须能在无人轮询时继续推进，45 分钟超时必须取消任务；仅在 `costPoints > 0` 时结算或释放冻结积分。
+- MAIC 定价固定为 0 积分；任务以 `usageId` 贯穿 `queued → processing → importing → succeeded`、课程导入和 usage 结算。`app_maic_worker` 每分钟最多认领一项并用 `app_maic_runtime` 保证全局并发 1；`app_maic_reconcile` 只做遗留迁移、租约恢复、45 分钟超时和失败结算，不调用模型。
 - 用户媒体上传必须先由云函数签发受控 `cloudPath`，客户端只上传到该路径；业务云函数校验 `fileID/cloudPath` 归属后换取短期临时 URL 调上游，源素材默认私有短期保留并设置 `expiresAt`。
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
@@ -81,7 +81,8 @@
 - `PAYMENT_PROVIDER` — `mock` / `virtual` / `wechat`（预留）
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
 - `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
-- `MAIC_API_BASE_URL`、`MAIC_INTEGRATION_SECRET` — 仅配置于 `app_maic`；前者指向 MAIC dev 集成入口，后者与 MAIC HMAC 密钥一致，禁止下发客户端
+- `MAIC_AI_MODE=direct_minimax`、`MAIC_AI_MODEL=MiniMax-M2.7`、`MINIMAX_BASE_URL=https://api.minimaxi.com/v1`、`MINIMAX_API_KEY` — 仅配置于 `app_maic_worker`；密钥禁止下发客户端或写入仓库
+- `MAIC_DAILY_LIMIT` — 仅配置于 `app_maic`，默认且最大为 3，可降低不可提高
 
 小程序虚拟支付（线上售卖积分）额外需要：
 - `VIRTUAL_PAY_OFFER_ID` — mp 后台虚拟支付 offerId
@@ -100,7 +101,9 @@
 - 新应用竖切模板见 `templates/app_vertical_slice/`，已预配置设计系统。
 - 应用不得绕过 `coreApp.createUsage` / `finishUsage` / `failUsage` 直接操作积分；应用云函数仅允许只读当前 `app_usage_records` 做执行校验，不得直接写公共集合。
 - `maic` 是平台垂直应用：小程序课程只存 CloudBase，不与 MAIC Web 账号/课程同步；客户端不得直连 MAIC/MiniMax，不得使用 WebView 或执行服务端内容。
+- MAIC 不再有独立 Web、SQLite、PM2、HMAC 或本机 Worker；模型仅由 CloudBase `app_maic_worker` 服务端调用，新课程首版固定空 `assets`，既有课程资产继续兼容播放和删除。
 - MAIC 原生播放器负责翻页和互动门控：旧协议中的 `navigate` 必须忽略；quiz、interaction、PBL 完成前不得进入下一幕。舞台布局和门控规则集中在 `player-view-model.js`，不要退回通用纵向白卡。
+- OpenMAIC 只读跟踪只评估生成质量、协议、JSON 修复、模型适配和安全修复；Web、编辑器、SQLite、图片/语音/视频与导出更新直接忽略，禁止自动合并上游。
 - 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。
 
 ## 11. 测试与交付
