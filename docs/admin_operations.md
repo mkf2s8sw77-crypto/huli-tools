@@ -133,6 +133,7 @@ const res = await app.callFunction({ name: "adminCore", data: { action: "getAdmi
 {
   action: "upsertPackage",
   packageKey: "pkg_6yuan",
+  productId: "points_60",        // 小程序虚拟支付道具 ID，mp 后台道具管理配置；虚拟支付充值包必填，可为空字符串
   name: "6元充值包",
   amountFen: 600,
   basePoints: 60,
@@ -141,6 +142,8 @@ const res = await app.callFunction({ name: "adminCore", data: { action: "getAdmi
   sortOrder: 1,
 }
 ```
+
+> 注意：走小程序虚拟支付（`PAYMENT_PROVIDER=virtual`）时，`productId` 必须与 mp 后台「道具管理」中已发布的道具 ID 一致，且道具价格需与 `amountFen` 一致。
 
 ## 审计日志字段
 

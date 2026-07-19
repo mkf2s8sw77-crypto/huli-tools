@@ -74,8 +74,17 @@ module.exports = {
   listOrders(page, pageSize) {
     return callCloud("corePayment", { action: "listOrders", page, pageSize });
   },
+  getOrder(orderNo) {
+    return callCloud("corePayment", { action: "getOrder", orderNo });
+  },
   mockPayOrder(orderNo) {
     return callCloud("corePayment", { action: "mockPayOrder", orderNo });
+  },
+  createVirtualOrder(packageKey, code) {
+    return callCloud("corePayment", { action: "createVirtualOrder", packageKey, code });
+  },
+  confirmVirtualOrder(orderNo) {
+    return callCloud("corePayment", { action: "confirmVirtualOrder", orderNo });
   },
 
   // 使用记录

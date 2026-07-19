@@ -187,6 +187,7 @@
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `packageKey` | string | 充值包唯一标识 |
+| `productId` | string | 小程序虚拟支付道具 ID（mp 后台道具管理配置，虚拟支付充值包必填，可为空字符串） |
 | `name` | string | 显示名称 |
 | `amountFen` | number | 金额（分） |
 | `basePoints` | number | 基础积分 |

@@ -36,3 +36,7 @@ private.*.key
 # 临时预览产物
 tmp-preview/
 preview-qr.png
+
+# 浏览器自动化产物（登录 profile、截图、脚本依赖）
+.playwright-cli/
+output/

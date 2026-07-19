@@ -76,9 +76,16 @@
 开发最小集：
 - `ADMIN_OPENIDS` — 小程序管理员白名单
 - `ADMIN_WEB_UIDS` — Web 管理端 CloudBase Auth uid 白名单
-- `PAYMENT_PROVIDER` — `mock` 或 `wechat`
+- `PAYMENT_PROVIDER` — `mock` / `virtual` / `wechat`（预留）
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
 - `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
+
+小程序虚拟支付（线上售卖积分）额外需要：
+- `VIRTUAL_PAY_OFFER_ID` — mp 后台虚拟支付 offerId
+- `VIRTUAL_PAY_APP_KEY` — 现网 AppKey（`VIRTUAL_PAY_ENV=0` 时使用）
+- `VIRTUAL_PAY_APP_KEY_SANDBOX` — 沙箱 AppKey（`VIRTUAL_PAY_ENV=1` 时使用）
+- `VIRTUAL_PAY_ENV` — `0`=现网，`1`=沙箱
+- `WX_MINIPROGRAM_APPSECRET` — 小程序 AppSecret（code2session / access_token），仅存云函数环境变量
 
 真实微信支付额外需要：
 - `WX_PAY_MCH_ID`、`WX_PAY_APPID`、`WX_PAY_API_V3_KEY`、`WX_PAY_SERIAL_NO`、`WX_PAY_PRIVATE_KEY`、`WX_PAY_NOTIFY_URL`
@@ -99,3 +106,4 @@
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。
 - 涉及 `admin-web/` 的功能或验收规则时，同步更新 `admin-web/README.md`、`docs/admin_operations.md` 及 `promptDocs/prompt-pack-huli-tools-admin-web-0530/` 中对应测试/运行清单。
 - macOS 上 `tcb` 登录态保存在系统 Keychain（不在 `~/.tcb/`），不要用 `~/.tcb/cli.json` 是否存在判断登录状态；以 `tcb env list` 能否返回为准。
+- 查 CloudBase 业务 collection **必须**用 CloudBase MCP 的 `readNoSqlDatabaseStructure(action="listCollections")` 或 SDK；`tcb db list` 只列 NoSQL 2.0 **数据模型**，看不到业务用的传统 collection，会误判"集合全空"。如未挂 MCP，用 `npx -y mcporter call cloudbase.readNoSqlDatabaseStructure action=listCollections` 调。

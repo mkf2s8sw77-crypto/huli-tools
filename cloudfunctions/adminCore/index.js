@@ -212,7 +212,7 @@ const POINT_TX_SAFE_FIELDS = ["_id", "userId", "type", "deltaAvailable", "deltaF
 const ORDER_SAFE_FIELDS = ["_id", "orderNo", "userId", "packageKey", "amountFen", "pointsTotal", "status", "provider", "providerTradeNo", "paidAt", "closedAt", "createdAt", "updatedAt"];
 const USAGE_SAFE_FIELDS = ["_id", "userId", "appKey", "status", "costPoints", "freezeTransactionId", "settleTransactionId", "releaseTransactionId", "inputSummary", "resultRef", "errorCode", "errorMessage", "startedAt", "finishedAt"];
 const APP_SAFE_FIELDS = ["_id", "appKey", "name", "description", "entryPage", "cloudFunctionName", "status", "pricing", "sortOrder", "icon", "createdAt", "updatedAt"];
-const PACKAGE_SAFE_FIELDS = ["_id", "packageKey", "name", "amountFen", "basePoints", "bonusPoints", "status", "sortOrder", "createdAt", "updatedAt"];
+const PACKAGE_SAFE_FIELDS = ["_id", "packageKey", "productId", "name", "amountFen", "basePoints", "bonusPoints", "status", "sortOrder", "createdAt", "updatedAt"];
 const AUDIT_SAFE_FIELDS = ["_id", "adminUserId", "action", "targetCollection", "targetId", "beforeSummary", "afterSummary", "requestId", "createdAt"];
 
 // ─── 只读 Action ──────────────────────────────────────────
@@ -825,7 +825,7 @@ async function upsertApp(event, context) {
 async function upsertPackage(event, context) {
   const wxContext = cloud.getWXContext();
   const requestId = context.requestId || Date.now().toString();
-  const { packageKey, name, amountFen, basePoints, bonusPoints, status, sortOrder } = event;
+  const { packageKey, productId, name, amountFen, basePoints, bonusPoints, status, sortOrder } = event;
 
   const adminCheck = await validateAdmin(wxContext, requestId);
   if (!adminCheck.ok) return adminCheck.response;
@@ -833,6 +833,9 @@ async function upsertPackage(event, context) {
 
   if (!packageKey || typeof packageKey !== "string" || packageKey.trim().length === 0) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "packageKey 不能为空" }, requestId);
+  }
+  if (productId !== undefined && productId !== null && typeof productId !== "string") {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "productId 必须是字符串" }, requestId);
   }
   if (typeof amountFen !== "number" || !Number.isInteger(amountFen) || amountFen <= 0) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "amountFen 必须是正整数" }, requestId);
@@ -861,6 +864,7 @@ async function upsertPackage(event, context) {
 
   const pkgData = {
     packageKey: trimmedKey,
+    productId: (productId || "").trim(),
     name: (name || "").trim(),
     amountFen,
     basePoints,

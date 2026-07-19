@@ -76,15 +76,35 @@ actions = [
   "验证词语卧底、病例推理、历史回看、取消释放和 AI fallback",
 ]
 
+[phase.9]
+description = "小程序虚拟支付接入与积分充值上线"
+actions = [
+  "corePayment 新增 createVirtualOrder/confirmVirtualOrder/getOrder 与 xpay_goods_deliver_notify 发货推送处理",
+  "recharge_packages 增加 productId 字段（adminCore.upsertPackage 与 admin-web 充值包表单同步支持）",
+  "充值页接入 wx.requestVirtualPayment（short_series_goods），mock 卡片仅 mockEnabled 时显示",
+  "云开发消息推送配置 xpay_goods_deliver_notify -> corePayment",
+  "验证沙箱下单->支付->查单/推送->积分到账->订单 paid 全链路",
+]
+
 [env.required]
 description = "云函数环境变量（开发阶段最小集）"
 vars = [
   { name = "ADMIN_OPENIDS", example = "openid1,openid2", note = "管理员白名单，逗号分隔" },
-  { name = "PAYMENT_PROVIDER", example = "mock", note = "mock 或 wechat" },
+  { name = "PAYMENT_PROVIDER", example = "mock", note = "mock / virtual / wechat（预留）" },
   { name = "MOCK_PAYMENT_ENABLED", example = "true", note = "开发测试用，生产必须 false" },
   { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，必须显式配置且所有公共云函数保持一致" },
   { name = "CLOUDBASE_AI_MODEL", example = "按 DescribeAIModels 启用结果填写", note = "app_nursing_undercover AI NPC 使用；未配置时走模板 fallback" },
   { name = "CLOUDBASE_AI_ENV_ID", example = "cloudbase-3gphz7fk0fe1b760", note = "可选，CloudBase AI SDK 初始化环境" },
+]
+
+[env.virtual_payment]
+description = "小程序虚拟支付环境变量（仅当 PAYMENT_PROVIDER=virtual 时需要）"
+vars = [
+  "VIRTUAL_PAY_OFFER_ID",
+  "VIRTUAL_PAY_APP_KEY",
+  "VIRTUAL_PAY_APP_KEY_SANDBOX",
+  "VIRTUAL_PAY_ENV",
+  "WX_MINIPROGRAM_APPSECRET",
 ]
 
 [env.wechat_payment]
