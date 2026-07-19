@@ -7,7 +7,7 @@
 - 云环境 ID：`cloudbase-3gphz7fk0fe1b760`
 - 启动方式：用微信开发者工具打开项目根目录；命令行只负责静态检查和文档/脚本验证。
 - 测试账号：任意可登录微信开发者工具的微信号；管理员测试需要把该账号 openid 配入 `ADMIN_OPENIDS`。
-- 支付模式：首版默认 `PAYMENT_PROVIDER=mock`、`MOCK_PAYMENT_ENABLED=true`；真实微信支付未配置前不得按真实支付验收。
+- 支付模式：开发测试用 `PAYMENT_PROVIDER=mock`、`MOCK_PAYMENT_ENABLED=true`；线上虚拟支付用 `PAYMENT_PROVIDER=virtual` 并按 TC-08b/TC-08c 验收；真实微信支付未配置前不得按真实支付验收。
 - 数据准备：先按 `docs/cloud_collections.md` 创建集合（含 `app_ai_draw_tasks`），再部署云函数，调用 `adminCore.initSchema` seed 默认应用和充值包。
 - reset 方式：开发环境可清空公共集合后重新调用 `adminCore.initSchema`；不要在生产环境执行清空。
 
@@ -130,6 +130,35 @@ git diff --check
   - 可用积分不再增加。
   - 不新增重复 `recharge` 流水。
   - 接口返回稳定的已支付状态（`alreadyPaid: true`）。
+
+### TC-08b 小程序虚拟支付到账
+
+- 目标：验证 `PAYMENT_PROVIDER=virtual` 下虚拟支付全链路。
+- 前置条件：`PAYMENT_PROVIDER=virtual`，已配置 `VIRTUAL_PAY_OFFER_ID` / `VIRTUAL_PAY_APP_KEY_SANDBOX` / `VIRTUAL_PAY_ENV=1` / `WX_MINIPROGRAM_APPSECRET`，充值包已配置 mp 后台已发布道具的 `productId`，云开发消息推送已配置 `xpay_goods_deliver_notify` → `corePayment`。
+- 步骤：
+  1. 打开充值页，选择带 `productId` 的充值包，点击「立即充值」。
+  2. 完成沙箱支付（安卓/开发者工具，iOS 不支持沙箱）。
+  3. 查看余额、订单和积分流水。
+  4. 支付成功后立即重复调用 `corePayment.confirmVirtualOrder`。
+- 断言：
+  - `createVirtualOrder` 返回 `signData` / `paySig` / `signature`，`mode=short_series_goods`。
+  - 订单状态变为 `paid`，可用积分增加 `basePoints + bonusPoints`，流水包含 `recharge`。
+  - 查单与发货推送两条通道只到账一次（幂等键 `recharge_<orderNo>`）。
+  - 未配置虚拟支付变量时返回 `PAYMENT_NOT_CONFIGURED` 并列出缺失变量。
+  - `MOCK_PAYMENT_ENABLED=false` 时充值页不显示「模拟支付」入口。
+  - 取消支付不产生任何积分/订单状态变更（订单保持 `created`）。
+
+### TC-08c 虚拟支付发货推送幂等
+
+- 目标：验证重复发货推送不重复到账。
+- 步骤：
+  1. 构造同一 `OutTradeNo` 的 `xpay_goods_deliver_notify` 事件重复触发 `corePayment`。
+  2. 查看余额和流水。
+- 断言：
+  - 积分不重复增加，不新增重复流水。
+  - 推送回包为 `{"ErrCode":0,"ErrMsg":"success"}`。
+  - 推送中 `OpenId` 与订单用户不一致时不到账。
+  - `Env` 与当前 `VIRTUAL_PAY_ENV` 不一致时忽略且回包成功。
 
 ### TC-09 普通用户不能管理
 

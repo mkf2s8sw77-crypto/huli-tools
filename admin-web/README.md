@@ -49,6 +49,10 @@ VITE_WECHAT_PROVIDER_ID=wx_open
 
 Web 管理员白名单在 `adminCore` 云函数环境变量 `ADMIN_WEB_UIDS` 中配置；首次扫码自动准入会写入 `system_configs/admin_web_auto_admins`。这些管理员 uid 不写入前端环境变量。
 
+## 充值包与虚拟支付
+
+「充值包管理」页面的 `productId` 字段对应小程序 mp 后台「虚拟支付 → 道具管理」中已发布的道具 ID；走小程序虚拟支付（`PAYMENT_PROVIDER=virtual`）时必须填写且道具价格与充值包金额一致，详见 `docs/payment_setup.md`。
+
 ## 检查与构建
 
 ```bash

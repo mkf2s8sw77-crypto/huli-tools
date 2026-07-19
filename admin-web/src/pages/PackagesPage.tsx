@@ -35,6 +35,7 @@ export default function PackagesPage() {
     if (record) {
       form.setFieldsValue({
         packageKey: record.packageKey,
+        productId: record.productId,
         name: record.name,
         amountYuan: Number(fenToYuan(record.amountFen as number)),
         basePoints: record.basePoints,
@@ -59,6 +60,7 @@ export default function PackagesPage() {
       }
       await adminApi.upsertPackage({
         packageKey: values.packageKey,
+        productId: values.productId,
         name: values.name,
         amountFen,
         basePoints: values.basePoints,
@@ -86,6 +88,7 @@ export default function PackagesPage() {
         pagination={{ current: page, total, pageSize: 50, onChange: (p) => { setPage(p); load(p); } }}
         columns={[
           { title: "PackageKey", dataIndex: "packageKey", width: 120 },
+          { title: "虚拟支付道具ID", dataIndex: "productId", width: 130, render: (v: string) => v || "-" },
           { title: "名称", dataIndex: "name", width: 140 },
           { title: "金额(元)", dataIndex: "amountFen", width: 80, render: (v: number) => "¥" + fenToYuan(v) },
           { title: "基础积分", dataIndex: "basePoints", width: 80 },
@@ -107,6 +110,9 @@ export default function PackagesPage() {
         <Form form={form} onFinish={handleSave} layout="vertical">
           <Form.Item name="packageKey" label="PackageKey" rules={[{ required: true }]}>
             <Input disabled={!!editing} />
+          </Form.Item>
+          <Form.Item name="productId" label="虚拟支付道具ID" tooltip="小程序虚拟支付(mp 后台)配置的道具 ID，虚拟支付充值包必填">
+            <Input placeholder="如 pkg_60points" allowClear />
           </Form.Item>
           <Form.Item name="name" label="名称" rules={[{ required: true }]}>
             <Input />
