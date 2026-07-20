@@ -21,7 +21,7 @@
 - **表面**：暖米渐变背景、白色卡片、暖陶描边与轻柔阴影；禁止重新引入彩虹高光和高饱和多巴胺配色。
 - **Logo**：两端使用 `https://media.huli.sh.cn/huli-tech-logo.png` 的本地化资产；展示时必须圆角裁切，不得使用方角原图。
 - **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部大号浮动胶囊导航在 `miniprogram/custom-tab-bar/`。
-- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。柔蓝灰侧栏 `#3B4A6B`。通用组件在 `admin-web/src/components/`。
+- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。通用组件在 `admin-web/src/components/`。注意：管理端目前仍沿用 v2"柔彩多巴胺"token（晴空蓝主色 `#5E95C8`、柔蓝灰侧栏 `#3B4A6B`），尚未迁移到 v3 陶土棕；新增管理端页面应使用 `theme.ts` 现有 token，不要直接套用小程序端 v3 色板。
 - 新页面和新应用必须使用 v3 token 和公共组件，采用"应用执行页"模式。功能图标使用 `.icon-tile` CSS-only 图标，不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
@@ -103,13 +103,13 @@
 - `maic` 是平台垂直应用：小程序课程只存 CloudBase，不与 MAIC Web 账号/课程同步；客户端不得直连 MAIC/MiniMax，不得使用 WebView 或执行服务端内容。
 - MAIC 不再有独立 Web、SQLite、PM2、HMAC 或本机 Worker；模型仅由 CloudBase `app_maic_worker` 服务端调用，新课程首版固定空 `assets`，既有课程资产继续兼容播放和删除。
 - MAIC 原生播放器负责翻页和互动门控：旧协议中的 `navigate` 必须忽略；quiz、interaction、PBL 完成前不得进入下一幕。舞台布局和门控规则集中在 `player-view-model.js`，不要退回通用纵向白卡。
-- OpenMAIC 只读跟踪只评估生成质量、协议、JSON 修复、模型适配和安全修复；Web、编辑器、SQLite、图片/语音/视频与导出更新直接忽略，禁止自动合并上游。
+- OpenMAIC 只读跟踪只评估生成质量、协议、JSON 修复、模型适配和安全修复；Web、编辑器、SQLite、图片/语音/视频与导出更新直接忽略，禁止自动合并上游。上游差异探测用 `bash scripts/check-maic-upstream.sh`（对比基线 SHA 并输出 compare 链接，不自动合并）。
 - 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。
 
 ## 11. 测试与交付
 
 - 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。该流程使用 Node.js 20，避免 Node.js 25 与 `miniprogram-ci` 不兼容。
-- 每次提交前运行 `bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。
+- 每次提交前运行 `node --test tests/*.test.js`（MAIC 播放器与 worker 核心单测，node 内置 test runner）、`bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。注意 `node --test tests/` 目录形式会报 "Cannot find module"，必须用 `tests/*.test.js` 通配。
 - 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。
