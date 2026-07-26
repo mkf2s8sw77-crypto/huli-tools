@@ -1,13 +1,8 @@
-<ui-page title="积分充值" subtitle="选择充值包为账户增加积分">
-  <!-- mini-hero(骨架 B):充值引导 -->
-  <view class="recharge-hero fade-in" wx:if="{{!loading && packages.length > 0}}">
-    <view class="recharge-hero__row">
-      <text class="recharge-hero__title serif-num">为账户补充积分</text>
-      <text class="recharge-hero__sub">选择下方任一充值包创建订单</text>
-    </view>
-    <view class="recharge-hero__row" style="margin-top: 8rpx;">
-      <text class="recharge-hero__sub">{{packages.length}} 个套餐可选 · 实时到账</text>
-    </view>
+<ui-page>
+  <!-- 标题区 -->
+  <view class="recharge-head fade-in">
+    <text class="recharge-head__title">为账户补充积分</text>
+    <text class="recharge-head__sub">选择下方任一充值包，实时到账</text>
   </view>
 
   <view wx:if="{{loading}}">
@@ -23,42 +18,42 @@
   </view>
 
   <view wx:else>
-    <view
-      wx:for="{{packages}}"
-      wx:key="packageKey"
-      class="pkg-card card lift-on-hover fade-in-{{index % 4 + 1}}"
-    >
-      <view class="pkg-card__header">
-        <view class="pkg-card__title">
-          <text class="pkg-card__name serif-num">{{item.name}}</text>
-          <text class="pkg-card__price serif-num">¥{{item.amountYuan}}</text>
+    <ui-section title="充值套餐">
+      <view
+        wx:for="{{packages}}"
+        wx:key="packageKey"
+        class="pkg-card card lift-on-hover fade-in-{{index % 4 + 1}}"
+      >
+        <view wx:if="{{item.bonusPoints > 0}}" class="pkg-card__hot">推荐</view>
+        <view class="pkg-card__head">
+          <text class="pkg-card__name">{{item.name}}</text>
+          <text class="pkg-card__price"><text class="pkg-card__price-cur">¥</text>{{item.amountYuan}}</text>
         </view>
+        <view class="pkg-card__lines">
+          <view class="pkg-card__line">
+            <text class="pkg-card__label">基础积分</text>
+            <text class="pkg-card__val">{{item.basePoints}}</text>
+          </view>
+          <view wx:if="{{item.bonusPoints > 0}}" class="pkg-card__line">
+            <text class="pkg-card__label">赠送积分</text>
+            <text class="pkg-card__val pkg-card__val--bonus">+{{item.bonusPoints}}</text>
+          </view>
+          <view class="pkg-card__line pkg-card__line--total">
+            <text class="pkg-card__label">到账总计</text>
+            <ui-price value="{{item.basePoints + item.bonusPoints}}" type="points" size="md" suffix=" 积分" />
+          </view>
+        </view>
+        <button
+          type="primary"
+          size="mini"
+          loading="{{creating}}"
+          disabled="{{creating}}"
+          data-pkg="{{item}}"
+          bindtap="onTapPackage"
+          class="pkg-card__btn"
+        >{{provider === 'virtual' ? '立即充值' : '创建订单'}}</button>
       </view>
-      <view class="care-divider"></view>
-      <view class="pkg-card__body">
-        <view class="pkg-card__row">
-          <text class="pkg-card__label">基础积分</text>
-          <text class="pkg-card__val serif-num">{{item.basePoints}}</text>
-        </view>
-        <view wx:if="{{item.bonusPoints > 0}}" class="pkg-card__row">
-          <text class="pkg-card__label">赠送积分</text>
-          <text class="pkg-card__val pkg-card__val--bonus serif-num">+{{item.bonusPoints}}</text>
-        </view>
-        <view class="pkg-card__row pkg-card__row--total">
-          <text class="pkg-card__label">到账总计</text>
-          <ui-price value="{{item.basePoints + item.bonusPoints}}" type="points" size="md" suffix=" 积分" />
-        </view>
-      </view>
-      <button
-        type="primary"
-        size="mini"
-        loading="{{creating}}"
-        disabled="{{creating}}"
-        data-pkg="{{item}}"
-        bindtap="onTapPackage"
-        class="pkg-card__btn"
-      >{{provider === 'virtual' ? '立即充值' : '创建订单'}}</button>
-    </view>
+    </ui-section>
   </view>
 
   <view wx:if="{{payingOrderNo && mockEnabled && provider !== 'virtual'}}" class="card mock-card fade-in">

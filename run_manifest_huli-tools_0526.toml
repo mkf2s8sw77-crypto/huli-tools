@@ -89,6 +89,16 @@ actions = [
 ]
 
 [phase.10]
+description = "界面整体重设计 v4.1（清透活力 · Bento 工具墙）"
+actions = [
+  "设计系统 v3->v4.1：品牌紫 #7C5CFC，docs/design_system.md 重写",
+  "首页重构为 Bento 磁贴工具墙，积分后置为顶栏胶囊，删除 quick-nav",
+  "我的页改为账户中心（紫色 hero + 菜单卡），tabbar 改为 工具/我的",
+  "tokens.wxss/common.wxss 全量替换，ui 组件与六个核心页面迁移，应用执行页换壳",
+  "admin-web theme.ts token 对齐（主色活力紫、侧栏深紫灰）",
+]
+
+[phase.10]
 description = "MAIC 智慧课堂原生小程序应用"
 actions = [
   "新增 app_maic 队列 API、app_maic_worker 单并发生成器与 app_maic_reconcile 收口链路",

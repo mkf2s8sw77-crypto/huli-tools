@@ -1,58 +1,58 @@
-/* huli-tools 设计系统 v3 — 自然疗愈
-   暖米黄调 · 陶土棕强调 · 衬线标题(轻量)
-   衬线字体仅在 page-title / 数值 / 应用名称使用,正文保持无衬线。
-   替代 v2 的"柔彩多巴胺"调性。 */
+/* huli-tools 设计系统 v4.1 — Bento 工具墙
+   冷白紫调底色 · 活力紫品牌 · 珊瑚橙价格强调
+   衬线字体已移除:标题/数值统一 sans + font-weight:800 + tabular-nums。
+   替代 v3 的"自然疗愈"暖米陶土调性。 */
 
 page {
-  /* ── 背景层(暖米系列) ── */
-  --color-bg: #F5F0E8;          /* 页面底色,暖米 */
-  --color-surface: #FBF8F2;     /* 输入框/卡内嵌区 */
+  /* ── 背景层(冷白带紫调) ── */
+  --color-bg: #F6F5FA;          /* 页面底色 */
+  --color-surface: #F7F6FC;     /* 输入框/卡内嵌区 */
   --color-surface-elevated: #ffffff;
   --color-bg-card: #ffffff;
-  --color-border: #E0D6C2;      /* 暖陶土描边 */
-  --color-border-soft: #EDE5D3;
+  --color-border: #EEEAF7;      /* 卡片描边 */
+  --color-border-soft: #F4F1FA; /* 卡内分隔线 */
 
-  /* ── 主色:陶土棕(替代原晴空蓝) ── */
-  --color-primary: #8A6A3A;     /* 陶土棕,品牌/可交互元素 */
-  --color-primary-hover: #6F5329;
-  --color-primary-bright: #B8956A; /* 暖陶土亮 */
-  --color-primary-light: #F2E9D8;  /* 浅米 */
+  /* ── 主色:活力紫(沪里品牌色) ── */
+  --color-primary: #7C5CFC;
+  --color-primary-hover: #6D3FE8; /* deep/选中态 */
+  --color-primary-bright: #9F7BFA;
+  --color-primary-light: #F0EDFA; /* 淡紫底 */
   --color-on-primary: #ffffff;
 
-  /* ── 品牌辅色:雾绿(替代原薄荷青) ── */
-  --color-brand-soft: #7A8B6A;   /* 雾蒙绿,关怀辅色 */
-  --color-brand-soft-bright: #98A888;
-  --color-brand-soft-light: #ECEEE3;
+  /* ── 品牌辅色:青绿(MAIC/免费语义) ── */
+  --color-brand-soft: #0DA593;
+  --color-brand-soft-bright: #3ED0BC;
+  --color-brand-soft-light: #D6F4F1;
 
-  /* ── 暖调强调:陶橙(替代原珊瑚橙) ── */
-  --color-accent-warm: #C8804A;   /* 陶土橙,价格/积分 */
-  --color-accent-warm-bright: #D69A6A;
-  --color-accent-warm-light: #F4E2D2;
+  /* ── 暖调强调:珊瑚橙(价格/推荐角标) ── */
+  --color-accent-warm: #FF7A59;
+  --color-accent-warm-bright: #FF9A6B;
+  --color-accent-warm-light: #FFE9E2;
 
-  /* ── 多巴胺扩展色(降饱和) ── */
-  --color-peach: #C8988A;          /* 陶桃粉,降饱和 */
-  --color-peach-light: #F2E2DC;
-  --color-lemon: #C8A24A;          /* 陶柠,降饱和 */
-  --color-lemon-light: #F4ECD2;
-  --color-lavender: #9A8AA8;      /* 雾蒙薰衣草,降饱和 */
-  --color-lavender-light: #ECE7EF;
-
-  /* ── 状态色(更柔) ── */
-  --color-success: #6F8F5A;        /* 莫兰迪绿,降饱和 */
-  --color-success-light: #E5ECDC;
-  --color-warning: #B8904A;        /* 莫兰迪琥珀 */
-  --color-warning-light: #F0E5C8;
-  --color-danger: #B66A6A;         /* 莫兰迪砖红 */
-  --color-danger-light: #F0D9D9;
-
-  /* ── 文字色(墨色,带温度) ── */
-  --color-text: #2D2418;           /* 墨褐,正文 */
-  --color-text-secondary: #5A4A38;/* 暖灰次 */
-  --color-text-muted: #8A7A66;    /* 暖灰弱 */
+  /* ── 扩展色(对齐新色板,供旧类名继续引用) ── */
+  --color-peach: #FF9A6B;          /* 珊瑚亮橙 */
+  --color-peach-light: #FFE9E2;
+  --color-lemon: #B8904A;          /* 琥珀(同 warning) */
+  --color-lemon-light: #F0E5C8;
+  --color-lavender: #9F7BFA;       /* 亮紫 */
+  --color-lavender-light: #F0EDFA;
 
   /* ── 语义色 ── */
-  --color-price: #C8804A;
-  --color-points: #8A6A3A;
+  --color-success: #0DA593;
+  --color-success-light: #D6F4F1;
+  --color-warning: #B8904A;
+  --color-warning-light: #F0E5C8;
+  --color-danger: #E8563A;
+  --color-danger-light: #FFE9E2;
+
+  /* ── 文字色(冷墨紫) ── */
+  --color-text: #18142A;
+  --color-text-secondary: #5A5468;
+  --color-text-muted: #9A93B0;
+
+  /* ── 语义色 ── */
+  --color-price: #FF7A59;   /* 价格珊瑚橙 */
+  --color-points: #7C5CFC;  /* 积分品牌紫 */
 
   /* ── MAIC 业务品牌色(仅 MAIC 内容区使用) ── */
   --color-maic-bg: #F4F7FB;
@@ -67,7 +67,7 @@ page {
   --color-maic-overlay: rgba(255, 255, 255, 0.14);
   --color-maic-overlay-strong: rgba(255, 255, 255, 0.90);
   --color-maic-spotlight-mask: rgba(15, 23, 42, 0.34);
-  --color-maic-danger-ring: rgba(182, 106, 106, 0.20);
+  --color-maic-danger-ring: rgba(232, 86, 58, 0.20);
   --shadow-maic-soft: 0 10rpx 30rpx rgba(15, 23, 42, 0.15);
   --shadow-maic: 0 26rpx 60rpx rgba(15, 23, 42, 0.20);
   --shadow-maic-blue: 0 10rpx 26rpx rgba(37, 99, 235, 0.22);
@@ -76,38 +76,45 @@ page {
   /* ── 微信绿保留(仅微信登录按钮) ── */
   --color-wechat: #07c160;
 
-  /* ── 圆角(更柔) ── */
+  /* ── 圆角(卡片 20px / 磁贴 22px / 按钮 14px / 胶囊) ── */
   --radius-sm: 4px;
-  --radius-md: 10px;     /* 比 v2 大 1 档,更柔 */
-  --radius-lg: 16px;     /* 卡片,v2 的 20rpx 改 16px */
-  --radius-xl: 24px;     /* hero,v2 的 28rpx 改 24px */
+  --radius-md: 14px;     /* 按钮 */
+  --radius-lg: 20px;     /* 卡片 */
+  --radius-xl: 24px;     /* hero */
+  --radius-tile: 22px;   /* bento 磁贴 */
   --radius-pill: 999px;
 
-  /* ── 阴影(更柔,带温度) ── */
-  --shadow-soft: 0 1px 2px rgba(45, 36, 24, 0.04), 0 2px 8px rgba(45, 36, 24, 0.04);
-  --shadow-card: 0 1px 1px rgba(255, 255, 255, 0.5) inset,
-                 0 2px 12px rgba(125, 98, 50, 0.08);
-  --shadow-elevated: 0 1px 1px rgba(255, 255, 255, 0.6) inset,
-                     0 8px 24px rgba(125, 98, 50, 0.1);
+  /* ── 阴影(紫调轻阴影) ── */
+  --shadow-soft: 0 6px 18px rgba(60, 40, 110, 0.05);
+  --shadow-card: 0 6px 18px rgba(60, 40, 110, 0.05);
+  --shadow-elevated: 0 14px 34px rgba(124, 92, 252, 0.32);
 
-  /* ── 间距(微调,CJK 适配更紧) ── */
+  /* ── 间距 ── */
   --spacing-xs: 8rpx;
   --spacing-sm: 16rpx;
   --spacing-md: 24rpx;
   --spacing-lg: 32rpx;
   --spacing-xl: 48rpx;
 
-  /* ── 页面渐变(暖米,无多巴胺彩虹) ── */
-  --page-gradient: linear-gradient(180deg, #EFE6D2 0%, #F5F0E8 320rpx, #F8F4EB 100%);
+  /* ── 页面底色(纯色,无渐变) ── */
+  --page-gradient: #F6F5FA;
 
-  /* ── 渐变(只保留陶土+雾绿,删多巴胺彩虹) ── */
-  --gradient-primary: linear-gradient(135deg, #8A6A3A 0%, #B8956A 100%);
-  --gradient-hero: linear-gradient(135deg, #B8956A 0%, #98A888 100%);     /* 暖陶+雾绿 */
-  --gradient-brand-soft: linear-gradient(135deg, #7A8B6A 0%, #98A888 100%);
-  --gradient-warm: linear-gradient(135deg, #C8804A 0%, #D69A6A 100%);
-  --gradient-peach: linear-gradient(135deg, #C8988A 0%, #D6A8A0 100%);
-  --gradient-lemon: linear-gradient(135deg, #C8A24A 0%, #D6BA68 100%);
-  --gradient-lavender: linear-gradient(135deg, #9A8AA8 0%, #B0A0BC 100%);
+  /* ── 渐变 ── */
+  --gradient-primary: linear-gradient(135deg, #7C5CFC 0%, #9F7BFA 100%);
+  --gradient-hero: linear-gradient(140deg, #7C5CFC 0%, #9F7BFA 60%, #B893F6 100%);
+  --gradient-brand-soft: linear-gradient(150deg, #0DA593 0%, #14B8A6 60%, #3ED0BC 100%);
+  --gradient-warm: linear-gradient(135deg, #FF7A59 0%, #FF9A6B 100%);
+  --gradient-peach: linear-gradient(135deg, #FF7A59 0%, #FF9A6B 100%);
+  --gradient-lemon: linear-gradient(135deg, #B8904A 0%, #D6BA68 100%);
+  --gradient-lavender: linear-gradient(150deg, #4F46E5 0%, #6366F1 60%, #8B7CF6 100%);
+
+  /* ── Bento 磁贴主题(首页工具墙) ── */
+  --gradient-tile-photo: linear-gradient(150deg, #7C5CFC 0%, #B458E8 55%, #E05FA8 100%);
+  --gradient-tile-game: linear-gradient(150deg, #4F46E5 0%, #6366F1 60%, #8B7CF6 100%);
+  --gradient-tile-maic: linear-gradient(150deg, #0DA593 0%, #14B8A6 60%, #3ED0BC 100%);
+  --shadow-tile-photo: 0 28rpx 68rpx rgba(124, 92, 252, 0.35);
+  --shadow-tile-game: 0 20rpx 52rpx rgba(79, 70, 229, 0.30);
+  --shadow-tile-maic: 0 20rpx 52rpx rgba(13, 165, 147, 0.30);
 
   /* ── 微动效时长(可复用) ── */
   --t-fast: 120ms;
@@ -116,9 +123,7 @@ page {
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* ── 字体 ── */
-  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC",
-                "STSong", Georgia, serif;
+  /* ── 字体(无衬线;数字用 800 + tabular-nums) ── */
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC",
                "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;

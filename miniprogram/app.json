@@ -2,25 +2,29 @@
   "pages": [
     "pages/index/index",
     "pages/profile/profile",
+    "pages/recharge/recharge",
+    "pages/orders/orders",
+    "pages/transactions/transactions",
     "pages/apps/ai_draw/index",
     "pages/apps/nursing_undercover/index",
     "pages/apps/maic/index",
     "pages/apps/maic/generating",
     "pages/apps/maic/course",
     "pages/apps/maic/player",
+    "pages/tools/demo-sum/index",
     "pages/usage-records/usage-records"
   ],
   "window": {
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#F5F0E8",
-    "navigationBarTitleText": "huli-tools",
+    "navigationBarBackgroundColor": "#F6F5FA",
+    "navigationBarTitleText": "huli 工具箱",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#F5F0E8"
+    "backgroundColor": "#F6F5FA"
   },
   "tabBar": {
     "custom": true,
     "list": [
-      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/index/index", "text": "工具" },
       { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
@@ -28,6 +32,7 @@
     "ui-page": "/components/ui/ui-page/index",
     "ui-card": "/components/ui/ui-card/index",
     "ui-section": "/components/ui/ui-section/index",
+    "ui-price": "/components/ui/ui-price/index",
     "ui-status": "/components/ui/ui-status/index",
     "ui-empty": "/components/ui/ui-empty/index",
     "ui-error": "/components/ui/ui-error/index",

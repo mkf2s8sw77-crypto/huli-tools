@@ -9,7 +9,7 @@
 
 .maic-course-cover__title {
   display: block;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 40rpx;
   font-weight: 600;
   line-height: 1.45;
@@ -101,7 +101,7 @@
 
 .maic-course-card__title {
   margin-top: 18rpx;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 32rpx;
   font-weight: 600;
   line-height: 1.4;
@@ -158,7 +158,7 @@
 
 .maic-generation__status {
   margin-top: 34rpx;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 34rpx;
   font-weight: 600;
 }

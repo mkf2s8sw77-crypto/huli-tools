@@ -1,76 +1,69 @@
-/* 充值页 v3 — 自然疗愈 */
+/* 充值页 v4.1 — Bento 工具墙 */
 
-.recharge-hero {
-  background: var(--gradient-warm);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  box-shadow: var(--shadow-elevated);
-  color: var(--color-on-primary);
-  position: relative;
-  overflow: hidden;
-}
-.recharge-hero::after {
-  content: "";
-  position: absolute;
-  top: -50rpx; right: -30rpx;
-  width: 200rpx; height: 200rpx;
-  border-radius: 50%;
-  background: var(--color-on-primary);
-  opacity: 0.10;
-}
-.recharge-hero__row {
+/* ── 标题区 ── */
+.recharge-head {
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
-  position: relative;
-  z-index: 1;
+  margin-bottom: var(--spacing-lg);
 }
-.recharge-hero__title {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: var(--color-on-primary);
-  line-height: 1.25;
+.recharge-head__title {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.5rpx;
+  line-height: 1.3;
 }
-.recharge-hero__sub {
-  font-size: 24rpx;
-  color: var(--color-on-primary);
-  opacity: 0.86;
+.recharge-head__sub {
+  font-size: 26rpx;
+  color: var(--color-text-muted);
+  margin-top: 12rpx;
 }
 
 /* ── 充值包卡 ── */
-.pkg-card__header {
-  margin-bottom: 0;
+.pkg-card {
+  padding: 40rpx;
 }
-.pkg-card__title {
+.pkg-card__hot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(90deg, #FF7A59 0%, #FF9A6B 100%);
+  color: #ffffff;
+  font-size: 21rpx;
+  font-weight: 800;
+  padding: 8rpx 24rpx;
+  border-radius: 0 0 0 24rpx;
+}
+.pkg-card__head {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
+  justify-content: space-between;
 }
 .pkg-card__name {
-  font-size: 32rpx;
-  font-weight: 600;
+  font-size: 33rpx;
+  font-weight: 800;
   color: var(--color-text);
 }
 .pkg-card__price {
-  font-size: 38rpx;
-  font-weight: 600;
+  font-size: 48rpx;
+  font-weight: 800;
   color: var(--color-accent-warm);
   font-variant-numeric: tabular-nums;
 }
-.pkg-card__body {
-  margin-bottom: var(--spacing-md);
+.pkg-card__price-cur {
+  font-size: 26rpx;
+  font-weight: 600;
 }
-.pkg-card__row {
+.pkg-card__lines {
+  margin: 26rpx 0 32rpx;
+  padding-top: 26rpx;
+  border-top: 1rpx solid var(--color-border-soft);
+}
+.pkg-card__line {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xs);
-}
-.pkg-card__row--total {
-  margin-top: var(--spacing-sm);
-  padding-top: var(--spacing-sm);
-  border-top: 1rpx solid var(--color-border-soft);
+  padding: 8rpx 0;
 }
 .pkg-card__label {
   font-size: 26rpx;
@@ -78,12 +71,15 @@
 }
 .pkg-card__val {
   font-size: 26rpx;
+  font-weight: 700;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 .pkg-card__val--bonus {
-  color: var(--color-success);
-  font-weight: 600;
+  color: var(--color-danger);
+}
+.pkg-card__line--total .pkg-card__label {
+  color: var(--color-text-secondary);
 }
 .pkg-card__btn {
   width: 100%;
@@ -91,10 +87,9 @@
 
 /* ── 模拟支付(开发/测试) ── */
 .mock-card {
-  border: 1rpx dashed var(--color-warning);
-  background: var(--color-warning-light);
+  border: 1rpx dashed var(--color-accent-warm);
+  background: var(--color-accent-warm-light);
 }
-.mock-card::before { display: none; }
 .mock-card__order {
   display: block;
   font-size: 24rpx;
@@ -108,10 +103,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-radius: 32rpx;
+  margin-top: var(--spacing-md);
   cursor: pointer;
 }
 .link-card__text {
   font-size: 28rpx;
-  color: var(--color-primary);
-  font-weight: 500;
+  color: var(--color-primary-hover);
+  font-weight: 700;
 }

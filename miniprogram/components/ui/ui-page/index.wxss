@@ -4,7 +4,7 @@
   padding: var(--spacing-lg);
   min-height: 100vh;
   box-sizing: border-box;
-  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(220rpx + env(safe-area-inset-bottom));
 }
 
 .ui-page__header {

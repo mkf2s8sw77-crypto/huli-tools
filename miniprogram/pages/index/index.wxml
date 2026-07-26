@@ -9,46 +9,52 @@
     <ui-error text="{{error}}" bind:retry="loadHomeData" />
   </view>
 
-  <view wx:else>
-    <view class="free-hero fade-in">
-      <view class="free-hero__main">
-        <text class="free-hero__eyebrow">huli 工具箱</text>
-        <text class="free-hero__title serif-num">全部工具免费开放</text>
-        <text class="free-hero__desc">选择下方工具即可直接使用</text>
+  <block wx:else>
+    <!-- 顶栏:品牌 + 积分胶囊 -->
+    <view class="topbar fade-in">
+      <view class="brand">
+        <image class="brand__logo" src="/assets/images/huli-tech-logo.png" mode="aspectFill" />
+        <text class="brand__name">huli 工具箱</text>
       </view>
-      <view class="free-hero__mark" aria-hidden="true"></view>
+      <view class="points-pill" bindtap="onGoRecharge">
+        <view class="points-pill__bolt"></view>
+        <text class="points-pill__num">{{userSummary.points.availablePoints}}</text>
+      </view>
     </view>
 
-    <!-- 应用目录(骨架 A 列表) -->
-    <view class="fade-in fade-in-2">
-      <ui-section title="应用目录">
-        <ui-empty wx:if="{{apps.length === 0}}" text="暂无可用应用" />
+    <!-- slogan -->
+    <view class="slogan fade-in fade-in-1">
+      <text class="slogan__main">护理人的 AI 工具箱</text>
+      <text class="slogan__sub">挑个工具，直接开工</text>
+    </view>
 
-        <view
-          wx:for="{{apps}}"
-          wx:key="appKey"
-          class="app-card card lift-on-hover"
-          data-app="{{item}}"
-          bindtap="onTapApp"
-        >
-          <view class="app-card__body">
-            <view class="app-card__icon icon-tile icon-tile--app {{item.iconClass}}">
-              <view class="icon-tile__glyph"></view>
-            </view>
-            <view class="app-card__info">
-              <view class="app-card__title-row">
-                <text class="app-card__name serif-num">{{item.name}}</text>
-                <ui-status wx:if="{{item.status === 'coming_soon'}}" text="即将上线" type="warning" />
-              </view>
-              <text class="app-card__desc">{{item.description || ''}}</text>
-              <view class="app-card__cost">
-                <text class="app-card__cost-text serif-num">免费使用</text>
-              </view>
-            </view>
-          </view>
-          <view class="app-card__arrow"></view>
+    <!-- bento 工具墙(空目录时显示空状态) -->
+    <ui-empty wx:if="{{apps.length === 0}}" text="暂无可用应用" />
+
+    <view wx:else class="bento fade-in fade-in-2">
+      <view
+        wx:for="{{apps}}"
+        wx:key="appKey"
+        class="tile {{item.tileClass}} {{index === 0 ? 'tile--tall' : ''}}"
+        data-app="{{item}}"
+        bindtap="onTapApp"
+      >
+        <view class="tile__glyph"></view>
+        <view wx:if="{{item.tag}}" class="tile__tag {{item.tagHot ? 'tile__tag--hot' : ''}}">{{item.tag}}</view>
+        <view class="tile__spacer"></view>
+        <text class="tile__name">{{item.name}}</text>
+        <text class="tile__desc">{{item.description || ''}}</text>
+        <view class="tile__price {{item.priceFree ? 'tile__price--free' : ''}}">{{item.priceText}}</view>
+      </view>
+
+      <!-- 更多工具占位砖 -->
+      <view class="tile tile--more">
+        <view class="tile-more__plus">+</view>
+        <view class="tile-more__texts">
+          <text class="tile-more__name">更多护理工具</text>
+          <text class="tile-more__desc">持续上新，敬请期待</text>
         </view>
-      </ui-section>
+      </view>
     </view>
-  </view>
+  </block>
 </ui-page>

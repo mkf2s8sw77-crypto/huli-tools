@@ -36,7 +36,7 @@
 }
 
 .app-exec-header__name {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 38rpx;
   font-weight: 600;
   color: var(--color-on-primary);

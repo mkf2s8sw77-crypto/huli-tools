@@ -149,7 +149,7 @@ page {
   display: block;
   width: 88%;
   margin-top: 28rpx;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 50rpx;
   font-weight: 700;
   line-height: 1.25;
@@ -221,7 +221,7 @@ page {
   line-height: 1.82;
 }
 
-.maic-block--lead .maic-paragraph { font-family: var(--font-serif); font-size: 32rpx; line-height: 1.72; }
+.maic-block--lead .maic-paragraph { font-family: var(--font-sans); font-size: 32rpx; line-height: 1.72; }
 
 .maic-list view {
   display: grid;
@@ -251,7 +251,7 @@ page {
 .maic-callout--success { background: var(--color-success-light); }
 .maic-callout--warning { background: var(--color-warning-light); }
 .maic-callout--warning::before { background: var(--color-accent-warm); }
-.maic-callout__title { display: block; margin-bottom: 10rpx; color: var(--color-maic-ink); font-family: var(--font-serif); font-size: 29rpx; font-weight: 700; }
+.maic-callout__title { display: block; margin-bottom: 10rpx; color: var(--color-maic-ink); font-family: var(--font-sans); font-size: 29rpx; font-weight: 700; }
 
 .maic-image { width: 100%; border-radius: 4rpx 22rpx 22rpx 22rpx; }
 .maic-image__caption { display: block; margin-top: 12rpx; color: var(--color-maic-muted); font-size: 23rpx; }
@@ -272,7 +272,7 @@ page {
 .maic-step-list__num,
 .maic-reveal-step > text { z-index: 1; display: flex !important; align-items: center; justify-content: center; width: 50rpx; height: 50rpx; border-radius: 50%; color: var(--color-on-primary) !important; background: var(--color-maic-blue); font-family: var(--font-mono); }
 .maic-step-list__title,
-.maic-reveal-step__title { margin-bottom: 6rpx; color: var(--color-maic-ink) !important; font-family: var(--font-serif); font-size: 28rpx !important; font-weight: 700; }
+.maic-reveal-step__title { margin-bottom: 6rpx; color: var(--color-maic-ink) !important; font-family: var(--font-sans); font-size: 28rpx !important; font-weight: 700; }
 
 .maic-diagram { display: flex; flex-wrap: wrap; gap: 16rpx; }
 .maic-diagram__node { padding: 20rpx 24rpx; border: 2rpx solid var(--color-maic-blue); border-radius: 4rpx 18rpx 18rpx 18rpx; color: var(--color-maic-blue); background: var(--color-maic-soft); font-size: 26rpx; font-weight: 600; }
@@ -291,7 +291,7 @@ page {
 }
 
 .maic-challenge-heading text:last-child { color: var(--color-maic-border); font-size: 50rpx; line-height: 1; }
-.maic-question { margin-bottom: 32rpx; color: var(--color-maic-ink); font-family: var(--font-serif); font-size: 34rpx; font-weight: 700; line-height: 1.55; }
+.maic-question { margin-bottom: 32rpx; color: var(--color-maic-ink); font-family: var(--font-sans); font-size: 34rpx; font-weight: 700; line-height: 1.55; }
 
 .maic-option {
   display: grid;
@@ -319,7 +319,7 @@ page {
 .maic-feedback { margin-top: 26rpx; padding: 28rpx; border-left: 8rpx solid; border-radius: 0 20rpx 20rpx 0; font-size: 26rpx; line-height: 1.72; }
 .maic-feedback--correct { border-left-color: var(--color-success); color: var(--color-success); background: var(--color-success-light); }
 .maic-feedback--wrong { border-left-color: var(--color-danger); color: var(--color-danger); background: var(--color-danger-light); }
-.maic-feedback__title { display: block; margin-bottom: 9rpx; font-family: var(--font-serif); font-size: 29rpx; font-weight: 700; }
+.maic-feedback__title { display: block; margin-bottom: 9rpx; font-family: var(--font-sans); font-size: 29rpx; font-weight: 700; }
 
 .maic-tabs { width: 100%; margin-bottom: 22rpx; }
 .maic-tabs__inner { display: flex; gap: 12rpx; white-space: nowrap; }
@@ -350,7 +350,7 @@ page {
 .maic-case-file text { display: block; font-size: 27rpx; line-height: 1.72; }
 .maic-case-file text:first-child { margin-bottom: 16rpx; color: var(--color-maic-blue); font-family: var(--font-mono); font-size: 21rpx; font-weight: 700; letter-spacing: 2rpx; }
 .maic-pbl-node { padding: 28rpx; border: 1rpx solid var(--color-maic-border); border-radius: 4rpx 22rpx 22rpx 22rpx; background: var(--color-maic-surface); }
-.maic-pbl-node__meta { display: flex; justify-content: space-between; gap: 18rpx; margin-bottom: 20rpx; color: var(--color-maic-blue); font-family: var(--font-serif); font-size: 27rpx; font-weight: 700; }
+.maic-pbl-node__meta { display: flex; justify-content: space-between; gap: 18rpx; margin-bottom: 20rpx; color: var(--color-maic-blue); font-family: var(--font-sans); font-size: 27rpx; font-weight: 700; }
 .maic-pbl-node__narrative { display: block; margin-bottom: 24rpx; color: var(--color-maic-ink-soft); font-size: 28rpx; line-height: 1.75; }
 
 .maic-teacher {

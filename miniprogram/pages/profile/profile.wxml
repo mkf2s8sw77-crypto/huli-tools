@@ -1,4 +1,4 @@
-<ui-page title="我的账户">
+<ui-page variant="dashboard">
   <view wx:if="{{loading}}">
     <ui-card>
       <view class="skeleton" style="height: 200rpx; border-radius: 24rpx;"></view>
@@ -9,25 +9,73 @@
     <ui-error text="未获取到用户信息" bind:retry="loadProfile" />
   </view>
 
-  <view wx:else>
-    <view class="service-card fade-in">
-      <view class="service-card__content">
-        <text class="service-card__eyebrow">当前服务</text>
-        <text class="service-card__title serif-num">全部免费开放</text>
-        <text class="service-card__desc">所有已上线工具均可直接使用</text>
+  <block wx:else>
+    <!-- 顶栏:品牌 -->
+    <view class="topbar fade-in">
+      <view class="brand">
+        <image class="brand__logo" src="/assets/images/huli-tech-logo.png" mode="aspectFill" />
+        <text class="brand__name">我的账户</text>
       </view>
     </view>
 
-    <!-- 用户身份条(并入 account-card 的下方,作为单独一行) -->
-    <view class="id-bar lift-on-hover fade-in fade-in-1">
-      <image class="brand-logo" src="/assets/images/huli-tech-logo.png" mode="aspectFill" />
+    <!-- 账户 hero -->
+    <view class="acct-hero fade-in fade-in-1">
+      <view class="acct-hero__row">
+        <view class="acct-hero__main">
+          <text class="acct-hero__label">可用积分</text>
+          <text class="acct-hero__num">{{points.availablePoints}}</text>
+        </view>
+        <view class="acct-hero__btn" bindtap="onGoRecharge">充值</view>
+      </view>
+      <view class="acct-hero__sub">
+        <view class="acct-hero__sub-item">
+          <text class="acct-hero__sub-label">累计充值</text>
+          <text class="acct-hero__sub-num">{{points.totalRechargedPoints}}</text>
+        </view>
+        <view class="acct-hero__sub-item">
+          <text class="acct-hero__sub-label">累计消费</text>
+          <text class="acct-hero__sub-num">{{points.totalConsumedPoints}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用户身份条 -->
+    <view class="id-bar lift-on-hover fade-in fade-in-2">
+      <image class="id-bar__logo" src="/assets/images/huli-tech-logo.png" mode="aspectFill" />
       <text class="id-bar__text">{{maskedOpenid}}</text>
     </view>
 
-    <!-- 设置面板(骨架 A 列表) -->
-    <view class="fade-in fade-in-2">
+    <!-- 账户管理菜单 -->
+    <view class="fade-in fade-in-3">
       <ui-section title="账户管理">
         <view class="menu-list">
+          <view class="menu-item" bindtap="onGoRecharge">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--blue icon-tile--recharge">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">积分充值</text>
+            </view>
+            <text class="menu-item__arrow">›</text>
+          </view>
+          <view class="menu-item" bindtap="onGoOrders">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--indigo icon-tile--orders">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">我的订单</text>
+            </view>
+            <text class="menu-item__arrow">›</text>
+          </view>
+          <view class="menu-item" bindtap="onGoTransactions">
+            <view class="menu-item__left">
+              <view class="menu-item__icon icon-tile icon-tile--sky icon-tile--transactions">
+                <view class="icon-tile__glyph"></view>
+              </view>
+              <text class="menu-item__text">积分流水</text>
+            </view>
+            <text class="menu-item__arrow">›</text>
+          </view>
           <view class="menu-item" bindtap="onGoUsageRecords">
             <view class="menu-item__left">
               <view class="menu-item__icon icon-tile icon-tile--peach icon-tile--records">
@@ -40,5 +88,5 @@
         </view>
       </ui-section>
     </view>
-  </view>
+  </block>
 </ui-page>

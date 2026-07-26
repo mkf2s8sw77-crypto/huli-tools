@@ -1,6 +1,7 @@
-/* huli-tools 设计系统 v3 — 自然疗愈风
+/* huli-tools 设计系统 v4.1 — Bento 工具墙
    通用样式层:所有页面都从这里取。
-   衬线字体仅在 .page-title / .serif-num / .app-card__name 等"标题/数值"使用。
+   衬线体系已移除:标题/数值统一 sans + font-weight:800 + tabular-nums
+   (.serif-num 类名保留作向后兼容,但已改为 sans 粗体等宽数字)。
    微动效:点击波纹 / hover 抬起 / 加载渐变 / 进场 fade-in。 */
 
 @import "./tokens.wxss";
@@ -72,18 +73,18 @@
   padding: var(--spacing-lg);
 }
 
-/* ─────────────── 页面头部(只标题用衬线) ─────────────── */
+/* ─────────────── 页面头部 ─────────────── */
 .page-header {
   margin-bottom: var(--spacing-lg);
 }
 
 .page-title {
   display: block;
-  font-family: var(--font-serif);
-  font-size: 38rpx;
-  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 40rpx;
+  font-weight: 800;
   color: var(--color-text);
-  letter-spacing: 0;
+  letter-spacing: -0.5rpx;
   line-height: 1.3;
 }
 
@@ -106,12 +107,11 @@
   font-family: var(--font-sans);
 }
 
-/* 衬线大数值(用于积分、价格等) */
+/* 粗体等宽大数值(用于积分、价格等;类名沿用,衬线已移除) */
 .serif-num {
-  font-family: var(--font-serif);
-  font-feature-settings: "tnum" 1;
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: 800;
   letter-spacing: -0.01em;
 }
 
@@ -119,8 +119,8 @@
 .section-title {
   display: block;
   font-family: var(--font-sans);
-  font-size: 30rpx;
-  font-weight: 600;
+  font-size: 32rpx;
+  font-weight: 800;
   color: var(--color-text);
   line-height: 1.35;
   margin: 4rpx 0 22rpx;
@@ -133,9 +133,9 @@
   left: 0;
   top: 8rpx;
   bottom: 8rpx;
-  width: 6rpx;
+  width: 8rpx;
   border-radius: var(--radius-pill);
-  background: var(--color-accent-warm);
+  background: linear-gradient(180deg, #7C5CFC 0%, #B893F6 100%);
 }
 
 /* ─────────────── 卡片 ─────────────── */
@@ -145,7 +145,7 @@
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--color-border-soft);
+  border: 1rpx solid var(--color-border);
   position: relative;
   overflow: hidden;
   transition: transform var(--t-base) var(--ease-out),
@@ -165,12 +165,11 @@
 }
 
 .card--hero {
-  background: var(--gradient-primary);
+  background: var(--gradient-hero);
   color: var(--color-on-primary);
   border: none;
   box-shadow: var(--shadow-elevated);
 }
-.card--hero::before { display: none; }
 
 /* ─────────────── 表单字段 ─────────────── */
 .form-label {
@@ -196,16 +195,18 @@
   box-shadow: 0 0 0 3rpx var(--color-primary-light);
 }
 
-/* ─────────────── 价格/积分(衬线大字) ─────────────── */
+/* ─────────────── 价格/积分(粗体大字) ─────────────── */
 .text-price {
   color: var(--color-price);
-  font-weight: 600;
-  font-family: var(--font-serif);
+  font-weight: 800;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
 }
 .text-points {
   color: var(--color-points);
-  font-weight: 600;
-  font-family: var(--font-serif);
+  font-weight: 800;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ─────────────── 状态标签(pill) ─────────────── */
@@ -215,7 +216,7 @@
   font-size: 22rpx;
   padding: 4rpx 16rpx;
   border-radius: var(--radius-pill);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
   font-family: var(--font-sans);
 }
@@ -260,7 +261,7 @@
 }
 .list-hero__value {
   font-size: 36rpx;
-  font-weight: 600;
+  font-weight: 800;
   color: var(--color-on-primary);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
@@ -306,7 +307,8 @@
 .info-card__amount {
   font-size: 30rpx;
   color: var(--color-accent-warm);
-  font-weight: 600;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 .info-card__footer {
   display: flex;
@@ -366,8 +368,8 @@
 .info-card__cost {
   font-size: 26rpx;
   color: var(--color-accent-warm);
-  font-weight: 600;
-  font-family: var(--font-serif);
+  font-weight: 800;
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 .info-card__cost--free {
@@ -413,7 +415,7 @@
   width: 32rpx;
   height: 32rpx;
   border-radius: 50%;
-  background: var(--color-lavender);
+  background: var(--color-primary-bright);
   opacity: 0.5;
 }
 .empty-state__text {
@@ -469,7 +471,7 @@
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--color-border-soft);
+  border: 1rpx solid var(--color-border);
   overflow: hidden;
 }
 .menu-item {
@@ -499,11 +501,12 @@
 }
 .menu-item__text {
   font-size: 30rpx;
+  font-weight: 600;
   color: var(--color-text);
 }
 .menu-item__arrow {
-  font-size: 28rpx;
-  color: var(--color-text-muted);
+  font-size: 32rpx;
+  color: #C9C2DE;
   font-family: var(--font-sans);
 }
 
@@ -512,8 +515,9 @@ button[type="primary"] {
   background: var(--gradient-primary) !important;
   border-radius: var(--radius-md) !important;
   border: none !important;
-  box-shadow: var(--shadow-soft) !important;
+  box-shadow: 0 12rpx 32rpx rgba(124, 92, 252, 0.32) !important;
   font-family: var(--font-sans) !important;
+  font-weight: 800;
   transition: transform var(--t-fast) var(--ease-out),
               box-shadow var(--t-fast) var(--ease-out) !important;
 }
@@ -532,9 +536,10 @@ button[type="warn"] {
   border-radius: var(--radius-md) !important;
   border: none !important;
   color: var(--color-on-primary) !important;
+  font-weight: 800;
 }
 
-/* ─────────────── 分隔符(单色,不彩虹) ─────────────── */
+/* ─────────────── 分隔符(单色) ─────────────── */
 .care-divider {
   height: 1rpx;
   margin: var(--spacing-lg) 0;
@@ -549,9 +554,9 @@ button[type="warn"] {
   align-items: center;
 }
 .stat-block__value {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 48rpx;
-  font-weight: 600;
+  font-weight: 800;
   color: var(--color-text);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -563,7 +568,7 @@ button[type="warn"] {
   font-family: var(--font-sans);
 }
 
-/* ─────────────── CSS 应用图标符号(降饱和) ─────────────── */
+/* ─────────────── CSS 应用图标符号 ─────────────── */
 .app-icon-symbol {
   width: 72rpx;
   height: 72rpx;
@@ -579,9 +584,10 @@ button[type="warn"] {
 .app-icon-symbol--blue { background: var(--gradient-primary); }
 .app-icon-symbol--teal { background: var(--gradient-brand-soft); }
 
-/* ─────────────── CSS 图标系统(icon-tile) ─────────────── */
+/* ─────────────── CSS 图标系统(icon-tile) ───────────────
+   v4.1:淡底 + 主色/主题色线条图标,不再使用彩色实底砖。 */
 .icon-tile {
-  --icon-line: var(--color-on-primary);
+  --icon-line: var(--color-primary);
   width: 80rpx;
   height: 80rpx;
   border-radius: var(--radius-lg);
@@ -591,7 +597,7 @@ button[type="warn"] {
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: var(--shadow-soft);
+  background: var(--color-primary-light);
   transition: transform var(--t-base) var(--ease-out);
 }
 .icon-tile:active { transform: scale(0.94); }
@@ -617,13 +623,15 @@ button[type="warn"] {
 .icon-tile--sm  { width: 48rpx; height: 48rpx; border-radius: var(--radius-md); }
 .icon-tile--app { width: 88rpx; height: 88rpx; border-radius: 24rpx; }
 
-/* ── 暖调色(降饱和) ── */
-.icon-tile--blue    { background: var(--gradient-primary); }
-.icon-tile--teal    { background: var(--gradient-brand-soft); }
-.icon-tile--coral   { background: var(--gradient-warm); }
-.icon-tile--peach   { background: var(--gradient-peach); }
-.icon-tile--lavender{ background: var(--gradient-lavender); }
-.icon-tile--lemon   { background: var(--gradient-lemon); --icon-line: var(--color-text); }
+/* ── 配色(淡底 + 主题色线条) ── */
+.icon-tile--blue    { background: var(--color-primary-light); --icon-line: var(--color-primary); }
+.icon-tile--indigo  { background: #E4E1FB; --icon-line: #6A5FD8; }
+.icon-tile--sky     { background: #DAEEFB; --icon-line: #2F7FC4; }
+.icon-tile--teal    { background: var(--color-brand-soft-light); --icon-line: var(--color-brand-soft); }
+.icon-tile--coral   { background: var(--color-accent-warm-light); --icon-line: var(--color-accent-warm); }
+.icon-tile--peach   { background: var(--color-danger-light); --icon-line: var(--color-danger); }
+.icon-tile--lavender{ background: var(--color-lavender-light); --icon-line: var(--color-lavender); }
+.icon-tile--lemon   { background: var(--color-lemon-light); --icon-line: var(--color-lemon); }
 
 /* ── 图标形状(几何,留用 v2 的 CSS-only 设计) ── */
 .icon-tile--recharge::before {
@@ -649,8 +657,8 @@ button[type="warn"] {
   left: 31rpx; top: 29rpx;
   width: 18rpx; height: 4rpx;
   border-radius: var(--radius-pill);
-  background: rgba(45, 36, 24, 0.32);
-  box-shadow: 0 10rpx 0 rgba(45, 36, 24, 0.28), 0 20rpx 0 rgba(45, 36, 24, 0.22);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10rpx 0 rgba(255, 255, 255, 0.75), 0 20rpx 0 rgba(255, 255, 255, 0.65);
 }
 
 .icon-tile--transactions::before {

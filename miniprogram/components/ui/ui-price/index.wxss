@@ -1,8 +1,9 @@
 @import "../../../styles/common.wxss";
 
 .ui-price {
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .ui-price--points {

@@ -3,10 +3,6 @@
 .ui-form-field {
   margin-bottom: 28rpx;
   padding: 30rpx 34rpx;
-  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-surface) 100%);
+  background: var(--color-bg-card);
   box-shadow: var(--shadow-card);
-}
-
-.ui-form-field::before {
-  opacity: 0.55;
 }

@@ -2,7 +2,7 @@ Component({
   data: {
     selected: 0,
     list: [
-      { pagePath: "/pages/index/index", text: "首页", iconClass: "tab-icon--home", active: true },
+      { pagePath: "/pages/index/index", text: "工具", iconClass: "tab-icon--grid", active: true },
       { pagePath: "/pages/profile/profile", text: "我的", iconClass: "tab-icon--profile", active: false },
     ],
   },

@@ -14,15 +14,16 @@
 - 云函数代码风格保持 CommonJS，两空格缩进。
 - 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。
 
-## 3. 设计系统（v3 自然疗愈）
+## 3. 设计系统（v4.1 清透活力 · Bento 工具墙）
 
-- 详见 `docs/design_system.md`。视觉方向：暖米底色、陶土棕主色、雾绿辅色的自然疗愈工具平台。
-- **色板**：背景 `#F5F0E8`、主色 `#8A6A3A`、雾绿 `#7A8B6A`、陶橙 `#C8804A`、正文 `#2D2418`。微信绿仅用于微信登录按钮。
-- **表面**：暖米渐变背景、白色卡片、暖陶描边与轻柔阴影；禁止重新引入彩虹高光和高饱和多巴胺配色。
+- 详见 `docs/design_system.md`。视觉方向：冷白带紫调底色 + 沪里品牌紫 `#7C5CFC`，首页为 Bento 彩色磁贴工具墙。
+- **信息架构**：积分后置（首页顶栏积分胶囊，大卡与充值入口在「我的」账户中心）；首页无积分 hero、无快捷入口行；订单/流水/使用记录全部收纳在「我的」。tabbar 为「工具 / 我的」。
+- **色板**：背景 `#F6F5FA`、主色 `#7C5CFC`（深 `#6D3FE8`、亮阶 `#9F7BFA`、淡底 `#F0EDFA`）、强调珊瑚橙 `#FF7A59`（价格/推荐）、正文 `#18142A`。应用磁贴主题色：定妆照紫粉渐变、卧底靛蓝渐变、MAIC 青绿渐变。微信绿仅用于微信登录按钮。
+- **表面**：白卡片 + `#EEEAF7` 边框 + 轻阴影；磁贴用主题色渐变 + 同色 30% 透明投影。禁止回退土褐米黄（v3）或彩虹多巴胺（v2）体系；数字用 `font-weight:800` + `tabular-nums`，不用衬线字体。
 - **Logo**：两端使用 `https://media.huli.sh.cn/huli-tech-logo.png` 的本地化资产；展示时必须圆角裁切，不得使用方角原图。
-- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部大号浮动胶囊导航在 `miniprogram/custom-tab-bar/`。
-- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入。通用组件在 `admin-web/src/components/`。注意：管理端目前仍沿用 v2"柔彩多巴胺"token（晴空蓝主色 `#5E95C8`、柔蓝灰侧栏 `#3B4A6B`），尚未迁移到 v3 陶土棕；新增管理端页面应使用 `theme.ts` 现有 token，不要直接套用小程序端 v3 色板。
-- 新页面和新应用必须使用 v3 token 和公共组件，采用"应用执行页"模式。功能图标使用 `.icon-tile` CSS-only 图标，不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
+- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部悬浮胶囊导航在 `miniprogram/custom-tab-bar/`。
+- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入；主色与小程序端一致（活力紫），侧栏深紫灰 `#3D3656`。通用组件在 `admin-web/src/components/`。
+- 新页面和新应用必须使用 v4.1 token 和公共组件，采用"应用执行页"模式。功能图标使用 CSS-only 图标（icon-tile 或等价实现），不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
 ## 4. 安全铁律

@@ -9,6 +9,11 @@ Page({
   data: {
     loading: false,
     user: null,
+    points: {
+      availablePoints: 0,
+      totalRechargedPoints: 0,
+      totalConsumedPoints: 0,
+    },
     maskedOpenid: "",
   },
 
@@ -31,6 +36,11 @@ Page({
       const user = data.user || null;
       this.setData({
         user,
+        points: data.points || {
+          availablePoints: 0,
+          totalRechargedPoints: 0,
+          totalConsumedPoints: 0,
+        },
         maskedOpenid: maskOpenid(user ? user.openid : ""),
         loading: false,
       });
@@ -38,6 +48,18 @@ Page({
       api.toastError(err);
       this.setData({ loading: false });
     }
+  },
+
+  onGoRecharge() {
+    wx.navigateTo({ url: "/pages/recharge/recharge" });
+  },
+
+  onGoOrders() {
+    wx.navigateTo({ url: "/pages/orders/orders" });
+  },
+
+  onGoTransactions() {
+    wx.navigateTo({ url: "/pages/transactions/transactions" });
   },
 
   onGoUsageRecords() {

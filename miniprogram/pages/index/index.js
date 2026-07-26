@@ -1,15 +1,30 @@
 const api = require("../../services/api");
 
-const APP_ICON_CLASS_MAP = {
-  ai_draw: "icon-tile--peach icon-tile--image",
-  nursing_undercover: "icon-tile--lavender icon-tile--undercover",
-  maic: "icon-tile--teal icon-tile--toolbox",
+const TILE_CLASS_MAP = {
+  ai_draw: "tile--photo",
+  nursing_undercover: "tile--game",
+  maic: "tile--maic",
+  demo_sum: "tile--plain",
+};
+
+const TILE_TAG_MAP = {
+  ai_draw: "HOT",
+  nursing_undercover: "教学游戏",
+  maic: "AI 课堂",
 };
 
 function decorateApp(app) {
+  const pricing = app.pricing || null;
+  const costPoints =
+    pricing && pricing.mode === "fixed" ? Number(pricing.costPoints) || 0 : 0;
+  const tag = TILE_TAG_MAP[app.appKey] || (app.status === "coming_soon" ? "即将上线" : "");
   return {
     ...app,
-    iconClass: APP_ICON_CLASS_MAP[app.appKey] || "icon-tile--teal icon-tile--toolbox",
+    tileClass: TILE_CLASS_MAP[app.appKey] || "tile--plain",
+    tag,
+    tagHot: tag === "HOT",
+    priceText: costPoints > 0 ? `${costPoints} 积分/次` : "免费",
+    priceFree: costPoints <= 0,
   };
 }
 
@@ -18,6 +33,9 @@ Page({
     loading: true,
     error: null,
     apps: [],
+    userSummary: {
+      points: { availablePoints: 0 },
+    },
   },
 
   onLoad() {
@@ -35,13 +53,14 @@ Page({
     this.setData({ loading: true, error: null });
 
     try {
-      const [, appsData] = await Promise.all([
+      const [userSummary, appsData] = await Promise.all([
         api.bootstrapUser(),
         api.listApps(),
       ]);
 
       this.setData({
         apps: (appsData.apps || []).map(decorateApp),
+        userSummary: userSummary || { points: { availablePoints: 0 } },
         loading: false,
       });
     } catch (err) {
@@ -71,4 +90,7 @@ Page({
     });
   },
 
+  onGoRecharge() {
+    wx.navigateTo({ url: "/pages/recharge/recharge" });
+  },
 });

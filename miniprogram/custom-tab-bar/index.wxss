@@ -1,42 +1,21 @@
 @import "../styles/tokens.wxss";
 
+/* v4.1 悬浮白胶囊 tabbar */
 .tab-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 36rpx;
+  bottom: calc(36rpx + env(safe-area-inset-bottom));
+  height: 136rpx;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 44rpx;
+  border: 1rpx solid var(--color-border);
+  box-shadow: 0 20rpx 60rpx rgba(60, 40, 110, 0.14);
   display: flex;
-  justify-content: center;
-  padding: 18rpx 44rpx 22rpx;
-  padding-bottom: calc(22rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(245, 240, 232, 0) 0%, rgba(245, 240, 232, 0.88) 28%, #ffffff 100%);
   z-index: 1000;
-}
-
-.tab-bar__inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 14rpx;
-  width: 620rpx;
-  background: var(--color-surface-elevated);
-  border-radius: 46rpx;
-  padding: 12rpx;
-  box-shadow: 0 10rpx 34rpx rgba(125, 98, 50, 0.16), 0 2rpx 8rpx rgba(125, 98, 50, 0.08);
-  border: 2rpx solid rgba(255, 255, 255, 0.92);
-  position: relative;
-  overflow: hidden;
-  transition: box-shadow var(--t-base) var(--ease-out);
-}
-
-.tab-bar__inner::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 42rpx;
-  right: 42rpx;
-  height: 4rpx;
-  background: var(--gradient-hero);
-  opacity: 0.6;
 }
 
 .tab-bar-item {
@@ -48,95 +27,94 @@
   flex: 1;
   gap: 8rpx;
   min-width: 0;
-  padding: 14rpx 0 13rpx;
-  min-height: 108rpx;
-  box-sizing: border-box;
-  border-radius: 34rpx;
-  transition: background var(--t-base) var(--ease-out),
-              transform var(--t-fast) var(--ease-out),
-              box-shadow var(--t-base) var(--ease-out);
-  z-index: 1;
+  color: var(--color-text-muted);
+  transition: color var(--t-fast) var(--ease-out),
+              transform var(--t-fast) var(--ease-out);
 }
 
 .tab-bar-item:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .tab-bar-item.active {
-  background: var(--gradient-hero);
-  box-shadow: 0 8rpx 22rpx rgba(184, 149, 106, 0.3);
-}
-
-.tab-bar-item__icon {
-  color: var(--color-text-secondary);
-  transition: color var(--t-fast) var(--ease-out);
-}
-
-.tab-bar-item.active .tab-bar-item__icon {
-  color: var(--color-on-primary);
+  color: var(--color-primary-hover);
 }
 
 .tab-text {
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
+  font-size: 22rpx;
   font-weight: 600;
   line-height: 1;
-  transition: color var(--t-fast) var(--ease-out);
-}
-
-.tab-bar-item.active .tab-text {
-  color: var(--color-on-primary);
+  color: inherit;
 }
 
 .tab-icon {
   position: relative;
-  width: 36rpx;
-  height: 36rpx;
+  width: 44rpx;
+  height: 44rpx;
   color: inherit;
 }
 
 .tab-icon::before,
-.tab-icon::after {
+.tab-icon::after,
+.tab-icon__glyph::before,
+.tab-icon__glyph::after {
   content: "";
   position: absolute;
   box-sizing: border-box;
 }
 
-.tab-icon--home::before {
-  left: 4rpx;
-  top: 9rpx;
-  width: 28rpx;
-  height: 24rpx;
+/* 工具:四宫格线框 */
+.tab-icon--grid::before {
+  left: 2rpx;
+  top: 2rpx;
+  width: 12rpx;
+  height: 12rpx;
   border: 4rpx solid currentColor;
-  border-top: none;
-  border-radius: 0 0 6rpx 6rpx;
+  border-radius: 5rpx;
 }
 
-.tab-icon--home::after {
-  left: 5rpx;
-  top: 3rpx;
-  width: 26rpx;
-  height: 26rpx;
-  border-left: 4rpx solid currentColor;
-  border-top: 4rpx solid currentColor;
-  transform: rotate(45deg);
-  border-radius: 4rpx 0 0 0;
+.tab-icon--grid::after {
+  left: 24rpx;
+  top: 2rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border: 4rpx solid currentColor;
+  border-radius: 5rpx;
 }
 
+.tab-icon--grid .tab-icon__glyph::before {
+  left: 2rpx;
+  top: 24rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border: 4rpx solid currentColor;
+  border-radius: 5rpx;
+}
+
+.tab-icon--grid .tab-icon__glyph::after {
+  left: 24rpx;
+  top: 24rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border: 4rpx solid currentColor;
+  border-radius: 5rpx;
+}
+
+/* 我的:小人像线框 */
 .tab-icon--profile::before {
-  left: 11rpx;
+  left: 12rpx;
   top: 3rpx;
-  width: 14rpx;
-  height: 14rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border: 4rpx solid currentColor;
   border-radius: 50%;
-  background: currentColor;
 }
 
 .tab-icon--profile::after {
   left: 5rpx;
-  bottom: 2rpx;
+  bottom: 3rpx;
   width: 26rpx;
-  height: 18rpx;
+  height: 16rpx;
   border: 4rpx solid currentColor;
   border-bottom: none;
   border-radius: 18rpx 18rpx 0 0;

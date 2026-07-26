@@ -2,11 +2,11 @@
 
 .ui-action-btn {
   min-height: 96rpx;
-  border-radius: var(--radius-lg) !important;
-  font-weight: 700;
+  border-radius: var(--radius-md) !important;
+  font-weight: 800;
   font-size: 34rpx;
   letter-spacing: 0;
-  box-shadow: 0 10rpx 24rpx rgba(94, 149, 200, 0.2) !important;
+  box-shadow: 0 12rpx 32rpx rgba(124, 92, 252, 0.32) !important;
 }
 
 .ui-action-btn--loading {

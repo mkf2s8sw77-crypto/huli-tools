@@ -362,17 +362,17 @@ git diff --check
   - 第 4 门返回 `DAILY_LIMIT_REACHED`，不留下可继续执行的 usage 或任务。
   - 跨用户访问均返回 `FORBIDDEN`，无法获取临时媒体 URL。
 
-## 4. 设计系统视觉一致性验收
+## 4. 设计系统视觉一致性验收（v4.1）
 
-- 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw`、`nursing_undercover` 页面无白屏。
-- 所有页面使用 `ui-page` 组件统一页面壳，标题样式一致。
-- 卡片使用 `card` class 或 `ui-card` 组件，圆角 16rpx、阴影一致。
-- 状态标签颜色统一：成功绿、警告黄、危险红、默认灰。
-- 积分数值使用陶土棕 `--color-points`，价格使用陶橙 `--color-price`，不使用旧的微信绿。
+- 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw`、`nursing_undercover`、`maic` 页面无白屏。
+- 首页为 Bento 磁贴工具墙：无积分 hero 卡、无 quick-nav 快捷入口；顶栏为品牌 logo + 积分胶囊；主打应用磁贴占两行高。
+- 「我的」页包含紫色账户 hero（可用积分 + 充值按钮 + 累计充值/消费）和账户管理菜单卡。
+- tabbar 为「工具 / 我的」，工具 tab 为四宫格图标，选中色 `#6D3FE8`。
+- 主色为品牌紫 `#7C5CFC`，价格/推荐为珊瑚橙 `#FF7A59`，页面背景 `#F6F5FA`。
+- 数字使用 `font-weight: 800` + `tabular-nums`，全站无衬线字体（旧 serif-num/Noto Serif SC 已移除）。
 - 空状态（`ui-empty`）和错误态（`ui-error`）布局一致。
-- Tab bar 选中色为平台陶土棕（`--color-primary`），非微信绿。
-- 页面内无硬编码的 `#07c160`、`#1890ff`、`#52c41a` 等非 Token 颜色值。
-- 模板 `templates/app_vertical_slice/` 复制新应用后，页面默认使用设计系统组件。
+- 页面内无硬编码的 `#8A6A3A`、`#5E95C8`、`#07c160`（微信登录按钮除外）等旧体系色值。
+- 模板 `templates/app_vertical_slice/` 复制新应用后，页面默认使用 v4.1 token 与公共组件。
 
 ## 5. 人工检查项
 
