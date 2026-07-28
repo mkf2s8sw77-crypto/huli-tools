@@ -47,16 +47,13 @@ async function main() {
       "node_modules/**/*",
       "admin-web/**/*",
       ".playwright-mcp/**/*",
+      ".playwright-cli/**/*",
+      "output/**/*",
       "tmp-preview/**/*",
       "cloudfunctions/**/*",
       "docs/**/*",
       "promptDocs/**/*",
       "templates/**/*",
-      "miniprogram/pages/recharge/**/*",
-      "miniprogram/pages/orders/**/*",
-      "miniprogram/pages/transactions/**/*",
-      "miniprogram/pages/tools/demo-sum/**/*",
-      "miniprogram/components/ui/ui-price/**/*",
     ],
   });
 
