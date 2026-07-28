@@ -214,6 +214,11 @@ const USAGE_SAFE_FIELDS = ["_id", "userId", "appKey", "status", "costPoints", "f
 const APP_SAFE_FIELDS = ["_id", "appKey", "name", "description", "entryPage", "cloudFunctionName", "status", "pricing", "sortOrder", "icon", "createdAt", "updatedAt"];
 const PACKAGE_SAFE_FIELDS = ["_id", "packageKey", "productId", "name", "amountFen", "basePoints", "bonusPoints", "status", "sortOrder", "createdAt", "updatedAt"];
 const AUDIT_SAFE_FIELDS = ["_id", "adminUserId", "action", "targetCollection", "targetId", "beforeSummary", "afterSummary", "requestId", "createdAt"];
+const MODEL_PROVIDER_SAFE_FIELDS = ["_id", "providerKey", "displayName", "type", "driver", "config", "enabled", "createdAt", "updatedAt"];
+const MODEL_BINDING_SAFE_FIELDS = ["_id", "appKey", "capability", "providerKey", "fallbackProviderKeys", "paramOverrides", "enabled", "createdAt", "updatedAt"];
+
+// provider.config 中禁止出现密钥材料（密钥只能放 coreModel 环境变量，secretEnv 仅存变量名）
+const FORBIDDEN_PROVIDER_CONFIG_KEY = /(apiKey|appSecret|secret|password|privateKey|accessToken)/i;
 
 // ─── 只读 Action ──────────────────────────────────────────
 
@@ -662,6 +667,7 @@ async function checkCollectionsExist() {
     "admin_audit_logs", "system_configs", "app_ai_draw_tasks",
     "app_nursing_undercover_sessions", "app_maic_tasks", "app_maic_courses",
     "app_maic_scenes", "app_maic_progress", "app_maic_assets",
+    "app_paper_polish_tasks",
   ];
   const missing = [];
   for (const name of required) {
@@ -1076,6 +1082,257 @@ async function bootstrapFirstWebAdmin(event, context) {
   }
 }
 
+// ─── 模型网关配置（coreModel） ─────────────────────────────
+
+async function listModelProviders(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = await validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+
+  try {
+    const query = db.collection("model_providers");
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("providerKey", "asc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((p) => pickFields(p, MODEL_PROVIDER_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "model_providers 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询模型提供方失败: " + err.message }, requestId);
+  }
+}
+
+function validateProviderConfig(config) {
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return "config 必须为对象";
+  }
+  for (const key of Object.keys(config)) {
+    if (key !== "secretEnv" && FORBIDDEN_PROVIDER_CONFIG_KEY.test(key)) {
+      return `config 禁止包含密钥字段：${key}（密钥只能配置为 coreModel 环境变量）`;
+    }
+  }
+  return null;
+}
+
+async function upsertModelProvider(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const { providerKey, displayName, type, driver, config, enabled } = event;
+
+  const adminCheck = await validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+  const adminUserId = adminCheck.adminUserId;
+
+  const trimmedKey = (providerKey || "").trim();
+  if (!/^[a-z][a-z0-9_]{1,40}$/.test(trimmedKey)) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "providerKey 必须为小写 snake_case（2-41 位）" }, requestId);
+  }
+  const validTypes = ["text_chat", "image_gen", "audio_tts"];
+  if (!validTypes.includes(type)) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "type 必须是 text_chat / image_gen / audio_tts" }, requestId);
+  }
+  const validDrivers = ["minimax", "cloudbase_ai", "gpt_image_web"];
+  if (!validDrivers.includes(driver)) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "driver 必须是 minimax / cloudbase_ai / gpt_image_web" }, requestId);
+  }
+  const configError = validateProviderConfig(config);
+  if (configError) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: configError }, requestId);
+  }
+
+  const now = new Date();
+  const providerData = {
+    providerKey: trimmedKey,
+    displayName: (displayName || "").trim(),
+    type,
+    driver,
+    config,
+    enabled: enabled !== false,
+    updatedAt: now,
+  };
+
+  let existing = null;
+  try {
+    const res = await db.collection("model_providers").where({ providerKey: trimmedKey }).get();
+    existing = res.data[0] || null;
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "查询模型提供方失败: " + err.message }, requestId);
+  }
+
+  if (existing) {
+    try {
+      await db.collection("model_providers").doc(existing._id).update({ data: providerData });
+    } catch (err) {
+      return makeResponse(false, { code: "DB_ERROR", message: "更新模型提供方失败: " + err.message }, requestId);
+    }
+    await writeAuditLog(adminUserId, "upsertModelProvider", "model_providers", trimmedKey, { existing }, { updated: providerData }, requestId);
+    return makeResponse(true, { providerKey: trimmedKey, operation: "update" }, requestId);
+  }
+
+  try {
+    await db.collection("model_providers").add({ data: { ...providerData, createdAt: now } });
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "创建模型提供方失败: " + err.message }, requestId);
+  }
+  await writeAuditLog(adminUserId, "upsertModelProvider", "model_providers", trimmedKey, {}, { created: providerData }, requestId);
+  return makeResponse(true, { providerKey: trimmedKey, operation: "create" }, requestId);
+}
+
+async function listModelBindings(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const adminCheck = await validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+
+  const { page, pageSize, skip } = parsePagination(event);
+
+  try {
+    const query = db.collection("app_model_bindings");
+    const totalRes = await query.count();
+    const listRes = await query
+      .orderBy("appKey", "asc")
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return makeResponse(true, {
+      list: (listRes.data || []).map((b) => pickFields(b, MODEL_BINDING_SAFE_FIELDS)),
+      total: totalRes.total || 0,
+      page,
+      pageSize,
+    }, requestId);
+  } catch (err) {
+    if (err.message && err.message.includes("collection not exists")) {
+      return makeResponse(false, { code: "MISSING_COLLECTION", message: "app_model_bindings 集合不存在" }, requestId);
+    }
+    return makeResponse(false, { code: "DB_ERROR", message: "查询模型绑定失败: " + err.message }, requestId);
+  }
+}
+
+async function upsertModelBinding(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const { appKey, capability, providerKey, fallbackProviderKeys, paramOverrides, enabled } = event;
+
+  const adminCheck = await validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+  const adminUserId = adminCheck.adminUserId;
+
+  const trimmedAppKey = (appKey || "").trim();
+  const trimmedCapability = (capability || "").trim();
+  if (!/^[a-z][a-z0-9_]{0,40}$/.test(trimmedAppKey)) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "appKey 必须为小写 snake_case" }, requestId);
+  }
+  if (!/^[a-z][a-z0-9_]{0,40}$/.test(trimmedCapability)) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "capability 必须为小写 snake_case" }, requestId);
+  }
+  const trimmedProvider = (providerKey || "").trim();
+  if (!trimmedProvider) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "providerKey 不能为空" }, requestId);
+  }
+  const fallbacks = Array.isArray(fallbackProviderKeys) ? fallbackProviderKeys.map((k) => String(k).trim()).filter(Boolean) : [];
+  if (fallbacks.includes(trimmedProvider)) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "fallback 不能包含主 provider" }, requestId);
+  }
+  if (new Set(fallbacks).size !== fallbacks.length) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "fallbackProviderKeys 不能重复" }, requestId);
+  }
+  if (paramOverrides !== undefined && (typeof paramOverrides !== "object" || paramOverrides === null || Array.isArray(paramOverrides))) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "paramOverrides 必须为对象" }, requestId);
+  }
+
+  // 主 provider 与 fallback 必须已存在
+  try {
+    const keys = [trimmedProvider, ...fallbacks];
+    const res = await db.collection("model_providers").where({ providerKey: db.command.in(keys) }).get();
+    const existing = new Set((res.data || []).map((p) => p.providerKey));
+    const missing = keys.filter((k) => !existing.has(k));
+    if (missing.length > 0) {
+      return makeResponse(false, { code: "INVALID_PARAM", message: "provider 不存在: " + missing.join(", ") }, requestId);
+    }
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "校验 provider 失败: " + err.message }, requestId);
+  }
+
+  const bindingId = `${trimmedAppKey}__${trimmedCapability}`;
+  const now = new Date();
+  const bindingData = {
+    appKey: trimmedAppKey,
+    capability: trimmedCapability,
+    providerKey: trimmedProvider,
+    fallbackProviderKeys: fallbacks,
+    paramOverrides: paramOverrides || {},
+    enabled: enabled !== false,
+    updatedAt: now,
+  };
+
+  let before = null;
+  try {
+    const res = await db.collection("app_model_bindings").doc(bindingId).get();
+    before = res.data || null;
+  } catch (err) {
+    before = null;
+  }
+
+  try {
+    await db.collection("app_model_bindings").doc(bindingId).set({
+      data: { ...bindingData, ...(before ? {} : { createdAt: now }) },
+    });
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "保存模型绑定失败: " + err.message }, requestId);
+  }
+  await writeAuditLog(adminUserId, "upsertModelBinding", "app_model_bindings", bindingId, before || {}, { saved: bindingData }, requestId);
+  return makeResponse(true, { bindingId, operation: before ? "update" : "create" }, requestId);
+}
+
+async function smokeModelProvider(event, context) {
+  const wxContext = cloud.getWXContext();
+  const requestId = context.requestId || Date.now().toString();
+  const { providerKey } = event;
+
+  const adminCheck = await validateAdmin(wxContext, requestId);
+  if (!adminCheck.ok) return adminCheck.response;
+  const adminUserId = adminCheck.adminUserId;
+
+  const trimmedKey = (providerKey || "").trim();
+  if (!trimmedKey) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "providerKey 不能为空" }, requestId);
+  }
+  const token = getInternalToken();
+  if (!token) {
+    return makeResponse(false, { code: "INTERNAL_SECRET_NOT_CONFIGURED", message: "内部调用凭据未配置" }, requestId);
+  }
+
+  try {
+    const res = await cloud.callFunction({
+      name: "coreModel",
+      data: { action: "smokeProvider", _internalToken: token, providerKey: trimmedKey },
+    });
+    const result = res.result || {};
+    await writeAuditLog(adminUserId, "smokeModelProvider", "model_providers", trimmedKey, {}, result.ok ? { latencyMs: result.data && result.data.latencyMs } : { error: result.error }, requestId);
+    if (!result.ok) {
+      const error = result.error || {};
+      return makeResponse(false, { code: error.code || "SMOKE_FAILED", message: error.message || "连通性测试失败" }, requestId);
+    }
+    return makeResponse(true, result.data, requestId);
+  } catch (err) {
+    return makeResponse(false, { code: "SMOKE_FAILED", message: "连通性测试调用失败: " + err.message }, requestId);
+  }
+}
+
 // ─── 主入口 ───────────────────────────────────────────────
 
 exports.main = async (event, context) => {
@@ -1098,6 +1355,11 @@ exports.main = async (event, context) => {
     listUsageRecords,
     listApps,
     listPackages,
+    listModelProviders,
+    upsertModelProvider,
+    listModelBindings,
+    upsertModelBinding,
+    smokeModelProvider,
   };
 
   const handler = actionMap[action];

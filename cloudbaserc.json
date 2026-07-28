@@ -18,6 +18,13 @@
       "installDependency": true
     },
     {
+      "name": "coreModel",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 300,
+      "installDependency": true
+    },
+    {
       "name": "corePayment",
       "runtime": "Nodejs18.15",
       "handler": "index.main",
@@ -71,6 +78,13 @@
       "runtime": "Nodejs18.15",
       "handler": "index.main",
       "timeout": 60,
+      "installDependency": true
+    },
+    {
+      "name": "app_paper_polish",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 300,
       "installDependency": true
     },
     {

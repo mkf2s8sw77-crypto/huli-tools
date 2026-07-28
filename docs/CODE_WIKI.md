@@ -58,6 +58,7 @@ huli-tools/
 │       ├── usage-records/        # 使用记录
 │       ├── apps/ai_draw/         # 护士职业定妆照应用
 │       ├── apps/nursing_undercover/ # 谁是卧底（护理版）应用
+│       ├── apps/paper_polish/    # 护理论文英文润色应用
 │       └── tools/demo-sum/       # 示例工具：求和
 └── cloudfunctions/               # 云函数目录
     ├── coreUser/                 # 用户身份与积分账户 bootstrap
@@ -65,6 +66,7 @@ huli-tools/
     ├── corePoints/               # 积分账本、冻结/结算/释放/充值
     ├── corePayment/              # 支付订单与充值包
     ├── adminCore/                # 管理接口与数据 seed
+    ├── coreModel/                # 大模型网关（模型调用统一入口）
     ├── demoSum/                  # 示例业务云函数（求和）
     ├── app_ai_draw/              # 护士职业定妆照应用云函数
     ├── app_nursing_undercover/   # 谁是卧底（护理版）应用云函数
@@ -135,7 +137,7 @@ huli-tools/
 
 #### app.json
 
-- **页面列表**：`pages/index/index`、`pages/profile/profile`、`pages/tools/demo-sum/index`、`pages/apps/ai_draw/index`、`pages/recharge/recharge`、`pages/orders/orders`、`pages/transactions/transactions`、`pages/usage-records/usage-records`
+- **页面列表**：`pages/index/index`、`pages/profile/profile`、`pages/tools/demo-sum/index`、`pages/apps/ai_draw/index`、`pages/apps/nursing_undercover/index`、`pages/apps/paper_polish/index`、`pages/apps/maic/*`、`pages/recharge/recharge`、`pages/orders/orders`、`pages/transactions/transactions`、`pages/usage-records/usage-records`
 - **TabBar**：自定义 TabBar（`custom: true`），包含首页和我的两个入口。
 - **云开发**：`"cloud": true`
 
@@ -322,6 +324,11 @@ huli-tools/
 | `upsertApp` | 管理员 | 新增或更新应用 |
 | `upsertPackage` | 管理员 | 新增或更新充值包 |
 | `bootstrapFirstWebAdmin` | 已登录 Web 用户 | 无任何管理员时，将当前 CloudBase Auth uid 自动准入为首位 Web 管理员 |
+| `listModelProviders` | 管理员 | 查询模型提供方列表 |
+| `upsertModelProvider` | 管理员 | 新增或更新模型提供方，校验 `config` 不得含密钥字段 |
+| `listModelBindings` | 管理员 | 查询应用模型绑定列表 |
+| `upsertModelBinding` | 管理员 | 新增或更新应用绑定，校验 provider 存在、fallback 不重复且不含主 provider |
+| `smokeModelProvider` | 管理员 | 代理 `coreModel.smokeProvider` 做连通性测试 |
 
 支持小程序 openid（`ADMIN_OPENIDS`）和 Web uid（`ADMIN_WEB_UIDS` + `system_configs/admin_web_auto_admins`）双通道鉴权。Web uid 由 `@cloudbase/node-sdk` 在云函数服务端通过 `auth.getUserInfo().uid` 读取，不能由前端传入。
 
@@ -331,6 +338,21 @@ huli-tools/
 - `validateAdmin(wxContext, requestId)`：兼容层，内部调用 `resolveAdminIdentity`。
 - `writeAuditLog(...)`：写审计日志，Web 管理员使用 `web:<uid>` 格式。
 - `pickFields(obj, fields)`：字段白名单过滤。
+
+#### coreModel — 大模型网关（公共底座层）
+
+| Action | 权限 | 说明 |
+|--------|------|------|
+| `generateText` | **内部调用** | 按 `appKey` × `capability` 解析绑定并调用模型生成文本，支持 `overrides` 参数覆盖，需 `_internalToken` |
+| `smokeProvider` | **内部调用** | 对指定 `providerKey` 做连通性测试，需 `_internalToken` |
+| `seedDefaults` | **内部调用** | 写入默认 provider 与绑定 seed 数据，需 `_internalToken` |
+
+**关键设计**：
+
+- `drivers/minimax.js`：OpenAI 兼容 `/chat/completions` 驱动，密钥从 `process.env[config.secretEnv]` 读取；`drivers/cloudbaseAi.js`：基于 `@cloudbase/node-sdk` 的 `ai.createModel`。
+- `lib/router.js`：纯函数，负责绑定解析与 fallback 判定，仅 transient 错误码（`MODEL_RATE_LIMITED`、`MODEL_TRANSIENT_ERROR`）触发 fallback。
+- `lib/registry.js`：读取 `model_providers` / `app_model_bindings` 注册表，带 60s 内存缓存。
+- 密钥不进入集合，`config.secretEnv` 只存环境变量名。
 
 ### 4.3 业务示例云函数
 
@@ -362,7 +384,17 @@ huli-tools/
   3. 未结束对局返回客户端时必须隐藏 NPC 密令、阵营和 `undercoverRoleId`。
   4. `submitSpeech` / `submitVote` 使用 `clientActionId` 做幂等，避免重复生成 NPC 发言或重复结算。
   5. 投票成功必须先完成 `coreApp.finishUsage`，再把 session 标记为 `finished`；取消对局必须先 `failUsage`，再标记 `cancelled`。
-  6. CloudBase AI 模型 ID 通过 `CLOUDBASE_AI_MODEL` 环境变量配置，未配置或不可用时使用模板 fallback，不在代码中猜测模型 ID。
+  6. 模型调用统一经 `coreModel` 网关（`capability`：`npc_speech` / `npc_vote` / `debrief`），`CLOUDBASE_AI_MODEL` 仅作为 `coreModel.seedDefaults` 种子来源，运行时以 `model_providers` / `app_model_bindings` 为准；绑定缺失或模型不可用时使用模板 fallback，不在代码中猜测模型 ID。
+
+#### app_paper_polish — 护理论文英文润色
+
+- **职责**：接收用户粘贴的论文草稿（中/英文，≤20000 字符），经 `coreModel` 调大模型生成 Nature 风格英文成稿与中文改动要点。
+- **关键约束**：
+  1. `usageId` 必须属于当前用户且 `appKey` 必须为 `paper_polish`；定价 0 积分，usage 状态保持 `created`，无积分冻结链路。
+  2. 异步任务模式：`submit` 校验并创建 `app_paper_polish_tasks`（`_id=usageId`）后，以函数间自调用触发内部 `runTask`（带 `_internalToken`，不等待完成）；客户端每 3s 轮询 `query`，页面隐藏只停轮询不取消任务。
+  3. `runTask` 经 `coreModel.generateText`（`capability: "polish"`）单次调用，不自行重试；配置类错误映射为 `POLISH_SERVICE_UNAVAILABLE`，限流映射为 `POLISH_RATE_LIMITED`。
+  4. `query` 承担 read-time 超时兜底：`processing` 超 10 分钟置 `timed_out` 并 `failUsage`；`latest` 供页面重新进入时恢复未完成任务。
+  5. Prompt 规则蒸馏自 nature-skills 的 `nature-polishing` 技能（Apache-2.0，commit `1562ab71`），存于 `prompts/`（core/language/sections 蒸馏 + nursing 原创护理附录），输出契约为严格 JSON `{ polished, summary[] }`，解析失败降级为纯文本（`degraded`）。
 
 #### app_maic / app_maic_worker / app_maic_reconcile — MAIC 智慧课堂
 
@@ -397,6 +429,8 @@ huli-tools/
 | `payment_orders` | 支付订单 | 无写，只读自己 |
 | `admin_audit_logs` | 管理员操作审计 | 无权限 |
 | `system_configs` | 系统配置 | 无权限 |
+| `model_providers` | 大模型提供方注册表（密钥仅存 `secretEnv` 环境变量名） | 无权限 |
+| `app_model_bindings` | 应用 × 能力到 provider 的绑定与 fallback 链 | 无权限 |
 | `app_maic_tasks` | MAIC 异步任务与结算协调 | 无直接读写 |
 | `app_maic_courses` | MAIC 课程元数据 | 无直接读写 |
 | `app_maic_scenes` | MAIC 原生场景 | 无直接读写 |
@@ -404,6 +438,7 @@ huli-tools/
 | `app_maic_assets` | MAIC 云存储资产 | 无直接读写 |
 | `app_maic_runtime` | MAIC Worker 全局租约 | 无直接读写 |
 | `app_maic_artifacts` | MAIC 已校验课程短期暂存 | 无直接读写 |
+| `app_paper_polish_tasks` | 护理论文英文润色异步任务与结果 | 无直接读写 |
 
 ### 5.2 关键字段速查
 
@@ -593,7 +628,7 @@ demoSum (业务示例)
 
 微信开发者工具 → 云开发 → 云函数 → 选中函数 → 版本与配置 → 环境变量
 
-> 注意：`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover` 中配置为**相同的随机字符串**。`app_nursing_undercover` 如需启用 AI NPC，还需配置经过 CloudBase AI preflight 确认的 `CLOUDBASE_AI_MODEL`。
+> 注意：`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`coreModel`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_paper_polish` 中配置为**相同的随机字符串**。`coreModel` 需配置 `MINIMAX_API_KEY`；`MINIMAX_BASE_URL`、`MAIC_AI_MODEL`、`CLOUDBASE_AI_MODEL` 仅作为 `coreModel.seedDefaults` 的种子来源，运行时以 `model_providers` / `app_model_bindings` 为准，绑定缺失时应用走模板 fallback。
 
 ---
 
@@ -610,7 +645,7 @@ demoSum (业务示例)
 1. **打开项目**：用微信开发者工具打开项目根目录。
 2. **配置 APPID**：在 `project.config.json` 中将 `appid` 替换为真实小程序 APPID。
 3. **部署云函数**：右键以下云函数 → 「创建并部署：云端安装依赖」
-   - `coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`
+   - `coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`、`coreModel`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_paper_polish`
 4. **配置环境变量**：为上述云函数配置 `ADMIN_OPENIDS`、`INTERNAL_API_SECRET`、`PAYMENT_PROVIDER`、`MOCK_PAYMENT_ENABLED`。
 5. **创建数据库集合**：在微信开发者工具云开发控制台中创建 11 个集合（详见 `docs/cloud_collections.md`）。
 6. **初始化 seed 数据**：调用 `adminCore.initSchema`：

@@ -324,7 +324,7 @@ git diff --check
 ### TC-22 谁是卧底（护理版）对局、AI fallback 与历史回看
 
 - 目标：验证 `app_nursing_undercover` 的 usage 归属、对局状态机、投票结算、取消释放和历史复盘。
-- 前置条件：已创建 `app_nursing_undercover_sessions` 集合；`app_nursing_undercover`、`coreApp`、`corePoints` 已部署并配置相同 `INTERNAL_API_SECRET`；如需真实 AI NPC，`app_nursing_undercover` 还需配置已启用的 `CLOUDBASE_AI_MODEL`。
+- 前置条件：已创建 `app_nursing_undercover_sessions` 集合；`app_nursing_undercover`、`coreApp`、`corePoints` 已部署并配置相同 `INTERNAL_API_SECRET`；如需真实 AI NPC，`coreModel` 需已完成 provider/绑定配置（见 TC-24），`CLOUDBASE_AI_MODEL` 仅作为 `coreModel.seedDefaults` 种子来源。
 - 步骤：
   1. 调用 `api.createUsage("nursing_undercover", { mode: "word_undercover", difficulty: "student" })` 获取 `usageId`。
   2. 调用 `app_nursing_undercover.startGame`，传入 `usageId`、`mode=word_undercover`、`difficulty=student`、`npcCount=4`、`roundCount=2`。
@@ -344,7 +344,7 @@ git diff --check
 ### TC-23 MAIC CloudBase 原生课程、协议执行与 usage 幂等闭环
 
 - 目标：验证 `maic` 的 CloudBase 队列、单并发 Worker、后台恢复、原生播放器、用户隔离和 usage 闭环。
-- 前置条件：7 个 `app_maic_*` 集合均为 PRIVATE；任务索引已创建；`app_maic_worker.modelSmoke` 使用 `MiniMax-M2.7` 成功；每分钟 Worker 与每 5 分钟 reconcile timer 已启用；应用注册状态为 `active` 且 `costPoints=0`。
+- 前置条件：7 个 `app_maic_*` 集合均为 PRIVATE；任务索引已创建；`app_maic_worker.modelSmoke` 经 `coreModel` 网关调用成功（模型以 `maic__course_generate` 绑定的 provider 为准）；每分钟 Worker 与每 5 分钟 reconcile timer 已启用；应用注册状态为 `active` 且 `costPoints=0`。
 - 步骤：
   1. 创建 0 积分 usage 并提交课程主题，确认任务立即进入 `queued` 且兼容字段 `jobId=""`。
   2. 退出小程序并等待 `app_maic_worker` 推进，再返回查看结果；停止页面轮询期间任务仍应完成。
@@ -352,7 +352,7 @@ git diff --check
   4. 重复提交同一 `usageId`；再分别验证显式取消、MiniMax 限流/网络失败三次、协议错误纠错/兜底、租约恢复和 45 分钟超时。
   5. 同一用户当天创建 3 门后尝试第 4 门；使用另一微信用户尝试读取任务、课程、进度和既有媒体。
 - 断言：
-  - 日志只记录 requestId、状态、重试次数和 token 用量，模型为 `MiniMax-M2.7`，不包含 Key、完整 Prompt 或完整课程。
+  - 日志只记录 requestId、状态、重试次数和 token 用量，模型名以 `coreModel` 返回为准（默认种子为 `MiniMax-M2.7`），不包含 Key、完整 Prompt 或完整课程。
   - `app_maic_runtime/worker` 保证全局同时最多一个任务进入执行窗口，任务可在退出、网络中断和 Worker 租约过期后恢复。
   - 同一 `usageId` 只产生一个任务和课程；免费模式不产生积分冻结、结算或释放流水，但 usage 必须进入明确终态。
   - 四类场景与五类运行时动作均由原生舞台执行，无 WebView、HTML 或脚本；旧 `navigate` 被忽略且不会翻页。
@@ -362,9 +362,58 @@ git diff --check
   - 第 4 门返回 `DAILY_LIMIT_REACHED`，不留下可继续执行的 usage 或任务。
   - 跨用户访问均返回 `FORBIDDEN`，无法获取临时媒体 URL。
 
+### TC-24 coreModel 大模型网关与内部接口隔离
+
+- 目标：验证 `coreModel` 的三个内部 action、seed 数据、敏感集合隔离与路由单测。
+- 前置条件：已创建 `model_providers`、`app_model_bindings` 集合（客户端无权限）；`coreModel` 已部署并配置 `INTERNAL_API_SECRET`、`MINIMAX_API_KEY`。
+- 步骤：
+  1. 调用 `coreModel.seedDefaults`，检查两个集合的 seed 数据。
+  2. 从前端直接调用 `coreModel.generateText` / `smokeProvider` / `seedDefaults`（不传 `_internalToken`）。
+  3. 调用 `adminCore.smokeModelProvider` 对 `minimax_default` 做连通性测试。
+  4. 执行 `node --test tests/core-model-router.test.js`。
+- 断言：
+  - `model_providers` 存在 `minimax_default`（`CLOUDBASE_AI_MODEL` 已配置时另有 `cloudbase_ai_default`）；`app_model_bindings` 存在 `maic__course_generate`、`nursing_undercover__npc_speech` / `npc_vote` / `debrief` 绑定。
+  - 直接调用内部 action 返回 `FORBIDDEN` 或 `INTERNAL_SECRET_NOT_CONFIGURED`。
+  - 集合中不出现任何密钥值，`config.secretEnv` 仅为环境变量名。
+  - 单测全部通过（绑定解析、fallback 链、transient 判定、参数合并白名单）。
+
+### TC-25 MAIC / 卧底模型调用经 coreModel 网关
+
+- 目标：验证 `app_maic_worker` 与 `app_nursing_undercover` 的模型调用统一经 `coreModel.generateText`。
+- 前置条件：TC-24 通过；绑定与 provider 已启用。
+- 步骤：
+  1. 触发一次 MAIC 课程生成，观察 worker 日志与结果。
+  2. 开一局卧底，推进 NPC 发言、投票与复盘。
+  3. 临时禁用或删除 `nursing_undercover__npc_speech` 绑定，再次触发卧底 NPC 发言。
+  4. 触发 MAIC 协议纠错后的兜底课程生成。
+- 断言：
+  - MAIC 课程生成走 `maic__course_generate` 绑定（默认 `minimax_default`），`app_maic_worker` 不再直接持有 `MINIMAX_API_KEY`。
+  - 卧底 NPC 发言/投票/复盘分别走 `nursing_undercover__npc_speech` / `npc_vote` / `debrief` 绑定（默认 `cloudbase_ai_default`）。
+  - 绑定缺失时卧底保留模板 fallback 行为，不报错、不伪装为真实 AI 输出。
+  - 兜底课程的 artifact `model` 字段记录为 `template_fallback`。
+
+### TC-26 护理论文英文润色异步任务与 usage 闭环
+
+- 目标：验证 `app_paper_polish` 的 usage 归属、异步任务状态机、输入校验、超时兜底和结果回传。
+- 前置条件：已创建 `app_paper_polish_tasks` 集合（客户端无权限）；`app_paper_polish`、`coreApp`、`coreModel` 已部署并配置相同 `INTERNAL_API_SECRET`；`paper_polish__polish` 绑定已启用（见 TC-24 途径配置）；应用注册状态为 `active` 且 `costPoints=0`。
+- 步骤：
+  1. 调用 `api.createUsage("paper_polish", { inputChars, sections })` 获取 `usageId`。
+  2. 调用 `app_paper_polish.submit` 传入该 `usageId`、合法中文草稿（≤20000 字符）和章节选择，确认返回 `processing`。
+  3. 每 3s 轮询 `app_paper_polish.query` 直到 `succeeded`；期间退出页面再进入，确认经 `latest` 恢复轮询。
+  4. 用同一 `usageId` 重复调用 `submit`。
+  5. 临时分别提交：空文本、超过 20000 字符的文本、`demo_sum` 的 `usageId`、其他用户的 `usageId`。
+  6. 临时禁用 `paper_polish__polish` 绑定后再次提交。
+- 断言：
+  - 成功时任务状态为 `succeeded`，`resultText` 为英文成稿，`summary` 为中文改动要点，`language` 自动检测为 `zh-to-en`；usage 进入 `succeeded` 终态，0 积分不产生冻结/结算流水。
+  - 重复 `submit` 幂等返回当前任务状态，不产生第二个任务。
+  - 空文本返回 `POLISH_EMPTY_INPUT`，超长返回 `POLISH_INPUT_TOO_LONG`，跨应用返回 `APP_MISMATCH`，跨用户返回 `FORBIDDEN`；失败路径 usage 均进入 `failed`/`released` 终态。
+  - 绑定缺失时任务失败为 `POLISH_SERVICE_UNAVAILABLE`，不自行重试、不静默吞错。
+  - `processing` 超 10 分钟由 `query` 置为 `timed_out` 并结束 usage。
+  - 客户端任何接口响应均不回传原始草稿 `inputText`。
+
 ## 4. 设计系统视觉一致性验收（v4.1）
 
-- 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw`、`nursing_undercover`、`maic` 页面无白屏。
+- 首页、我的、充值、订单、积分流水、使用记录、`demo-sum`、`ai_draw`、`nursing_undercover`、`paper_polish`、`maic` 页面无白屏。
 - 首页为 Bento 磁贴工具墙：无积分 hero 卡、无 quick-nav 快捷入口；顶栏为品牌 logo + 积分胶囊；主打应用磁贴占两行高。
 - 「我的」页包含紫色账户 hero（可用积分 + 充值按钮 + 累计充值/消费）和账户管理菜单卡。
 - tabbar 为「工具 / 我的」，工具 tab 为四宫格图标，选中色 `#6D3FE8`。

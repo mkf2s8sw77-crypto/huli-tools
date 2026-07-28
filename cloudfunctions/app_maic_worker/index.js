@@ -181,7 +181,8 @@ async function generateValidatedCourse(task) {
       return {
         course: generateFallbackCourse(task),
         usage,
-        model: process.env.MAIC_AI_MODEL || "MiniMax-M2.7",
+        // 兜底课程由模板生成而非模型产出，如实记录；实际模型名见 coreModel 绑定配置
+        model: "template_fallback",
         fallbackUsed: true,
         correctionUsed: true,
       };

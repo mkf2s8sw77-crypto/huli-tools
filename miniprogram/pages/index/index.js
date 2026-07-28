@@ -4,6 +4,7 @@ const TILE_CLASS_MAP = {
   ai_draw: "tile--photo",
   nursing_undercover: "tile--game",
   maic: "tile--maic",
+  paper_polish: "tile--paper-polish",
   demo_sum: "tile--plain",
 };
 
@@ -11,6 +12,7 @@ const TILE_TAG_MAP = {
   ai_draw: "HOT",
   nursing_undercover: "教学游戏",
   maic: "AI 课堂",
+  paper_polish: "论文润色",
 };
 
 function decorateApp(app) {

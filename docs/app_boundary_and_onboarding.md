@@ -30,7 +30,9 @@
 
 ### 1.1 公共底座层
 
-提供用户账户、积分账本、充值支付、应用目录、使用记录、管理员审计等能力。**只有公共云函数（`coreUser`、`coreApp`、`corePoints`、`corePayment`、`adminCore`）才能直接写公共集合。** 应用云函数仅允许只读当前 `usageId` 对应的 `app_usage_records`，用于校验归属和执行状态。
+提供用户账户、积分账本、充值支付、应用目录、使用记录、管理员审计等能力。**只有公共云函数（`coreUser`、`coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`）才能直接写公共集合。** 应用云函数仅允许只读当前 `usageId` 对应的 `app_usage_records`，用于校验归属和执行状态。
+
+`coreModel` 是大模型网关：所有大模型调用（文本/图像/音频）的唯一出口。provider 注册表（`model_providers`）与应用绑定（`app_model_bindings`）由管理端维护，模型密钥只配置在 `coreModel` 环境变量中。
 
 ### 1.2 接入层
 
@@ -134,7 +136,8 @@
 ### 4.2 应用云函数禁止
 
 - **禁止** 应用云函数直接写任何公共集合。
-- **禁止** 应用云函数直接引用 `users`、`point_accounts`、`point_transactions`、`apps`、`recharge_packages`、`payment_orders`、`admin_audit_logs`、`system_configs`；如需这些数据，必须通过公共云函数。
+- **禁止** 应用云函数直接引用 `users`、`point_accounts`、`point_transactions`、`apps`、`recharge_packages`、`payment_orders`、`admin_audit_logs`、`system_configs`、`model_providers`、`app_model_bindings`；如需这些数据，必须通过公共云函数。
+- **禁止** 应用云函数直连任何大模型服务（MiniMax、CloudBase AI、图像/音频模型等）；所有模型调用必须经 `coreModel.generateText`（`_internalToken` + `appKey` + `capability`），模型密钥不得配置在应用云函数环境变量中。
 - **允许** 应用云函数只读当前 `usageId` 对应的 `app_usage_records`，用于校验 `userId`、`appKey` 和状态。
 - **禁止** 在公共集合中追加业务应用私有字段。
 - **禁止** 绕过 `coreApp.finishUsage` / `failUsage` 自行结算积分。

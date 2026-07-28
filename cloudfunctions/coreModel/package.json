@@ -1,0 +1,10 @@
+{
+  "name": "coreModel",
+  "version": "1.0.0",
+  "description": "大模型网关：provider/binding 注册表解析与文本生成统一出口",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": ">=3.16.0",
+    "wx-server-sdk": "latest"
+  }
+}

@@ -1,0 +1,209 @@
+/* paper_polish 应用执行页 — 仅业务私有样式，公共视觉规则由 tokens/common 提供 */
+
+.app-exec-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.app-exec-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.app-exec-header__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-exec-header__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.app-exec-header__cost {
+  font-size: 24rpx;
+  color: var(--color-accent-warm);
+  font-weight: 500;
+  margin-top: 2rpx;
+}
+
+.app-exec-btn {
+  margin: var(--spacing-md) 0;
+}
+
+.polish-input {
+  width: 100%;
+  min-height: 320rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.polish-input__meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-xs);
+}
+
+.polish-input__count {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.polish-input__count--warn {
+  color: var(--color-danger);
+}
+
+.polish-sections {
+  margin-top: var(--spacing-md);
+}
+
+.polish-sections__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.polish-sections__label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.polish-sections__hint {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+}
+
+.polish-sections__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.polish-chip {
+  padding: 10rpx 28rpx;
+  border-radius: var(--radius-full, 999rpx);
+  background: var(--color-bg-card);
+  border: 1rpx solid var(--color-border);
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+}
+
+.polish-chip--active {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.polish-progress {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.polish-progress__text {
+  font-size: 26rpx;
+  color: var(--color-text-muted);
+}
+
+.polish-result {
+  margin-top: var(--spacing-md);
+}
+
+.polish-result__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.polish-result__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.polish-result__meta {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+}
+
+.polish-result__text {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.polish-result__notice {
+  margin-top: var(--spacing-md);
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+}
+
+.polish-result__summary {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1rpx solid var(--color-border);
+}
+
+.polish-result__summary-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.polish-result__summary-item {
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+.polish-result__actions {
+  margin-top: var(--spacing-md);
+}
+
+.polish-result__copy {
+  margin: 0;
+}
+
+.polish-result__again {
+  margin-top: var(--spacing-md);
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.app-exec-error {
+  background: var(--color-danger-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+.app-exec-error text {
+  font-size: 28rpx;
+  color: var(--color-danger);
+}
+
+.app-exec-error__retry {
+  margin-top: var(--spacing-sm);
+}
+
+.app-exec-error__retry text {
+  font-size: 26rpx;
+  color: var(--color-primary);
+  font-weight: 500;
+}

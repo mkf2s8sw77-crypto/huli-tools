@@ -57,6 +57,8 @@
 | `listApps` | 管理端应用列表，包含 disabled 应用 |
 | `listPackages` | 管理端充值包列表，包含 disabled 套餐 |
 | `listAuditLogs` | 分页查询审计日志，支持 adminUserId、actionFilter、时间范围 |
+| `listModelProviders` | 查询模型提供方（`model_providers`）列表 |
+| `listModelBindings` | 查询应用模型绑定（`app_model_bindings`）列表 |
 
 ### 写操作接口
 
@@ -67,6 +69,9 @@
 | `upsertApp` | 新增或更新应用目录 |
 | `upsertPackage` | 新增或更新充值包 |
 | `bootstrapFirstWebAdmin` | 首次自动准入：当无任何管理员时，将当前用户 uid 写入持久化管理员列表 |
+| `upsertModelProvider` | 新增或更新模型提供方，校验 `config` 不得含密钥字段，自动写审计日志 |
+| `upsertModelBinding` | 新增或更新应用模型绑定，校验 provider 存在、fallback 不重复且不含主 provider，自动写审计日志 |
+| `smokeModelProvider` | 代理 `coreModel.smokeProvider` 做连通性测试，自动写审计日志 |
 
 ### 统一分页与筛选
 
@@ -150,6 +155,38 @@ const res = await app.callFunction({ name: "adminCore", data: { action: "getAdmi
 ```
 
 > 注意：走小程序虚拟支付（`PAYMENT_PROVIDER=virtual`）时，`productId` 必须与 mp 后台「道具管理」中已发布的道具 ID 一致，且道具价格需与 `amountFen` 一致。
+
+## 模型管理
+
+「模型管理」页位于 Web 管理端 `/models`（侧边菜单在「应用管理」之后），分「模型提供方」与「应用绑定」两个 tab。
+
+### 模型提供方（provider）维护
+
+- 通过 `listModelProviders` / `upsertModelProvider` 维护 `model_providers` 集合。
+- 字段：`providerKey`、`displayName`、`type`（当前 `text_chat`，预留 `image_gen`、`audio_tts`）、`driver`（当前 `minimax`、`cloudbase_ai`，预留 `gpt_image_web`）、`config`（`baseUrl` / `model` / `secretEnv` / `temperature` / `maxTokens` / `timeoutMs`）、`enabled`。
+- 密钥不写入集合；`config.secretEnv` 只配置 `coreModel` 环境变量名（如 `MINIMAX_API_KEY`），真实密钥值配置在 `coreModel` 云函数环境变量中。`upsertModelProvider` 会拒绝含密钥字段的 `config`。
+
+### 应用绑定维护
+
+- 通过 `listModelBindings` / `upsertModelBinding` 维护 `app_model_bindings` 集合，`_id` 固定为 `${appKey}__${capability}`。
+- 每条绑定指定主 `providerKey`、`fallbackProviderKeys[]`、`paramOverrides{}` 和 `enabled`；主 provider 必须存在，fallback 不得重复且不得包含主 provider。
+- fallback 仅在 transient 错误（`MODEL_RATE_LIMITED`、`MODEL_TRANSIENT_ERROR`）时触发；`coreModel` 注册表缓存 60s，保存后最长 60s 内生效。
+
+### 连通性测试
+
+- 「模型提供方」tab 的「连通性测试」按钮调用 `smokeModelProvider`，由 `adminCore` 代理 `coreModel.smokeProvider` 执行。
+
+### 审计
+
+- 上述写操作（upsert、smoke）均写入 `admin_audit_logs`。
+
+### 上线初始化流程
+
+1. 创建 `model_providers`、`app_model_bindings` 集合（客户端无权限）。
+2. 为 `coreModel` 配置环境变量：`INTERNAL_API_SECRET`、`MINIMAX_API_KEY`，可选 `MINIMAX_BASE_URL`、`MAIC_AI_MODEL`、`CLOUDBASE_AI_MODEL`。
+3. 部署 `coreModel` 云函数（Nodejs18.15，timeout 300）。
+4. 调用 `coreModel.seedDefaults` 写入默认 provider 与绑定（`minimax_default`、`cloudbase_ai_default` 及 MAIC/卧底绑定）。
+5. 在「模型管理」页执行连通性测试，确认 provider 可用。
 
 ## 审计日志字段
 

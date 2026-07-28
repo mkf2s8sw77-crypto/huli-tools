@@ -7,6 +7,7 @@
     "pages/transactions/transactions",
     "pages/apps/ai_draw/index",
     "pages/apps/nursing_undercover/index",
+    "pages/apps/paper_polish/index",
     "pages/apps/maic/index",
     "pages/apps/maic/generating",
     "pages/apps/maic/course",

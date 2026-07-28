@@ -69,19 +69,18 @@ npx -y -p @cloudbase/cli@3.5.0 cloudbase fn deploy app_maic_reconcile --force --
 | `PAYMENT_PROVIDER` | 支付提供商 | `mock`（开发阶段） |
 | `MOCK_PAYMENT_ENABLED` | 是否启用模拟支付 | `true`（开发阶段） |
 | `INTERNAL_API_SECRET` | 云函数间内部调用凭据 | 必须显式配置为随机字符串；未配置时扣费、到账、管理调分会失败 |
-| `CLOUDBASE_AI_MODEL` | 谁是卧底 AI NPC 使用的 CloudBase 模型 ID | 按 CloudBase AI preflight 后实际启用模型填写；未配置时应用使用模板 fallback |
-| `CLOUDBASE_AI_ENV_ID` | 可选，谁是卧底 AI SDK 初始化环境 ID | 默认 `cloudbase-3gphz7fk0fe1b760` |
-| `MAIC_AI_MODE` | MAIC Worker 模型通道 | 当前环境固定 `direct_minimax`，不做运行时双路重试 |
-| `MAIC_AI_MODEL` | MiniMax 模型 | `MiniMax-M2.7` |
-| `MINIMAX_BASE_URL` | MiniMax OpenAI 兼容入口 | `https://api.minimaxi.com/v1` |
-| `MINIMAX_API_KEY` | MiniMax 文本模型密钥 | 仅配置于 `app_maic_worker`，禁止写入仓库或日志 |
+| `CLOUDBASE_AI_MODEL` | CloudBase AI 模型 ID | 仅配置于 `coreModel`，作为 `seedDefaults` 种子来源；运行时以 `model_providers` 文档为准，未配置时谁是卧底使用模板 fallback |
+| `CLOUDBASE_AI_ENV_ID` | 可选，CloudBase AI SDK 初始化环境 ID | 仅配置于 `coreModel`，默认 `cloudbase-3gphz7fk0fe1b760` |
+| `MAIC_AI_MODEL` | MiniMax 模型（种子默认值） | 仅配置于 `coreModel`，作为 `seedDefaults` 种子来源；运行时模型以 `model_providers` 文档为准，默认 `MiniMax-M2.7` |
+| `MINIMAX_BASE_URL` | MiniMax OpenAI 兼容入口（种子默认值） | 仅配置于 `coreModel`，默认 `https://api.minimaxi.com/v1` |
+| `MINIMAX_API_KEY` | MiniMax 文本模型密钥 | 仅配置于 `coreModel`，禁止写入仓库、日志或 `model_providers` 文档 |
 | `MAIC_DAILY_LIMIT` | 单用户每日课程上限 | `3`；可降低，代码限制最大为 3 |
 
-`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_maic_worker`、`app_maic`、`app_maic_reconcile` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`。
+`INTERNAL_API_SECRET` 必须在 `coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`、`demoSum`、`app_ai_draw`、`app_nursing_undercover`、`app_maic_worker`、`app_maic`、`app_maic_reconcile` 以及后续所有 `app_*` 应用云函数中保持一致；否则业务云函数无法回调 `finishUsage` / `failUsage`，也无法调用 `coreModel.generateText`。
 
-当前个人版套餐不支持 CloudBase 自定义模型 Provider，因此 MAIC 明确使用 Worker 服务端直连 MiniMax；不要自动升级套餐，也不要在运行时同时尝试两条模型链路。
+所有大模型调用统一经 `coreModel` 网关：应用云函数用 `_internalToken` 调用 `coreModel.generateText`（携带 `appKey` + `capability`），provider/绑定关系存 `model_providers` / `app_model_bindings`，由管理端「模型管理」维护。应用不得再直连 MiniMax、CloudBase AI 或其他模型服务。
 
-`CLOUDBASE_AI_MODEL` 只配置在 `app_nursing_undercover` 等需要 AI 的业务云函数中。配置前必须在当前环境完成 Token Credits 与模型启用检查，不要把 SecretId、SecretKey 或临时凭据写入仓库。
+当前个人版套餐不支持 CloudBase 自定义模型 Provider，因此 MiniMax 文本模型走 `coreModel` 的 `minimax` 驱动服务端直连；fallback 链只能在管理端绑定中显式配置（`fallbackProviderKeys`），未配置时单 provider 失败即返回错误。
 
 真实微信支付预留变量（仅当 `PAYMENT_PROVIDER=wechat` 时需要）：
 

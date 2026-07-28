@@ -1,64 +1,51 @@
+const cloud = require("wx-server-sdk");
 const { SYSTEM_PROMPT, buildCorrectionPrompt, buildUserPrompt } = require("./core/prompt");
 
-function getConfig() {
-  const mode = String(process.env.MAIC_AI_MODE || "direct_minimax").trim();
-  if (mode !== "direct_minimax") {
-    throw Object.assign(new Error("当前环境仅支持 direct_minimax 模式"), { code: "MODEL_CONFIG_INVALID" });
-  }
-  const apiKey = String(process.env.MINIMAX_API_KEY || "").trim();
-  if (!apiKey) throw Object.assign(new Error("MiniMax API Key 未配置"), { code: "MODEL_CONFIG_MISSING" });
-  const baseUrl = String(process.env.MINIMAX_BASE_URL || "https://api.minimaxi.com/v1").replace(/\/+$/, "");
-  const parsed = new URL(baseUrl);
-  if (parsed.protocol !== "https:") throw Object.assign(new Error("MiniMax BaseURL 必须使用 HTTPS"), { code: "MODEL_CONFIG_INVALID" });
-  return { apiKey, baseUrl, model: String(process.env.MAIC_AI_MODEL || "MiniMax-M2.7").trim() };
-}
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
-function classifyHttpError(status, message) {
-  if (status === 408 || status === 409 || status === 425 || status === 429 || status >= 500) {
-    return Object.assign(new Error(message || `MiniMax 暂时不可用 (${status})`), { code: status === 429 ? "MODEL_RATE_LIMITED" : "MODEL_TRANSIENT_ERROR", transient: true, status });
-  }
-  return Object.assign(new Error(message || `MiniMax 请求失败 (${status})`), { code: "MODEL_REQUEST_FAILED", transient: false, status });
+// MAIC 不再直连 MiniMax：统一经 coreModel 网关（binding: maic__course_generate），
+// provider/模型/密钥由 model_providers + coreModel 环境变量管理。
+const CORE_MODEL_FUNCTION = "coreModel";
+const APP_KEY = "maic";
+const CAPABILITY = "course_generate";
+
+function getInternalToken() {
+  return process.env.INTERNAL_API_SECRET || "";
 }
 
 async function requestModel(messages) {
-  const config = getConfig();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 240000);
-  let response;
+  const token = getInternalToken();
+  if (!token) {
+    throw Object.assign(new Error("内部调用凭据未配置"), { code: "MODEL_CONFIG_MISSING" });
+  }
+  let res;
   try {
-    response = await fetch(`${config.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: config.model, messages, temperature: 0.35, max_tokens: 12000 }),
-      signal: controller.signal,
+    res = await cloud.callFunction({
+      name: CORE_MODEL_FUNCTION,
+      data: { action: "generateText", _internalToken: token, appKey: APP_KEY, capability: CAPABILITY, messages },
     });
   } catch (err) {
-    const message = err && err.name === "AbortError" ? "MiniMax 请求超时" : "MiniMax 网络请求失败";
-    throw Object.assign(new Error(message), { code: "MODEL_TRANSIENT_ERROR", transient: true, cause: err });
-  } finally {
-    clearTimeout(timeout);
+    throw Object.assign(new Error("coreModel 调用失败: " + err.message), { code: "MODEL_TRANSIENT_ERROR", transient: true, cause: err });
   }
-  let payload;
-  try {
-    payload = await response.json();
-  } catch (err) {
-    throw classifyHttpError(response.status, "MiniMax 返回了无效响应");
+  const result = res.result || {};
+  if (!result.ok) {
+    const error = result.error || {};
+    throw Object.assign(new Error(error.message || "模型调用失败"), {
+      code: error.code || "MODEL_REQUEST_FAILED",
+      transient: error.transient === true,
+      attempts: error.attempts,
+    });
   }
-  if (!response.ok) {
-    const message = payload && payload.error && (payload.error.message || payload.error.msg);
-    throw classifyHttpError(response.status, message);
-  }
-  const content = payload && payload.choices && payload.choices[0] && payload.choices[0].message && payload.choices[0].message.content;
-  if (!content) throw Object.assign(new Error("MiniMax 未返回课程内容"), { code: "MODEL_INVALID_RESPONSE", transient: false });
-  const usage = payload.usage || {};
+  const data = result.data || {};
+  const usage = data.usage || {};
   return {
-    text: content,
+    text: data.text || "",
     usage: {
-      promptTokens: Number(usage.prompt_tokens || 0),
-      completionTokens: Number(usage.completion_tokens || 0),
-      totalTokens: Number(usage.total_tokens || 0),
+      promptTokens: Number(usage.promptTokens || 0),
+      completionTokens: Number(usage.completionTokens || 0),
+      totalTokens: Number(usage.totalTokens || 0),
     },
-    model: payload.model || config.model,
+    model: data.model || "",
   };
 }
 
@@ -79,4 +66,4 @@ async function smokeModel() {
   ]);
 }
 
-module.exports = { generateCourseText, getConfig, smokeModel };
+module.exports = { generateCourseText, smokeModel };

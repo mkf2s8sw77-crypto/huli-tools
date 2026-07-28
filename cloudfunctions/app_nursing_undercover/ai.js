@@ -1,40 +1,33 @@
 "use strict";
 
-let cloudbaseApp = null;
-let aiModel = null;
+const cloud = require("wx-server-sdk");
 
-const MODEL_GROUP = "cloudbase";
-const DEFAULT_AI_ENV_ID = "cloudbase-3gphz7fk0fe1b760";
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+
+// 谁是卧底不再直连 CloudBase AI：统一经 coreModel 网关，
+// 绑定 nursing_undercover__npc_speech / npc_vote / debrief，模型由 model_providers 配置。
+// 绑定缺失或不可用时降级为模板生成（与迁移前行为一致）。
+const CORE_MODEL_FUNCTION = "coreModel";
+const APP_KEY = "nursing_undercover";
 const MAX_SPEECH_LENGTH = 120;
 
-function getModelId() {
-  return (process.env.CLOUDBASE_AI_MODEL || "").trim();
-}
+// 配置类错误：说明绑定/provider 未就绪，本实例后续直接走模板，不再重复 RPC
+const CONFIG_ERROR_CODES = [
+  "MODEL_BINDING_MISSING",
+  "MODEL_BINDING_DISABLED",
+  "MODEL_CONFIG_MISSING",
+  "INTERNAL_SECRET_NOT_CONFIGURED",
+  "FORBIDDEN",
+];
 
-function initAI() {
-  if (aiModel) return true;
-  const modelId = getModelId();
-  if (!modelId) {
-    return false;
-  }
-  try {
-    const cloudbase = require("@cloudbase/node-sdk");
-    const envId = process.env.CLOUDBASE_AI_ENV_ID
-      || process.env.TCB_ENV
-      || process.env.SCF_NAMESPACE
-      || DEFAULT_AI_ENV_ID;
-    cloudbaseApp = cloudbaseApp || cloudbase.init({ env: envId });
-    const ai = cloudbaseApp.ai();
-    aiModel = ai.createModel(MODEL_GROUP);
-    return true;
-  } catch (err) {
-    console.error("CloudBase AI init failed:", err.message);
-    return false;
-  }
+let aiAvailable = true;
+
+function getInternalToken() {
+  return process.env.INTERNAL_API_SECRET || "";
 }
 
 function isAIReady() {
-  return initAI();
+  return aiAvailable && Boolean(getInternalToken());
 }
 
 function buildNpcSpeechPrompt(role, scenario, roundNo, transcript, mode) {
@@ -144,43 +137,56 @@ function parseJSON(text) {
   return JSON.parse(cleaned);
 }
 
-async function generateWithModel(systemPrompt, userPrompt) {
-  const modelId = getModelId();
-  if (!modelId) {
-    return { ok: false, code: "AI_NOT_READY", message: "未配置 CLOUDBASE_AI_MODEL，已切换模板生成" };
-  }
+async function generateWithModel(systemPrompt, userPrompt, capability) {
   if (!isAIReady()) {
-    return { ok: false, code: "AI_NOT_READY", message: "AI 模型未就绪" };
+    return { ok: false, code: "AI_NOT_READY", message: "模型绑定未就绪，已切换模板生成" };
   }
 
+  let result;
   try {
-    const result = await aiModel.generateText({
-      model: modelId,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
+    const res = await cloud.callFunction({
+      name: CORE_MODEL_FUNCTION,
+      data: {
+        action: "generateText",
+        _internalToken: getInternalToken(),
+        appKey: APP_KEY,
+        capability,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        overrides: { temperature: 0.7, maxTokens: 500 },
+      },
     });
-    const text = result && result.text ? result.text : "";
-    if (!text) {
-      return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回为空" };
-    }
-    try {
-      const parsed = parseJSON(text);
-      return { ok: true, data: parsed, raw: text };
-    } catch (parseErr) {
-      return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回非 JSON: " + text.slice(0, 200) };
-    }
+    result = res.result || {};
   } catch (err) {
     return { ok: false, code: "AI_GENERATION_FAILED", message: "AI 调用失败: " + err.message };
+  }
+
+  if (!result.ok) {
+    const error = result.error || {};
+    if (CONFIG_ERROR_CODES.includes(error.code)) {
+      aiAvailable = false;
+      return { ok: false, code: "AI_NOT_READY", message: error.message || "模型绑定未配置" };
+    }
+    return { ok: false, code: "AI_GENERATION_FAILED", message: "AI 调用失败: " + (error.message || error.code || "未知错误") };
+  }
+
+  const text = result.data && result.data.text ? result.data.text : "";
+  if (!text) {
+    return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回为空" };
+  }
+  try {
+    const parsed = parseJSON(text);
+    return { ok: true, data: parsed, raw: text };
+  } catch (parseErr) {
+    return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回非 JSON: " + text.slice(0, 200) };
   }
 }
 
 async function generateNpcSpeech(role, scenario, roundNo, transcript, mode) {
   const { systemPrompt, userPrompt } = buildNpcSpeechPrompt(role, scenario, roundNo, transcript, mode);
-  const result = await generateWithModel(systemPrompt, userPrompt);
+  const result = await generateWithModel(systemPrompt, userPrompt, "npc_speech");
   if (!result.ok) return result;
 
   const data = result.data;
@@ -194,7 +200,7 @@ async function generateNpcSpeech(role, scenario, roundNo, transcript, mode) {
 
 async function generateNpcVote(role, transcript, allRoles, scenario, mode) {
   const { systemPrompt, userPrompt } = buildNpcVotePrompt(role, transcript, allRoles, scenario, mode);
-  const result = await generateWithModel(systemPrompt, userPrompt);
+  const result = await generateWithModel(systemPrompt, userPrompt, "npc_vote");
   if (!result.ok) return result;
 
   const data = result.data;
@@ -212,7 +218,7 @@ async function generateNpcVote(role, transcript, allRoles, scenario, mode) {
 
 async function generateDebrief(scenario, transcript, result, mode) {
   const { systemPrompt, userPrompt } = buildDebriefPrompt(scenario, transcript, result, mode);
-  const genResult = await generateWithModel(systemPrompt, userPrompt);
+  const genResult = await generateWithModel(systemPrompt, userPrompt, "debrief");
   if (!genResult.ok) return genResult;
 
   const data = genResult.data;

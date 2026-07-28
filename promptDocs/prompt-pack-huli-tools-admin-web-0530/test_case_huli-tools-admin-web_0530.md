@@ -202,9 +202,27 @@ npm --prefix admin-web run build
   - 正常源码检查通过。
   - 临时违规能被识别。
 
+### TC-13 模型管理页
+
+- 目标：确认 `/models` 模型管理页的 provider CRUD、连通性测试与绑定 CRUD 可用。
+- 前置条件：管理员登录；`coreModel` 已部署并完成 `seedDefaults`（见 huli-tools 测试文档 TC-24）。
+- 步骤：
+  1. 打开「模型管理」（侧边菜单「应用管理」之后），进入「模型提供方」tab。
+  2. 编辑一个 provider 的 `config`（如 `temperature`），保存。
+  3. 尝试在 `config` 中提交密钥字段（如 `apiKey`）。
+  4. 点击「连通性测试」按钮。
+  5. 切换到「应用绑定」tab，编辑一条绑定的主 provider 与 fallback 多选并保存。
+  6. 尝试提交 fallback 包含主 provider 或重复 fallback 的绑定。
+- 断言：
+  - 合法编辑成功并写 `admin_audit_logs`。
+  - 含密钥字段的 `config` 被拒绝（`INVALID_PARAM`）。
+  - 连通性测试经 `adminCore.smokeModelProvider` 返回稳定结果。
+  - fallback 含主 provider 或重复时返回 `INVALID_PARAM`；合法绑定保存成功并写审计。
+  - 覆盖 `listModelProviders`、`upsertModelProvider`、`smokeModelProvider`、`listModelBindings`、`upsertModelBinding` 五个 action。
+
 ## 5. 设计系统视觉一致性验收
 
-- 登录页、Dashboard、用户、应用、充值包、订单、使用记录、审计日志页面风格一致。
+- 登录页、Dashboard、用户、应用、充值包、订单、使用记录、模型管理、审计日志页面风格一致。
 - 所有页面使用 `PageHeader` 组件统一标题区。
 - 所有状态标签使用 `StatusTag` 组件，颜色映射统一。
 - 主题色为蓝青（`#2b6cb0`），非 Ant Design 默认蓝。

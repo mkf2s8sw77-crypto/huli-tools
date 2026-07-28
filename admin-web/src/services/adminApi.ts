@@ -80,6 +80,21 @@ export const adminApi = {
   upsertPackage: (params: Record<string, unknown>) =>
     callAdmin("upsertPackage", params),
 
+  listModelProviders: (params: { page?: number; pageSize?: number } = {}) =>
+    callAdmin<PaginatedData<Record<string, unknown>>>("listModelProviders", params),
+
+  upsertModelProvider: (params: Record<string, unknown>) =>
+    callAdmin("upsertModelProvider", params),
+
+  listModelBindings: (params: { page?: number; pageSize?: number } = {}) =>
+    callAdmin<PaginatedData<Record<string, unknown>>>("listModelBindings", params),
+
+  upsertModelBinding: (params: Record<string, unknown>) =>
+    callAdmin("upsertModelBinding", params),
+
+  smokeModelProvider: (params: { providerKey: string }) =>
+    callAdmin("smokeModelProvider", params),
+
   listAuditLogs: (params: { page?: number; pageSize?: number; adminUserId?: string; actionFilter?: string; startAt?: string; endAt?: string } = {}) =>
     callAdmin<PaginatedData<Record<string, unknown>>>("listAuditLogs", params),
 };

@@ -1,0 +1,9 @@
+{
+  "name": "app_paper_polish",
+  "version": "1.0.0",
+  "description": "应用云函数: paper_polish（护理论文英文润色）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

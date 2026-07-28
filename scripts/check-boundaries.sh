@@ -44,7 +44,7 @@ echo ""
 # ── 检查 1：客户端是否直接引用公共集合 ────────────────────
 echo "▶ 检查 1: 客户端(miniprogram/)是否直接引用公共敏感集合"
 
-SENSITIVE_COLLECTIONS="users|point_accounts|point_transactions|apps|app_usage_records|recharge_packages|payment_orders|admin_audit_logs|system_configs"
+SENSITIVE_COLLECTIONS="users|point_accounts|point_transactions|apps|app_usage_records|recharge_packages|payment_orders|admin_audit_logs|system_configs|model_providers|app_model_bindings"
 
 if [ -d "miniprogram" ]; then
   HITS=$(do_search "\.collection\(['\"]($SENSITIVE_COLLECTIONS)['\"]\)" "miniprogram/" | grep -v "node_modules" || true)
@@ -83,8 +83,8 @@ echo ""
 echo "▶ 检查 3: 应用云函数(app_*)是否越权引用公共核心集合"
 
 # app_* 应用云函数仅允许只读 app_usage_records 来校验当前 usageId。
-# 其他公共集合必须通过 core* 公共云函数访问。
-APP_FORBIDDEN_PUBLIC_COLLECTIONS="users|point_accounts|point_transactions|apps|recharge_packages|payment_orders|admin_audit_logs|system_configs"
+# 其他公共集合必须通过 core* 公共云函数访问；模型注册表只能经 coreModel 读写。
+APP_FORBIDDEN_PUBLIC_COLLECTIONS="users|point_accounts|point_transactions|apps|recharge_packages|payment_orders|admin_audit_logs|system_configs|model_providers|app_model_bindings"
 
 # allowlist: 公共云函数(coreApp, corePoints, corePayment, coreUser, adminCore)
 # 和 demo 函数(demoSum) 属于公共底座体系，允许操作公共集合。

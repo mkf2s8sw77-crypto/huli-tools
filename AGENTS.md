@@ -1,6 +1,6 @@
 # AGENTS.md: huli-tools 工程规则
 
-> 长期约束与架构规则。后续 coding Agent 维护本项目前应先阅读本文件。
+> 长期约束与架构规则。后续 coding Agent 维护本项目前应先阅读本文件；模块级架构、关键函数与数据契约的细节索引见 `docs/CODE_WIKI.md`。
 
 ## 1. 语言与沟通
 
@@ -12,7 +12,7 @@
 - `admin-web/` Web 管理端允许使用 Vite + React + TypeScript + Ant Design，但不适用于小程序端。
 - 后端运行时仅部署在微信云开发（云函数 + 云数据库），不得新增独立业务后端；业务确需调用外部 API 时，必须经云函数服务端调用并遵守状态机、鉴权和错误分类规则，客户端不得直连。
 - 云函数代码风格保持 CommonJS，两空格缩进。
-- 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。
+- 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。定时触发器不在该文件声明：`app_maic_worker`（每分钟）与 `app_maic_reconcile`（每 5 分钟）的 timer 在云开发控制台维护，重新部署不会自动重建；Worker 首次部署应先不建 timer，模型 smoke 通过后再启用（见 `docs/dev_setup.md`）。
 
 ## 3. 设计系统（v4.1 清透活力 · Bento 工具墙）
 
@@ -31,7 +31,8 @@
 - **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
 - **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
 - **金额与积分**：金额统一用整数"分"，积分统一用整数，时间统一用服务端 `Date`。
-- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，以及 `coreApp` 的 `finishUsage`、`failUsage` 仅供其他云函数内部调用，必须校验 `_internalToken`。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。
+- **模型密钥收口**：大模型密钥（如 `MINIMAX_API_KEY`）只允许配置在 `coreModel` 环境变量；`model_providers` 文档只存 `secretEnv` 变量名，禁止写入密钥本体；应用云函数环境变量不得配置任何模型密钥。
 - **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
 
 ## 5. Collection 与数据契约
@@ -69,6 +70,7 @@
 - 积分账户余额和积分流水必须在 `corePoints` 内同一事务完成，禁止先改余额再另行写流水。
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
 - AI 生图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
+- 文本大模型调用统一经 `coreModel.generateText`：fallback 链只在绑定 `fallbackProviderKeys` 中显式配置，仅对 transient 错误（`MODEL_RATE_LIMITED` / `MODEL_TRANSIENT_ERROR`）切换；未配置 fallback 时单 provider 失败直接返回，不得自行多路重试。
 - AI 生图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
 - MAIC 定价固定为 0 积分；任务以 `usageId` 贯穿 `queued → processing → importing → succeeded`、课程导入和 usage 结算。`app_maic_worker` 每分钟最多认领一项并用 `app_maic_runtime` 保证全局并发 1；`app_maic_reconcile` 只做遗留迁移、租约恢复、45 分钟超时和失败结算，不调用模型。
 - 用户媒体上传必须先由云函数签发受控 `cloudPath`，客户端只上传到该路径；业务云函数校验 `fileID/cloudPath` 归属后换取短期临时 URL 调上游，源素材默认私有短期保留并设置 `expiresAt`。
@@ -81,8 +83,9 @@
 - `ADMIN_WEB_UIDS` — Web 管理端 CloudBase Auth uid 白名单
 - `PAYMENT_PROVIDER` — `mock` / `virtual` / `wechat`（预留）
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
-- `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
-- `MAIC_AI_MODE=direct_minimax`、`MAIC_AI_MODEL=MiniMax-M2.7`、`MINIMAX_BASE_URL=https://api.minimaxi.com/v1`、`MINIMAX_API_KEY` — 仅配置于 `app_maic_worker`；密钥禁止下发客户端或写入仓库
+- `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
+- `MINIMAX_API_KEY` — 仅配置于 `coreModel`；密钥禁止下发客户端、写入仓库或存入集合文档
+- `MAIC_AI_MODEL`、`MINIMAX_BASE_URL`、`CLOUDBASE_AI_MODEL` — 仅配置于 `coreModel`，作为 `seedDefaults` 种子默认值；运行时模型与绑定关系以 `model_providers` / `app_model_bindings` 文档为准（管理端「模型管理」维护）
 - `MAIC_DAILY_LIMIT` — 仅配置于 `app_maic`，默认且最大为 3，可降低不可提高
 
 小程序虚拟支付（线上售卖积分）额外需要：
@@ -101,8 +104,10 @@
 - 新应用 `appKey` 使用小写 snake_case；页面放 `miniprogram/pages/apps/<appKey>/`；云函数命名 `app_<appKey>`；私有集合 `app_<appKey>_*`。
 - 新应用竖切模板见 `templates/app_vertical_slice/`，已预配置设计系统。
 - 应用不得绕过 `coreApp.createUsage` / `finishUsage` / `failUsage` 直接操作积分；应用云函数仅允许只读当前 `app_usage_records` 做执行校验，不得直接写公共集合。
+- 应用不得直连任何大模型服务；所有模型调用经 `coreModel.generateText`（`appKey` + `capability`），绑定关系（`app_model_bindings`）与 provider（`model_providers`）由管理端配置，prompt 组装留在应用侧。新应用接入模型时在管理端新增绑定即可，无需改公共代码。
 - `maic` 是平台垂直应用：小程序课程只存 CloudBase，不与 MAIC Web 账号/课程同步；客户端不得直连 MAIC/MiniMax，不得使用 WebView 或执行服务端内容。
-- MAIC 不再有独立 Web、SQLite、PM2、HMAC 或本机 Worker；模型仅由 CloudBase `app_maic_worker` 服务端调用，新课程首版固定空 `assets`，既有课程资产继续兼容播放和删除。
+- MAIC CloudBase 原生化与原生舞台 V2 的权威实施规格在 `specs/maic-cloudbase-native/` 与 `specs/maic-native-stage-v2/`（requirements/design/tasks），改动 MAIC 链路前先对照规格。
+- MAIC 不再有独立 Web、SQLite、PM2、HMAC 或本机 Worker；模型由 `app_maic_worker` 经 `coreModel` 网关服务端调用，新课程首版固定空 `assets`，既有课程资产继续兼容播放和删除。
 - MAIC 原生播放器负责翻页和互动门控：旧协议中的 `navigate` 必须忽略；quiz、interaction、PBL 完成前不得进入下一幕。舞台布局和门控规则集中在 `player-view-model.js`，不要退回通用纵向白卡。
 - OpenMAIC 只读跟踪只评估生成质量、协议、JSON 修复、模型适配和安全修复；Web、编辑器、SQLite、图片/语音/视频与导出更新直接忽略，禁止自动合并上游。上游差异探测用 `bash scripts/check-maic-upstream.sh`（对比基线 SHA 并输出 compare 链接，不自动合并）。
 - 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。

@@ -50,6 +50,7 @@
 | 定妆照 ai_draw | `linear-gradient(150deg,#7C5CFC,#B458E8 55%,#E05FA8)` | 紫粉，主打大格 |
 | 卧底 nursing_undercover | `linear-gradient(150deg,#4F46E5,#6366F1 60%,#8B7CF6)` | 靛蓝 |
 | MAIC maic | `linear-gradient(150deg,#0DA593,#14B8A6 60%,#3ED0BC)` | 青绿 |
+| 论文润色 paper_polish | `linear-gradient(150deg,#2563EB,#3B82F6 60%,#6BA3F5)` | 亮蓝 |
 | 默认/示例 | 白底 + `#D9D2EC` 虚线边框 | 占位/更多工具 |
 
 磁贴内图形符号为半透明白色（opacity 0.22）右下角放大装饰图形；价格胶囊为白底（92% 透明）+ 主题色文字，免费款青色文字。

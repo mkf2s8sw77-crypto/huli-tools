@@ -16,6 +16,8 @@
 | `payment_orders` | 支付订单 | 是 |
 | `admin_audit_logs` | 管理员操作审计 | 是 |
 | `system_configs` | 系统配置（开关、白名单等） | 是 |
+| `model_providers` | 大模型提供方注册表（coreModel 网关） | 是（模型网关启用时） |
+| `app_model_bindings` | 应用 ↔ 模型绑定与 fallback 链 | 是（模型网关启用时） |
 | `app_ai_draw_tasks` | 护士职业定妆照任务与 usage/job 绑定 | 是（护士定妆照应用启用时） |
 | `app_nursing_undercover_sessions` | 谁是卧底（护理版）对局数据 | 是（谁是卧底应用启用时） |
 | `app_maic_tasks` | MAIC usage、队列状态、租约与结算协调 | 是（MAIC 应用启用时） |
@@ -337,7 +339,87 @@
 ]
 ```
 
-## 10. app_ai_draw_tasks
+## 10. model_providers
+
+大模型提供方注册表（coreModel 网关）。**密钥不进本集合**：`config.secretEnv` 只存环境变量名，密钥本体仅配置在 `coreModel` 云函数环境变量中。
+
+### 字段
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `_id` | string | 自动生成 |
+| `providerKey` | string | 唯一键，小写 snake_case，如 `minimax_default` |
+| `displayName` | string | 展示名 |
+| `type` | string | `text_chat`；预留 `image_gen` / `audio_tts` |
+| `driver` | string | `minimax` / `cloudbase_ai`；预留 `gpt_image_web` |
+| `config` | object | `{ baseUrl?, model?, secretEnv?, temperature?, maxTokens?, timeoutMs? }`；禁止包含密钥字段（adminCore 写入时校验） |
+| `enabled` | bool | 停用时 coreModel 跳过该 provider |
+| `createdAt` / `updatedAt` | Date | 服务端时间 |
+
+### 权限建议
+
+- 客户端：无权限。
+- 云函数：`coreModel` 只读（60s 内存缓存），`adminCore` 读写并写审计。
+
+### seed 数据（由 `coreModel.seedDefaults` 幂等写入）
+
+```json
+[
+  {
+    "providerKey": "minimax_default",
+    "displayName": "MiniMax（默认）",
+    "type": "text_chat",
+    "driver": "minimax",
+    "config": { "baseUrl": "https://api.minimaxi.com/v1", "model": "MiniMax-M2.7", "secretEnv": "MINIMAX_API_KEY", "temperature": 0.35, "maxTokens": 12000, "timeoutMs": 240000 },
+    "enabled": true
+  },
+  {
+    "providerKey": "cloudbase_ai_default",
+    "displayName": "CloudBase AI（默认）",
+    "type": "text_chat",
+    "driver": "cloudbase_ai",
+    "config": { "model": "<CLOUDBASE_AI_MODEL 环境变量值，未配置则不创建该 provider>" },
+    "enabled": true
+  }
+]
+```
+
+## 11. app_model_bindings
+
+应用 ↔ 模型绑定。`_id` 固定为 `${appKey}__${capability}`，一个能力一条绑定。
+
+### 字段
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `_id` | string | `${appKey}__${capability}`，如 `maic__course_generate` |
+| `appKey` | string | 应用键 |
+| `capability` | string | 能力键，如 `course_generate` / `npc_speech` / `npc_vote` / `debrief` |
+| `providerKey` | string | 主模型提供方 |
+| `fallbackProviderKeys` | string[] | 备用链；主 provider 限流/超时/5xx（transient）时按序切换，默认 `[]` |
+| `paramOverrides` | object | 绑定级参数覆盖，仅 `model` / `temperature` / `maxTokens` / `timeoutMs` 可覆盖，默认 `{}` |
+| `enabled` | bool | 停用时 coreModel 返回 `MODEL_BINDING_DISABLED` |
+| `createdAt` / `updatedAt` | Date | 服务端时间 |
+
+### 权限建议
+
+- 客户端：无权限。
+- 云函数：`coreModel` 只读，`adminCore` 读写并写审计。
+
+### seed 数据（由 `coreModel.seedDefaults` 幂等写入）
+
+```json
+[
+  { "_id": "maic__course_generate", "appKey": "maic", "capability": "course_generate", "providerKey": "minimax_default", "fallbackProviderKeys": [], "paramOverrides": {}, "enabled": true },
+  { "_id": "nursing_undercover__npc_speech", "appKey": "nursing_undercover", "capability": "npc_speech", "providerKey": "cloudbase_ai_default", "fallbackProviderKeys": [], "paramOverrides": {}, "enabled": true },
+  { "_id": "nursing_undercover__npc_vote", "appKey": "nursing_undercover", "capability": "npc_vote", "providerKey": "cloudbase_ai_default", "fallbackProviderKeys": [], "paramOverrides": {}, "enabled": true },
+  { "_id": "nursing_undercover__debrief", "appKey": "nursing_undercover", "capability": "debrief", "providerKey": "cloudbase_ai_default", "fallbackProviderKeys": [], "paramOverrides": {}, "enabled": true }
+]
+```
+
+（`nursing_undercover__*` 三条仅在 `CLOUDBASE_AI_MODEL` 已配置、cloudbase_ai_default provider 创建成功时写入。）
+
+## 12. app_ai_draw_tasks
 
 护士职业定妆照应用私有集合，用于把外部图片生成任务 `jobId` 绑定到当前用户的 `usageId`，防止跨应用 usage 复用、跨任务查询和重复结算；源素材只保存私有 Cloud Storage `fileID/cloudPath`，对外生成时由云函数换取短期临时 URL。
 
@@ -371,7 +453,7 @@
 - 客户端：无直接读写权限。
 - 云函数：仅 `app_ai_draw` 和管理员维护工具读写。
 
-## 11. app_nursing_undercover_sessions
+## 13. app_nursing_undercover_sessions
 
 谁是卧底（护理版）应用私有集合，保存每局对局状态、发言、投票和复盘数据。
 
@@ -410,7 +492,7 @@
 - 客户端：无直接读写权限。
 - 云函数：仅 `app_nursing_undercover` 读写。
 
-## 12. MAIC 私有集合
+## 14. MAIC 私有集合
 
 七个集合均设置为「仅管理端可读写」，客户端只能通过 `app_maic` action 访问。
 
@@ -426,6 +508,40 @@
 
 `usageId` 是端到端幂等键。新任务状态固定为 `queued → processing → importing → succeeded`，终态为 `failed`、`cancelled`、`timed_out`；`submit_pending` 只用于迁移旧任务。只有课程和场景全部导入完成后才能 `finishUsage`；失败、取消或超过 45 分钟必须 `failUsage`。
 
+## 15. app_paper_polish_tasks
+
+护理论文英文润色应用私有集合，保存每次润色任务的输入元数据、状态和结果；`_id` 与 `usageId` 一致，作为端到端幂等键。润色为异步任务模式：`submit` 建任务后由内部 `runTask` 后台执行模型调用，`query` 做轮询与 10 分钟 read-time 超时兜底。定价 0 积分，不涉及积分冻结。原始草稿（`inputText`）与成稿（`resultText`）仅存于本集合，客户端不回传原文；任务文档默认 7 天过期（`expiresAt`）。
+
+### 字段
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `_id` | string | 与 `usageId` 一致 |
+| `userId` | string | 关联用户 |
+| `usageId` | string | 关联 `app_usage_records._id` |
+| `status` | string | `processing` / `succeeded` / `failed` / `timed_out` |
+| `inputText` | string | 用户提交的原始草稿（≤20000 字符） |
+| `inputChars` | number | 草稿字符数 |
+| `sections` | Array | 章节键数组（`abstract/intro/methods/results/discussion/conclusion/title`），空数组表示自动检测 |
+| `language` | string | `en` / `zh-to-en`，由服务端按中文字符占比自动检测 |
+| `resultText` | string | 润色成稿（成功后写入） |
+| `summary` | Array | 改动要点（中文，成功后写入） |
+| `degraded` | boolean | 模型输出未按 JSON 契约解析时为 `true`（成稿为原始输出） |
+| `model` | string | 实际调用的模型名 |
+| `providerKey` | string | 实际命中的模型提供方 |
+| `usage` | Object | 模型 token 用量（可选） |
+| `errorCode` | string | 错误码（可选）：`POLISH_EMPTY_INPUT` / `POLISH_INPUT_TOO_LONG` / `POLISH_SERVICE_UNAVAILABLE` / `POLISH_RATE_LIMITED` / `POLISH_FAILED` / `POLISH_OUTPUT_INVALID` / `POLISH_TIMED_OUT` |
+| `errorMessage` | string | 错误信息（可选） |
+| `expiresAt` | Date | 任务文档保留到期时间，默认 7 天 |
+| `createdAt` | Date | 创建时间 |
+| `updatedAt` | Date | 更新时间 |
+| `finishedAt` | Date | 结束时间 |
+
+### 权限建议
+
+- 客户端：无直接读写权限。
+- 云函数：仅 `app_paper_polish` 读写。
+
 ## 手工创建步骤
 
 若当前环境无法通过脚本自动创建集合，请按以下步骤操作：
@@ -436,5 +552,5 @@
 4. 为每个集合设置权限：
    - `apps`、`recharge_packages`：可设置「所有用户可读，仅创建者可写」或「所有用户可读，仅管理端可写」。
    - 其余集合（含全部 `app_maic_*`）：建议设置为「仅管理端可读写」，所有客户端写操作必须走云函数。
-5. 创建完成后，部署公共函数及 `app_ai_draw`、`app_nursing_undercover`、`app_maic_worker`、`app_maic`、`app_maic_reconcile`；Worker 首次先不启用 timer，模型 smoke 成功后再创建每分钟触发器。
-6. 调用 `adminCore.initSchema` 写入 seed 数据。
+5. 创建完成后，部署公共函数（含 `coreModel`）及 `app_ai_draw`、`app_nursing_undercover`、`app_paper_polish`、`app_maic_worker`、`app_maic`、`app_maic_reconcile`；Worker 首次先不启用 timer，模型 smoke 成功后再创建每分钟触发器。
+6. 调用 `adminCore.initSchema` 写入 seed 数据；再调用 `coreModel.seedDefaults`（内部 action，需 `_internalToken`）写入默认 provider 与应用绑定，最后在管理端「模型管理」做连通性测试。

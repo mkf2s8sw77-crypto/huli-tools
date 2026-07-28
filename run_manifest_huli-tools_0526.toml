@@ -21,8 +21,8 @@ commands = [
 [gate.deploy]
 description = "云函数部署后人工/半自动验收步骤"
 steps = [
-  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 app_ai_draw、app_nursing_undercover、app_maic_worker、app_maic、app_maic_reconcile）",
-  "2. 创建数据库集合（见 docs/cloud_collections.md，含 7 个 app_maic_* 私有集合）",
+  "1. 在微信开发者工具或 CloudBase CLI 中部署所有 cloudfunctions（含 coreModel、app_ai_draw、app_nursing_undercover、app_maic_worker、app_maic、app_maic_reconcile）",
+  "2. 创建数据库集合（见 docs/cloud_collections.md，含 7 个 app_maic_* 私有集合与 model_providers、app_model_bindings）",
   "3. 配置云函数环境变量（见 docs/dev_setup.md）",
   "4. 调用 adminCore.initSchema 写入 seed 数据",
 ]
@@ -107,6 +107,26 @@ actions = [
   "验证 usageId 幂等、M2.7、协议纠错与兜底、四类场景、忽略旧 navigate、互动门控和失败结算",
 ]
 
+[phase.11]
+description = "大模型网关 coreModel 与模型注册表/绑定集合"
+actions = [
+  "新增 coreModel 云函数（generateText/smokeProvider/seedDefaults 内部 action，drivers/minimax.js 与 drivers/cloudbaseAi.js）",
+  "创建 model_providers、app_model_bindings 公共集合（客户端无权限，密钥仅存 secretEnv 环境变量名）",
+  "adminCore 新增 listModelProviders/upsertModelProvider/listModelBindings/upsertModelBinding/smokeModelProvider",
+  "app_maic_worker、app_nursing_undercover 模型调用改经 coreModel.generateText",
+  "新增 tests/core-model-router.test.js 单测，check-boundaries.sh 敏感集合与禁止引用列表加入 model_providers/app_model_bindings",
+]
+
+[phase.12]
+description = "护理论文英文润色应用（paper_polish，包装 nature-polishing 技能）"
+actions = [
+  "新增 app_paper_polish 云函数（submit/runTask/query/latest，异步任务模式，coreModel capability=polish，0 积分）",
+  "prompts/ 蒸馏 nature-polishing 技能（Apache-2.0，commit 1562ab71）为 core/language/sections 模块并新增护理领域附录",
+  "创建 app_paper_polish_tasks 私有集合（客户端无权限），cloudbaserc.json 与 adminCore 集合清单同步登记",
+  "新增 pages/apps/paper_polish 执行页（粘贴文本、章节多选、3s 轮询、成稿复制），首页磁贴新增 tile--paper-polish 亮蓝主题",
+  "新增 tests/paper-polish-core.test.js 单测（语言检测、章节归一化、prompt 组装、输出解析）",
+]
+
 [env.required]
 description = "云函数环境变量（开发阶段最小集）"
 vars = [
@@ -114,12 +134,12 @@ vars = [
   { name = "PAYMENT_PROVIDER", example = "mock", note = "mock / virtual / wechat（预留）" },
   { name = "MOCK_PAYMENT_ENABLED", example = "true", note = "开发测试用，生产必须 false" },
   { name = "INTERNAL_API_SECRET", example = "随机字符串", note = "云函数间调用凭据，必须显式配置且所有公共云函数保持一致" },
-  { name = "CLOUDBASE_AI_MODEL", example = "按 DescribeAIModels 启用结果填写", note = "app_nursing_undercover AI NPC 使用；未配置时走模板 fallback" },
+  { name = "CLOUDBASE_AI_MODEL", example = "按 DescribeAIModels 启用结果填写", note = "仅 coreModel 使用，作 seedDefaults 种子来源；绑定缺失时应用走模板 fallback" },
   { name = "CLOUDBASE_AI_ENV_ID", example = "cloudbase-3gphz7fk0fe1b760", note = "可选，CloudBase AI SDK 初始化环境" },
   { name = "MAIC_AI_MODE", example = "direct_minimax", note = "当前环境固定使用 Worker 服务端直连" },
-  { name = "MAIC_AI_MODEL", example = "MiniMax-M2.7", note = "仅 app_maic_worker 使用" },
-  { name = "MINIMAX_BASE_URL", example = "https://api.minimaxi.com/v1", note = "仅 app_maic_worker 使用" },
-  { name = "MINIMAX_API_KEY", example = "仅云函数环境变量", note = "仅 app_maic_worker 使用，禁止写入仓库和日志" },
+  { name = "MAIC_AI_MODEL", example = "MiniMax-M2.7", note = "仅 coreModel 使用，作 seedDefaults 种子来源" },
+  { name = "MINIMAX_BASE_URL", example = "https://api.minimaxi.com/v1", note = "仅 coreModel 使用" },
+  { name = "MINIMAX_API_KEY", example = "仅云函数环境变量", note = "仅 coreModel 使用，禁止写入仓库和日志" },
   { name = "MAIC_DAILY_LIMIT", example = "3", note = "仅 app_maic 使用，最大为3" },
 ]
 

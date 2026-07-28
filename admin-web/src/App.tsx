@@ -9,6 +9,7 @@ import {
   OrderedListOutlined,
   FileTextOutlined,
   AuditOutlined,
+  ApiOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -23,6 +24,7 @@ import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import UserDetailPage from "./pages/UserDetailPage";
 import AppsPage from "./pages/AppsPage";
+import ModelsPage from "./pages/ModelsPage";
 import PackagesPage from "./pages/PackagesPage";
 import OrdersPage from "./pages/OrdersPage";
 import UsageRecordsPage from "./pages/UsageRecordsPage";
@@ -39,6 +41,7 @@ const menuItems = [
   { key: "/dashboard", icon: <DashboardOutlined />, label: "概览" },
   { key: "/users", icon: <UserOutlined />, label: "用户管理" },
   { key: "/apps", icon: <AppstoreOutlined />, label: "应用管理" },
+  { key: "/models", icon: <ApiOutlined />, label: "模型管理" },
   { key: "/packages", icon: <GiftOutlined />, label: "充值包管理" },
   { key: "/orders", icon: <OrderedListOutlined />, label: "订单查询" },
   { key: "/usage-records", icon: <FileTextOutlined />, label: "使用记录" },
@@ -304,6 +307,7 @@ function App() {
             <Route path="/users" element={<UsersPage />} />
             <Route path="/users/:userId" element={<UserDetailPage />} />
             <Route path="/apps" element={<AppsPage />} />
+            <Route path="/models" element={<ModelsPage />} />
             <Route path="/packages" element={<PackagesPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/usage-records" element={<UsageRecordsPage />} />

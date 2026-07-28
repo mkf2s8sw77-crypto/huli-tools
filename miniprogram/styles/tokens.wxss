@@ -112,9 +112,11 @@ page {
   --gradient-tile-photo: linear-gradient(150deg, #7C5CFC 0%, #B458E8 55%, #E05FA8 100%);
   --gradient-tile-game: linear-gradient(150deg, #4F46E5 0%, #6366F1 60%, #8B7CF6 100%);
   --gradient-tile-maic: linear-gradient(150deg, #0DA593 0%, #14B8A6 60%, #3ED0BC 100%);
+  --gradient-tile-polish: linear-gradient(150deg, #2563EB 0%, #3B82F6 60%, #6BA3F5 100%);
   --shadow-tile-photo: 0 28rpx 68rpx rgba(124, 92, 252, 0.35);
   --shadow-tile-game: 0 20rpx 52rpx rgba(79, 70, 229, 0.30);
   --shadow-tile-maic: 0 20rpx 52rpx rgba(13, 165, 147, 0.30);
+  --shadow-tile-polish: 0 20rpx 52rpx rgba(37, 99, 235, 0.30);
 
   /* ── 微动效时长(可复用) ── */
   --t-fast: 120ms;

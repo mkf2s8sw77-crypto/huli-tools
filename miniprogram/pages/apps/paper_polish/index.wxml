@@ -1,0 +1,95 @@
+<ui-page title="护理论文英文润色" subtitle="粘贴论文草稿，生成 Nature 风格英文成稿">
+  <!-- 应用头部 -->
+  <view class="app-exec-header card card--soft">
+    <view class="app-exec-header__row">
+      <view class="icon-tile icon-tile--app icon-tile--blue icon-tile--toolbox">
+        <view class="icon-tile__glyph"></view>
+      </view>
+      <view class="app-exec-header__info">
+        <text class="app-exec-header__name">护理论文英文润色</text>
+        <text class="app-exec-header__cost">免费 · 支持中文草稿译写与英文润色</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 输入区 -->
+  <ui-form-field label="论文草稿（中文或英文，≤20000 字符）">
+    <textarea
+      class="polish-input"
+      placeholder="粘贴摘要、引言、方法、结果或讨论等草稿内容…"
+      value="{{text}}"
+      maxlength="{{maxInputChars}}"
+      auto-height
+      bindinput="onInput"
+      disabled="{{submitting || polling}}"
+    />
+    <view class="polish-input__meta">
+      <text class="polish-input__count {{inputChars > maxInputChars * 0.9 ? 'polish-input__count--warn' : ''}}">{{inputChars}} / {{maxInputChars}}</text>
+    </view>
+  </ui-form-field>
+
+  <!-- 章节选择 -->
+  <view class="polish-sections">
+    <view class="polish-sections__header">
+      <text class="polish-sections__label">章节类型</text>
+      <text class="polish-sections__hint">{{autoDetect ? "未选择时将自动检测" : ""}}</text>
+    </view>
+    <view class="polish-sections__chips">
+      <view
+        wx:for="{{sectionOptions}}"
+        wx:key="key"
+        class="polish-chip {{item.selected ? 'polish-chip--active' : ''}}"
+        data-key="{{item.key}}"
+        bind:tap="onToggleSection"
+      >
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主操作区 -->
+  <ui-action-button
+    text="{{polling ? '润色中…' : '开始润色'}}"
+    disabled="{{submitting || polling || !inputChars}}"
+    loading="{{submitting || polling}}"
+    bind:tap="onSubmit"
+    extra-class="app-exec-btn"
+  />
+
+  <!-- 进度提示 -->
+  <view wx:if="{{taskStatusText}}" class="card card--soft polish-progress">
+    <text class="polish-progress__text">{{taskStatusText}}</text>
+  </view>
+
+  <!-- 结果区 -->
+  <view wx:if="{{resultText}}" class="card card--elevated polish-result">
+    <view class="polish-result__header">
+      <text class="polish-result__title">润色成稿</text>
+      <text class="polish-result__meta">{{languageLabel}}{{model ? " · " + model : ""}}</text>
+    </view>
+    <text class="polish-result__text" selectable>{{resultText}}</text>
+    <view wx:if="{{degraded}}" class="polish-result__notice">
+      <text>成稿为模型原始输出，未解析出改动摘要。</text>
+    </view>
+    <view wx:if="{{summary.length}}" class="polish-result__summary">
+      <text class="polish-result__summary-title">改动要点</text>
+      <view wx:for="{{summary}}" wx:key="index" class="polish-result__summary-item">
+        <text>· {{item}}</text>
+      </view>
+    </view>
+    <view class="polish-result__actions">
+      <ui-action-button text="一键复制成稿" bind:tap="onCopyResult" extra-class="polish-result__copy" />
+      <view class="polish-result__again" bind:tap="onReset">
+        <text>再润色一段</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错误 -->
+  <view wx:if="{{errorMsg}}" class="app-exec-error">
+    <text>{{errorMsg}}</text>
+    <view class="app-exec-error__retry" bind:tap="onReset">
+      <text>重新填写</text>
+    </view>
+  </view>
+</ui-page>

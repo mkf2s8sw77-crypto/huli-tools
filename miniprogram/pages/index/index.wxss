@@ -110,6 +110,10 @@
   background: var(--gradient-tile-maic);
   box-shadow: var(--shadow-tile-maic);
 }
+.tile--paper-polish {
+  background: var(--gradient-tile-polish);
+  box-shadow: var(--shadow-tile-polish);
+}
 
 /* 浅色砖(未映射应用默认) */
 .tile--plain {
