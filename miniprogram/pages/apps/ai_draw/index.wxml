@@ -32,26 +32,41 @@
   </ui-form-field>
 
   <ui-form-field label="参考图">
-    <view class="reference-grid">
-      <view
-        wx:for="{{referenceAssets}}"
-        wx:key="fileID"
-        class="reference-item"
-      >
-        <image class="reference-item__image" mode="aspectFill" src="{{item.tempFilePath}}" />
-        <button class="reference-item__remove" size="mini" data-index="{{index}}" bindtap="removeReference">×</button>
+    <button
+      wx:if="{{referenceAssets.length === 0}}"
+      class="reference-add-empty"
+      loading="{{uploadingReference}}"
+      disabled="{{uploadingReference || loading || polling || hasActiveTask}}"
+      bindtap="chooseReferences"
+    >
+      <view class="reference-add-empty__icon"></view>
+      <view class="reference-add-empty__texts">
+        <text class="reference-add-empty__title">添加参考图</text>
+        <text class="reference-add-empty__desc">制服 / 背景 / 医院 Logo / 护士帽，最多 8 张</text>
       </view>
-      <button
-        wx:if="{{referenceAssets.length < 8}}"
-        class="reference-add"
-        loading="{{uploadingReference}}"
-        disabled="{{uploadingReference || loading || polling || hasActiveTask}}"
-        bindtap="chooseReferences"
-      >
-        +
-      </button>
-    </view>
-    <text class="field-hint">可上传制服、背景、医院 Logo、护士帽等参考图，最多 8 张</text>
+    </button>
+    <block wx:else>
+      <view class="reference-grid">
+        <view
+          wx:for="{{referenceAssets}}"
+          wx:key="fileID"
+          class="reference-item"
+        >
+          <image class="reference-item__image" mode="aspectFill" src="{{item.tempFilePath}}" />
+          <button class="reference-item__remove" size="mini" data-index="{{index}}" bindtap="removeReference">×</button>
+        </view>
+        <button
+          wx:if="{{referenceAssets.length < 8}}"
+          class="reference-add"
+          loading="{{uploadingReference}}"
+          disabled="{{uploadingReference || loading || polling || hasActiveTask}}"
+          bindtap="chooseReferences"
+        >
+          <view class="reference-add__badge"></view>
+        </button>
+      </view>
+      <text class="field-hint">可上传制服、背景、医院 Logo、护士帽等参考图，最多 8 张</text>
+    </block>
   </ui-form-field>
 
   <ui-form-field label="构图">

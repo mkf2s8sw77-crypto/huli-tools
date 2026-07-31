@@ -7,7 +7,7 @@
         <text class="maic-brand__caption">智慧课堂</text>
       </view>
     </view>
-    <text class="maic-free-badge">免费生成</text>
+    <text class="maic-free-badge">限时免费生成</text>
   </view>
 
   <view class="maic-workbench fade-in fade-in-1">

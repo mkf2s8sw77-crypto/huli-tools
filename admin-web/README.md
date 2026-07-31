@@ -4,7 +4,7 @@
 
 ## 设计系统
 
-管理端通过 `src/theme.ts` 统一 Ant Design 柔彩多巴胺主题 Token（晴空蓝主色 `#5E95C8`、圆角 8px、柔蓝灰侧栏 `#3B4A6B`），由 `ConfigProvider` 在 `main.tsx` 中注入。
+管理端通过 `src/theme.ts` 统一 Ant Design 主题 Token（v4.1 清透活力：品牌紫主色 `#7C5CFC`、深紫灰侧栏 `#3D3656`，含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 在 `main.tsx` 中注入。
 
 通用组件放在 `src/components/`：
 

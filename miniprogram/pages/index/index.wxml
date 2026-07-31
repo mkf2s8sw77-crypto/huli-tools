@@ -1,8 +1,24 @@
 <ui-page variant="dashboard">
   <view wx:if="{{loading}}">
-    <ui-card>
-      <view class="skeleton" style="height: 96rpx; border-radius: 16rpx;"></view>
-    </ui-card>
+    <!-- 骨架首屏:与最终布局同形,避免白屏 -->
+    <view class="topbar">
+      <view class="brand">
+        <view class="skeleton" style="width: 64rpx; height: 64rpx; border-radius: 20rpx;"></view>
+        <view class="skeleton" style="width: 180rpx; height: 34rpx; border-radius: 10rpx;"></view>
+      </view>
+      <view class="skeleton" style="width: 120rpx; height: 62rpx; border-radius: 999rpx;"></view>
+    </view>
+    <view class="slogan">
+      <view class="skeleton" style="width: 68%; height: 52rpx; border-radius: 14rpx;"></view>
+      <view class="skeleton" style="width: 42%; height: 28rpx; border-radius: 10rpx; margin-top: 14rpx;"></view>
+    </view>
+    <view class="bento">
+      <view class="skeleton tile-skeleton tile-skeleton--tall"></view>
+      <view class="skeleton tile-skeleton"></view>
+      <view class="skeleton tile-skeleton"></view>
+      <view class="skeleton tile-skeleton"></view>
+      <view class="skeleton tile-skeleton tile-skeleton--more"></view>
+    </view>
   </view>
 
   <view wx:elif="{{error}}">

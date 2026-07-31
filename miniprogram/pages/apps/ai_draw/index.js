@@ -50,7 +50,7 @@ function getAssetPayload(asset) {
 Page({
   data: {
     appInfo: null,
-    costLabel: "免费使用",
+    costLabel: "限时免费使用",
     loading: false,
     uploadingSubject: false,
     uploadingReference: false,
@@ -103,7 +103,7 @@ Page({
       const data = await api.getAppDetail("ai_draw");
       this.setData({
         appInfo: data.app || null,
-        costLabel: "免费使用",
+        costLabel: "限时免费使用",
       });
     } catch (err) {
       console.error("获取应用详情失败:", err);

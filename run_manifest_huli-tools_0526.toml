@@ -98,7 +98,7 @@ actions = [
   "admin-web theme.ts token 对齐（主色活力紫、侧栏深紫灰）",
 ]
 
-[phase.10]
+[phase.11]
 description = "MAIC 智慧课堂原生小程序应用"
 actions = [
   "新增 app_maic 队列 API、app_maic_worker 单并发生成器与 app_maic_reconcile 收口链路",
@@ -107,7 +107,7 @@ actions = [
   "验证 usageId 幂等、M2.7、协议纠错与兜底、四类场景、忽略旧 navigate、互动门控和失败结算",
 ]
 
-[phase.11]
+[phase.12]
 description = "大模型网关 coreModel 与模型注册表/绑定集合"
 actions = [
   "新增 coreModel 云函数（generateText/smokeProvider/seedDefaults 内部 action，drivers/minimax.js 与 drivers/cloudbaseAi.js）",
@@ -117,7 +117,7 @@ actions = [
   "新增 tests/core-model-router.test.js 单测，check-boundaries.sh 敏感集合与禁止引用列表加入 model_providers/app_model_bindings",
 ]
 
-[phase.12]
+[phase.13]
 description = "护理论文英文润色应用（paper_polish，包装 nature-polishing 技能）"
 actions = [
   "新增 app_paper_polish 云函数（submit/runTask/query/latest，异步任务模式，coreModel capability=polish，0 积分）",

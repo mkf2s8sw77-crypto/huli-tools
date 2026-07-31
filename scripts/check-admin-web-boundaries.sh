@@ -8,6 +8,7 @@ set -euo pipefail
 #   1. admin-web/src 中不得出现业务集合直连
 #   2. admin-web/src 中不得出现敏感密钥/凭据标识
 #   3. admin-web/src 中不得直接调用 corePoints 内部 action
+#   4. admin-web/src 中不得存在 .database() 直接调用
 #
 # 本脚本不依赖 node_modules，仅扫描源码文本。
 # ──────────────────────────────────────────────────────────────

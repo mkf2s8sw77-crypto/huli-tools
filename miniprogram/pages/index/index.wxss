@@ -74,10 +74,11 @@
 .bento {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-auto-rows: 300rpx;
+  grid-auto-rows: 150rpx;
   gap: 28rpx;
 }
 .tile {
+  grid-row: span 2;
   border-radius: 44rpx;
   padding: 36rpx;
   position: relative;
@@ -91,10 +92,23 @@
   transform: scale(0.97);
 }
 .tile--tall {
-  grid-row: span 2;
+  grid-row: span 3;
 }
 .tile__spacer {
   flex: 1;
+}
+
+/* 骨架砖(首屏 loading) */
+.tile-skeleton {
+  grid-row: span 2;
+  border-radius: 44rpx;
+}
+.tile-skeleton--tall {
+  grid-row: span 3;
+}
+.tile-skeleton--more {
+  grid-column: span 2;
+  grid-row: span 2;
 }
 
 /* 主题砖 */
@@ -274,7 +288,7 @@
 /* ── 更多工具占位砖(虚线) ── */
 .tile--more {
   grid-column: span 2;
-  grid-row: span 1;
+  grid-row: span 2;
   background: var(--color-bg-card);
   border: 3rpx dashed #D9D2EC;
   box-shadow: none;

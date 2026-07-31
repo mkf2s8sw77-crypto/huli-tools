@@ -1,5 +1,7 @@
 const api = require("../../services/api");
 
+const HOME_CACHE_KEY = "home_cache_v1";
+
 const TILE_CLASS_MAP = {
   ai_draw: "tile--photo",
   nursing_undercover: "tile--game",
@@ -25,7 +27,7 @@ function decorateApp(app) {
     tileClass: TILE_CLASS_MAP[app.appKey] || "tile--plain",
     tag,
     tagHot: tag === "HOT",
-    priceText: costPoints > 0 ? `${costPoints} 积分/次` : "免费",
+    priceText: costPoints > 0 ? `${costPoints} 积分/次` : "限时免费",
     priceFree: costPoints <= 0,
   };
 }
@@ -41,6 +43,17 @@ Page({
   },
 
   onLoad() {
+    const cached = wx.getStorageSync(HOME_CACHE_KEY);
+    if (cached && Array.isArray(cached.apps) && cached.apps.length > 0) {
+      // 缓存命中：先用上次数据秒开，再后台静默刷新
+      this.setData({
+        apps: cached.apps.map(decorateApp),
+        userSummary: cached.userSummary || { points: { availablePoints: 0 } },
+        loading: false,
+      });
+      this.loadHomeData({ silent: true });
+      return;
+    }
     this.loadHomeData();
   },
 
@@ -51,8 +64,11 @@ Page({
     }
   },
 
-  async loadHomeData() {
-    this.setData({ loading: true, error: null });
+  async loadHomeData(options = {}) {
+    const silent = Boolean(options.silent);
+    if (!silent) {
+      this.setData({ loading: true, error: null });
+    }
 
     try {
       const [userSummary, appsData] = await Promise.all([
@@ -60,13 +76,20 @@ Page({
         api.listApps(),
       ]);
 
+      const apps = appsData.apps || [];
+      const summary = userSummary || { points: { availablePoints: 0 } };
       this.setData({
-        apps: (appsData.apps || []).map(decorateApp),
-        userSummary: userSummary || { points: { availablePoints: 0 } },
+        apps: apps.map(decorateApp),
+        userSummary: summary,
         loading: false,
       });
+      wx.setStorageSync(HOME_CACHE_KEY, { apps, userSummary: summary });
     } catch (err) {
       console.error("首页数据加载失败:", err);
+      if (silent) {
+        // 静默刷新失败时保留已渲染的缓存界面
+        return;
+      }
       this.setData({
         error: err.message || "加载失败，请稍后重试",
         loading: false,

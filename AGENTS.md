@@ -12,15 +12,15 @@
 - `admin-web/` Web 管理端允许使用 Vite + React + TypeScript + Ant Design，但不适用于小程序端。
 - 后端运行时仅部署在微信云开发（云函数 + 云数据库），不得新增独立业务后端；业务确需调用外部 API 时，必须经云函数服务端调用并遵守状态机、鉴权和错误分类规则，客户端不得直连。
 - 云函数代码风格保持 CommonJS，两空格缩进。
-- 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。定时触发器不在该文件声明：`app_maic_worker`（每分钟）与 `app_maic_reconcile`（每 5 分钟）的 timer 在云开发控制台维护，重新部署不会自动重建；Worker 首次部署应先不建 timer，模型 smoke 通过后再启用（见 `docs/dev_setup.md`）。
+- 项目根 `cloudbaserc.json` 锁定云开发环境 `envId` 与所有云函数的部署配置（运行时 / 超时 / 入口 / `installDependency`），是 `tcb fn deploy` 等命令的 source of truth；新增或重命名云函数必须同步更新该文件后再部署。定时触发器不在该文件声明，而是随函数目录内的 `config.json` 部署：`app_maic_worker/config.json`（每分钟）与 `app_maic_reconcile/config.json`（每 5 分钟）；Worker 首次部署应先移除 trigger，模型 smoke 通过后再加回启用（见 `docs/dev_setup.md`）。
 
 ## 3. 设计系统（v4.1 清透活力 · Bento 工具墙）
 
 - 详见 `docs/design_system.md`。视觉方向：冷白带紫调底色 + 沪里品牌紫 `#7C5CFC`，首页为 Bento 彩色磁贴工具墙。
 - **信息架构**：积分后置（首页顶栏积分胶囊，大卡与充值入口在「我的」账户中心）；首页无积分 hero、无快捷入口行；订单/流水/使用记录全部收纳在「我的」。tabbar 为「工具 / 我的」。
-- **色板**：背景 `#F6F5FA`、主色 `#7C5CFC`（深 `#6D3FE8`、亮阶 `#9F7BFA`、淡底 `#F0EDFA`）、强调珊瑚橙 `#FF7A59`（价格/推荐）、正文 `#18142A`。应用磁贴主题色：定妆照紫粉渐变、卧底靛蓝渐变、MAIC 青绿渐变。微信绿仅用于微信登录按钮。
+- **色板**：背景 `#F6F5FA`、主色 `#7C5CFC`（深 `#6D3FE8`、亮阶 `#9F7BFA`、淡底 `#F0EDFA`）、强调珊瑚橙 `#FF7A59`（价格/推荐）、正文 `#18142A`。应用磁贴主题色：定妆照紫粉渐变、卧底靛蓝渐变、MAIC 青绿渐变、paper_polish 亮蓝渐变（`--gradient-tile-polish`）。微信绿仅用于微信登录按钮。
 - **表面**：白卡片 + `#EEEAF7` 边框 + 轻阴影；磁贴用主题色渐变 + 同色 30% 透明投影。禁止回退土褐米黄（v3）或彩虹多巴胺（v2）体系；数字用 `font-weight:800` + `tabular-nums`，不用衬线字体。
-- **Logo**：两端使用 `https://media.huli.sh.cn/huli-tech-logo.png` 的本地化资产；展示时必须圆角裁切，不得使用方角原图。
+- **Logo**：两端均使用包内本地化资产（源图 `https://media.huli.sh.cn/huli-tech-logo.png`；小程序端在 `miniprogram/assets/images/`，管理端在 `admin-web/src/assets/`）；展示时必须圆角裁切，不得使用方角原图。
 - **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部悬浮胶囊导航在 `miniprogram/custom-tab-bar/`。
 - **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入；主色与小程序端一致（活力紫），侧栏深紫灰 `#3D3656`。通用组件在 `admin-web/src/components/`。
 - 新页面和新应用必须使用 v4.1 token 和公共组件，采用"应用执行页"模式。功能图标使用 CSS-only 图标（icon-tile 或等价实现），不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
@@ -31,7 +31,7 @@
 - **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
 - **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
 - **金额与积分**：金额统一用整数"分"，积分统一用整数，时间统一用服务端 `Date`。
-- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。应用侧内部入口同样适用：`app_paper_polish.runTask`、`app_ai_draw.cleanupExpiredAssets`、`app_maic_worker` 的非 Timer 入口（含 `modelSmoke`）、`app_maic_reconcile` 的全部入口。
 - **模型密钥收口**：大模型密钥（如 `MINIMAX_API_KEY`）只允许配置在 `coreModel` 环境变量；`model_providers` 文档只存 `secretEnv` 变量名，禁止写入密钥本体；应用云函数环境变量不得配置任何模型密钥。
 - **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
 
@@ -50,6 +50,7 @@
   // 失败时
   { ok: false, error: { code: "", message: "" }, requestId: "" }
   ```
+- 公共底座云函数为 `coreUser`、`coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`。例外：`demoSum` 是单 event 示例函数（无 `action` 分发，仅返回包络一致）；`getOpenId`、`sum` 为微信模板遗留函数，新代码不得仿照。
 - 管理操作必须写入 `admin_audit_logs`。
 
 ## 7. Web 管理端边界
@@ -60,7 +61,7 @@
 - Web 管理端通过 `@cloudbase/js-sdk` 调用 `adminCore` 云函数，不得绕过云函数直接读写集合。
 - Web 管理员来源：环境变量 `ADMIN_WEB_UIDS` + 首次扫码自动准入持久化于 `system_configs/admin_web_auto_admins`；两者合并校验。
 - `adminCore` 校验 Web 管理员时必须从服务端 CloudBase Auth 上下文读取 uid，不能信任前端传入 uid。
-- 微信扫码登录走 CloudBase Web Auth 的微信开放平台 OAuth（`genProviderRedirectUri` → `grantProviderToken` → `signInWithProvider`），AppSecret 仅存于 CloudBase 控制台，前端不保存。
+- 微信扫码登录走 CloudBase Web Auth 的微信开放平台 OAuth（`genProviderRedirectUri` → `grantProviderToken` → `signInWithProvider`），AppSecret 仅存于 CloudBase 控制台，前端不保存；扫码通道受 `VITE_WECHAT_LOGIN_ENABLED` 开关控制。管理端同时保留账号密码登录（用户名/邮箱 + 密码双通道）；无任何管理员时前端触发 `adminCore.bootstrapFirstWebAdmin` 完成首个 Web 管理员自举。
 - 提交前运行 `bash scripts/check-admin-web-boundaries.sh`。
 
 ## 8. 幂等与状态机
@@ -86,6 +87,7 @@
 - `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
 - `MINIMAX_API_KEY` — 仅配置于 `coreModel`；密钥禁止下发客户端、写入仓库或存入集合文档
 - `MAIC_AI_MODEL`、`MINIMAX_BASE_URL`、`CLOUDBASE_AI_MODEL` — 仅配置于 `coreModel`，作为 `seedDefaults` 种子默认值；运行时模型与绑定关系以 `model_providers` / `app_model_bindings` 文档为准（管理端「模型管理」维护）
+- `MAIC_AI_MODE` — 运行清单登记项，当前环境固定为 Worker 服务端直连（`direct_minimax`）
 - `MAIC_DAILY_LIMIT` — 仅配置于 `app_maic`，默认且最大为 3，可降低不可提高
 
 小程序虚拟支付（线上售卖积分）额外需要：
@@ -114,8 +116,8 @@
 
 ## 11. 测试与交付
 
-- 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。该流程使用 Node.js 20，避免 Node.js 25 与 `miniprogram-ci` 不兼容。
-- 每次提交前运行 `node --test tests/*.test.js`（MAIC 播放器与 worker 核心单测，node 内置 test runner）、`bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。注意 `node --test tests/` 目录形式会报 "Cannot find module"，必须用 `tests/*.test.js` 通配。
+- 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。脚本强制 Node.js ≤22（优先 node@20，高于 22 直接报错），以避免新版 Node 与 `miniprogram-ci` 不兼容。
+- 每次提交前运行 `node --test tests/*.test.js`（node 内置 test runner；现有 4 个测试文件：core-model-router、maic-player-view-model、maic-worker-core、paper-polish-core）、`bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。注意 `node --test tests/` 目录形式会报 "Cannot find module"，必须用 `tests/*.test.js` 通配。
 - 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。

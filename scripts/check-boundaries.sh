@@ -9,6 +9,7 @@ set -euo pipefail
 #   2. 客户端是否直接调用内部 action
 #   3. 应用云函数(app_*)是否越权引用公共核心集合
 #   4. 新增私有集合名是否不符合 app_<appKey>_ 前缀
+#   5. 客户端(miniprogram/)是否存在 wx.cloud.database() 直接写操作
 #
 # 依赖：rg (ripgrep)，无则 fallback 到 grep
 # 限制：启发式文本匹配，非完整静态分析。
