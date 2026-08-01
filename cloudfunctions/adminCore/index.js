@@ -1144,9 +1144,9 @@ async function upsertModelProvider(event, context) {
   if (!validTypes.includes(type)) {
     return makeResponse(false, { code: "INVALID_PARAM", message: "type 必须是 text_chat / image_gen / audio_tts" }, requestId);
   }
-  const validDrivers = ["minimax", "cloudbase_ai", "gpt_image_web"];
+  const validDrivers = ["minimax", "cloudbase_ai", "gpt_image_web", "kimi_code"];
   if (!validDrivers.includes(driver)) {
-    return makeResponse(false, { code: "INVALID_PARAM", message: "driver 必须是 minimax / cloudbase_ai / gpt_image_web" }, requestId);
+    return makeResponse(false, { code: "INVALID_PARAM", message: "driver 必须是 minimax / cloudbase_ai / gpt_image_web / kimi_code" }, requestId);
   }
   const configError = validateProviderConfig(config);
   if (configError) {

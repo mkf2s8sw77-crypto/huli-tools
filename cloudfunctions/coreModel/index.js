@@ -8,10 +8,12 @@ const registry = require("./lib/registry");
 const router = require("./lib/router");
 const minimaxDriver = require("./drivers/minimax");
 const cloudbaseAiDriver = require("./drivers/cloudbaseAi");
+const kimiCodeDriver = require("./drivers/kimiCode");
 
 const DRIVERS = {
   minimax: minimaxDriver,
   cloudbase_ai: cloudbaseAiDriver,
+  kimi_code: kimiCodeDriver,
 };
 
 const MAX_MESSAGES = 32;
@@ -127,6 +129,120 @@ async function generateText(event, context) {
   }, requestId);
 }
 
+// ─── generateImage / generateSpeech（多模态输出） ─────────
+
+// 与 generateText 相同的绑定解析 + fallback 链（仅 transient 错误切换 provider），
+// 但要求 provider.type 与所需能力匹配，且 driver 实现了对应能力函数。
+async function invokeProviderChain({ appKey, capability, requiredType, invoke, requestId }) {
+  const binding = await registry.getBinding(appKey, capability);
+  if (!binding) {
+    return makeResponse(false, { code: "MODEL_BINDING_MISSING", message: `未配置模型绑定：${appKey}__${capability}` }, requestId);
+  }
+  if (binding.enabled === false) {
+    return makeResponse(false, { code: "MODEL_BINDING_DISABLED", message: `模型绑定已停用：${appKey}__${capability}` }, requestId);
+  }
+
+  const chain = router.buildProviderChain(binding);
+  if (chain.length === 0) {
+    return makeResponse(false, { code: "MODEL_BINDING_INVALID", message: "绑定未配置可用 provider" }, requestId);
+  }
+
+  const attempts = [];
+  for (const providerKey of chain) {
+    const provider = await registry.getProvider(providerKey);
+    if (!provider) {
+      attempts.push({ providerKey, code: "MODEL_PROVIDER_MISSING", message: "provider 不存在" });
+      continue;
+    }
+    if (provider.enabled === false) {
+      attempts.push({ providerKey, code: "MODEL_PROVIDER_DISABLED", message: "provider 已停用" });
+      continue;
+    }
+    if (provider.type !== requiredType) {
+      attempts.push({ providerKey, code: "MODEL_PROVIDER_TYPE_MISMATCH", message: `provider 类型不匹配：期望 ${requiredType}，实际 ${provider.type}` });
+      return makeResponse(false, { code: "MODEL_PROVIDER_TYPE_MISMATCH", message: `provider ${providerKey} 类型为 ${provider.type}，不支持 ${requiredType} 能力`, providerKey, attempts }, requestId);
+    }
+    const driver = DRIVERS[provider.driver];
+    if (!driver) {
+      attempts.push({ providerKey, code: "MODEL_DRIVER_UNKNOWN", message: `未知驱动：${provider.driver}` });
+      continue;
+    }
+    const config = router.mergeParams(provider.config, binding.paramOverrides, null);
+    try {
+      const output = await invoke(driver, config);
+      attempts.push({ providerKey, ok: true });
+      return makeResponse(true, { ...output, providerKey, attempts }, requestId);
+    } catch (err) {
+      const code = err.code || "MODEL_REQUEST_FAILED";
+      attempts.push({ providerKey, code, message: err.message });
+      if (!router.isTransientError(err)) {
+        return makeResponse(false, { code, message: err.message, transient: false, providerKey, attempts }, requestId);
+      }
+    }
+  }
+
+  const last = attempts[attempts.length - 1] || {};
+  return makeResponse(false, {
+    code: last.code || "MODEL_ALL_PROVIDERS_FAILED",
+    message: `全部模型提供方调用失败（${chain.length} 个）：${last.message || "无可用 provider"}`,
+    transient: router.TRANSIENT_CODES.includes(last.code),
+    allProvidersFailed: true,
+    attempts,
+  }, requestId);
+}
+
+async function generateImage(event, context) {
+  const requestId = context.requestId || Date.now().toString();
+  const authError = verifyInternal(event);
+  if (authError) return makeResponse(false, authError, requestId);
+
+  const appKey = String(event.appKey || "").trim();
+  const capability = String(event.capability || "").trim();
+  const prompt = String(event.prompt || "").trim();
+  if (!appKey || !capability || !prompt) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "appKey、capability 与 prompt 不能为空" }, requestId);
+  }
+
+  return invokeProviderChain({
+    appKey,
+    capability,
+    requiredType: "image_gen",
+    requestId,
+    invoke: (driver, config) => {
+      if (typeof driver.generateImage !== "function") {
+        throw Object.assign(new Error(`驱动 ${config.driver || "unknown"} 不支持图像生成`), { code: "MODEL_CAPABILITY_UNSUPPORTED" });
+      }
+      return driver.generateImage({ config, prompt, overrides: event.overrides });
+    },
+  });
+}
+
+async function generateSpeech(event, context) {
+  const requestId = context.requestId || Date.now().toString();
+  const authError = verifyInternal(event);
+  if (authError) return makeResponse(false, authError, requestId);
+
+  const appKey = String(event.appKey || "").trim();
+  const capability = String(event.capability || "").trim();
+  const text = String(event.text || "").trim();
+  if (!appKey || !capability || !text) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "appKey、capability 与 text 不能为空" }, requestId);
+  }
+
+  return invokeProviderChain({
+    appKey,
+    capability,
+    requiredType: "audio_tts",
+    requestId,
+    invoke: (driver, config) => {
+      if (typeof driver.generateSpeech !== "function") {
+        throw Object.assign(new Error("当前驱动不支持语音合成"), { code: "MODEL_CAPABILITY_UNSUPPORTED" });
+      }
+      return driver.generateSpeech({ config, text, overrides: event.overrides });
+    },
+  });
+}
+
 // ─── smokeProvider ──────────────────────────────────────
 
 async function smokeProvider(event, context) {
@@ -148,18 +264,39 @@ async function smokeProvider(event, context) {
   }
 
   const startedAt = Date.now();
+  const type = provider.type || "text_chat";
   try {
-    const output = await driver.chatComplete({
-      config: router.mergeParams(provider.config, null, null),
-      messages: [
-        { role: "system", content: "只返回 JSON：{\"ok\":true}。" },
-        { role: "user", content: "连通性测试" },
-      ],
-    });
+    let result;
+    if (type === "image_gen") {
+      if (typeof driver.generateImage !== "function") {
+        throw Object.assign(new Error("当前驱动不支持图像生成"), { code: "MODEL_CAPABILITY_UNSUPPORTED" });
+      }
+      const output = await driver.generateImage({
+        config: router.mergeParams(provider.config, null, null),
+        prompt: "一朵紫色的小花，极简插画风格",
+      });
+      result = { providerKey, model: output.model, imageCount: (output.urls || []).length, sampleUrl: (output.urls || [])[0] || "" };
+    } else if (type === "audio_tts") {
+      if (typeof driver.generateSpeech !== "function") {
+        throw Object.assign(new Error("当前驱动不支持语音合成"), { code: "MODEL_CAPABILITY_UNSUPPORTED" });
+      }
+      const output = await driver.generateSpeech({
+        config: router.mergeParams(provider.config, null, null),
+        text: "连通性测试。",
+      });
+      result = { providerKey, model: output.model, format: output.format, audioBytes: output.audioBase64 ? Math.floor(output.audioBase64.length * 3 / 4) : 0 };
+    } else {
+      const output = await driver.chatComplete({
+        config: router.mergeParams(provider.config, null, null),
+        messages: [
+          { role: "system", content: "只返回 JSON：{\"ok\":true}。" },
+          { role: "user", content: "连通性测试" },
+        ],
+      });
+      result = { providerKey, model: output.model, text: output.text.slice(0, 200) };
+    }
     return makeResponse(true, {
-      providerKey,
-      model: output.model,
-      text: output.text.slice(0, 200),
+      ...result,
       latencyMs: Date.now() - startedAt,
     }, requestId);
   } catch (err) {
@@ -247,6 +384,80 @@ async function seedDefaults(event, context) {
     );
   }
 
+  // MiniMax 图像 / 语音条目：与 minimax_default 共用 MINIMAX_API_KEY，
+  // 不自动建绑定，由管理端按需绑定到应用 capability。
+  const minimaxBaseUrl = String(process.env.MINIMAX_BASE_URL || "https://api.minimaxi.com/v1");
+  await seedIfMissing(
+    db.collection(registry.PROVIDERS),
+    { providerKey: "minimax_image_default" },
+    {
+      providerKey: "minimax_image_default",
+      displayName: "MiniMax 图像（image-01）",
+      type: "image_gen",
+      driver: "minimax",
+      config: {
+        baseUrl: minimaxBaseUrl,
+        model: "image-01",
+        secretEnv: "MINIMAX_API_KEY",
+        aspectRatio: "1:1",
+        timeoutMs: 240000,
+      },
+      enabled: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    createdProviders,
+    skipped
+  );
+  await seedIfMissing(
+    db.collection(registry.PROVIDERS),
+    { providerKey: "minimax_speech_default" },
+    {
+      providerKey: "minimax_speech_default",
+      displayName: "MiniMax 语音（speech-02-hd）",
+      type: "audio_tts",
+      driver: "minimax",
+      config: {
+        baseUrl: minimaxBaseUrl,
+        model: "speech-02-hd",
+        secretEnv: "MINIMAX_API_KEY",
+        voiceId: "male-qn-qingse",
+        timeoutMs: 240000,
+      },
+      enabled: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    createdProviders,
+    skipped
+  );
+
+  // Kimi Code token plan（Anthropic 兼容）：仅在配置了 KIMI_API_KEY 时 seed。
+  if (String(process.env.KIMI_API_KEY || "").trim()) {
+    await seedIfMissing(
+      db.collection(registry.PROVIDERS),
+      { providerKey: "kimi_k3_256k" },
+      {
+        providerKey: "kimi_k3_256k",
+        displayName: "Kimi Code（k3-256k）",
+        type: "text_chat",
+        driver: "kimi_code",
+        config: {
+          baseUrl: "https://api.kimi.com/coding",
+          model: "k3-256k",
+          secretEnv: "KIMI_API_KEY",
+          maxTokens: 8000,
+          timeoutMs: 240000,
+        },
+        enabled: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      createdProviders,
+      skipped
+    );
+  }
+
   const bindings = [{ appKey: "maic", capability: "course_generate", providerKey: minimaxKey }];
   if (cloudbaseKey) {
     for (const capability of ["npc_speech", "npc_vote", "debrief"]) {
@@ -296,6 +507,8 @@ exports.main = async (event, context) => {
 
   const actionMap = {
     generateText,
+    generateImage,
+    generateSpeech,
     smokeProvider,
     seedDefaults,
   };

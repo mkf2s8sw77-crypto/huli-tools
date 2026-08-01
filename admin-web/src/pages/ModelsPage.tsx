@@ -14,7 +14,10 @@ const driverOptions = [
   { value: "minimax", label: "MiniMax（OpenAI 兼容）" },
   { value: "cloudbase_ai", label: "CloudBase AI" },
   { value: "gpt_image_web", label: "GPT Image Web（预留）" },
+  { value: "kimi_code", label: "Kimi Code（Anthropic 兼容）" },
 ];
+
+const HOSTED_DRIVERS = ["minimax", "kimi_code"];
 
 function getConfig(record: Record<string, unknown>): Record<string, unknown> {
   return (record.config as Record<string, unknown>) || {};
@@ -79,11 +82,11 @@ function ProvidersTab() {
     setSaving(true);
     try {
       const config: Record<string, unknown> = {};
-      if (values.driver === "minimax") {
+      if (HOSTED_DRIVERS.includes(values.driver as string)) {
         config.baseUrl = values.baseUrl;
         config.model = values.model;
         config.secretEnv = values.secretEnv;
-        if (values.temperature !== undefined) config.temperature = values.temperature;
+        if (values.driver === "minimax" && values.temperature !== undefined) config.temperature = values.temperature;
         if (values.maxTokens !== undefined) config.maxTokens = values.maxTokens;
         if (values.timeoutMs !== undefined) config.timeoutMs = values.timeoutMs;
       } else if (values.driver === "cloudbase_ai") {
@@ -173,20 +176,22 @@ function ProvidersTab() {
           <Form.Item name="driver" label="驱动" rules={[{ required: true }]}>
             <Select options={driverOptions} />
           </Form.Item>
-          {driver === "minimax" && (
+          {HOSTED_DRIVERS.includes(driver as string) && (
             <>
               <Form.Item name="baseUrl" label="BaseURL" rules={[{ required: true }]}>
-                <Input placeholder="https://api.minimaxi.com/v1" />
+                <Input placeholder={driver === "kimi_code" ? "https://api.kimi.com/coding" : "https://api.minimaxi.com/v1"} />
               </Form.Item>
               <Form.Item name="model" label="模型 ID" rules={[{ required: true }]}>
-                <Input placeholder="如 MiniMax-M2.7" />
+                <Input placeholder={driver === "kimi_code" ? "如 k3-256k" : "如 MiniMax-M2.7"} />
               </Form.Item>
               <Form.Item name="secretEnv" label="密钥环境变量名（secretEnv，密钥本身配置在 coreModel 环境变量）" rules={[{ required: true }]}>
-                <Input placeholder="MINIMAX_API_KEY" />
+                <Input placeholder={driver === "kimi_code" ? "KIMI_API_KEY" : "MINIMAX_API_KEY"} />
               </Form.Item>
-              <Form.Item name="temperature" label="temperature">
-                <InputNumber min={0} max={2} step={0.05} style={{ width: "100%" }} />
-              </Form.Item>
+              {driver === "minimax" && (
+                <Form.Item name="temperature" label="temperature">
+                  <InputNumber min={0} max={2} step={0.05} style={{ width: "100%" }} />
+                </Form.Item>
+              )}
               <Form.Item name="maxTokens" label="maxTokens">
                 <InputNumber min={1} precision={0} style={{ width: "100%" }} />
               </Form.Item>

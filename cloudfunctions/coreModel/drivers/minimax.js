@@ -75,4 +75,123 @@ async function chatComplete({ config, messages }) {
   };
 }
 
-module.exports = { chatComplete };
+// MiniMax 图像生成（/image_generation），同一 minimax driver 下的 image_gen 能力。
+async function generateImage({ config, prompt, overrides }) {
+  const secretEnv = config.secretEnv || "MINIMAX_API_KEY";
+  const apiKey = String(process.env[secretEnv] || "").trim();
+  if (!apiKey) throw modelError("MODEL_CONFIG_MISSING", `模型密钥未配置（${secretEnv}）`);
+  const baseUrl = String(config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
+  const parsed = new URL(baseUrl);
+  if (parsed.protocol !== "https:") throw modelError("MODEL_CONFIG_INVALID", "MiniMax BaseURL 必须使用 HTTPS");
+  const model = String(config.model || "").trim();
+  if (!model) throw modelError("MODEL_CONFIG_MISSING", "provider 未配置 model");
+  if (!prompt) throw modelError("MODEL_CONFIG_INVALID", "图像生成缺少 prompt");
+
+  const timeoutMs = Number(config.timeoutMs || DEFAULT_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  const body = { model, prompt, response_format: "url" };
+  const aspectRatio = (overrides && overrides.aspectRatio) || config.aspectRatio;
+  if (aspectRatio) body.aspect_ratio = String(aspectRatio);
+  const count = Number((overrides && overrides.n) || config.n || 1);
+  if (count > 1) body.n = count;
+
+  let response;
+  try {
+    response = await fetch(`${baseUrl}/image_generation`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    const message = err && err.name === "AbortError" ? "MiniMax 图像请求超时" : "MiniMax 图像网络请求失败";
+    throw modelError("MODEL_TRANSIENT_ERROR", message, { transient: true, cause: err });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (err) {
+    throw classifyHttpError(response.status, "MiniMax 图像返回了无效响应");
+  }
+  if (!response.ok) {
+    const message = payload && (payload.error && (payload.error.message || payload.error.msg) || payload.base_resp && payload.base_resp.status_msg);
+    throw classifyHttpError(response.status, message);
+  }
+  if (payload.base_resp && payload.base_resp.status_code && payload.base_resp.status_code !== 0) {
+    throw modelError("MODEL_REQUEST_FAILED", payload.base_resp.status_msg || "MiniMax 图像生成失败", { transient: false });
+  }
+  const urls = payload && payload.data && Array.isArray(payload.data.image_urls) ? payload.data.image_urls.filter(Boolean) : [];
+  if (!urls.length) throw modelError("MODEL_INVALID_RESPONSE", "MiniMax 未返回图片 URL", { transient: false });
+  return { urls, model: payload.model || model, meta: payload.metadata || {} };
+}
+
+// MiniMax 语音合成（/t2a_v2），需要 GroupId（config.groupId 或 MINIMAX_GROUP_ID 环境变量）。
+async function generateSpeech({ config, text, overrides }) {
+  const secretEnv = config.secretEnv || "MINIMAX_API_KEY";
+  const apiKey = String(process.env[secretEnv] || "").trim();
+  if (!apiKey) throw modelError("MODEL_CONFIG_MISSING", `模型密钥未配置（${secretEnv}）`);
+  const groupId = String(config.groupId || process.env.MINIMAX_GROUP_ID || "").trim();
+  if (!groupId) throw modelError("MODEL_CONFIG_MISSING", "MiniMax 语音需要 GroupId（config.groupId 或 MINIMAX_GROUP_ID）");
+  const baseUrl = String(config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
+  const parsed = new URL(baseUrl);
+  if (parsed.protocol !== "https:") throw modelError("MODEL_CONFIG_INVALID", "MiniMax BaseURL 必须使用 HTTPS");
+  const model = String(config.model || "").trim();
+  if (!model) throw modelError("MODEL_CONFIG_MISSING", "provider 未配置 model");
+  if (!text) throw modelError("MODEL_CONFIG_INVALID", "语音合成缺少 text");
+
+  const timeoutMs = Number(config.timeoutMs || DEFAULT_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  const body = {
+    model,
+    text,
+    voice_setting: {
+      voice_id: String((overrides && overrides.voiceId) || config.voiceId || "male-qn-qingse"),
+    },
+    audio_setting: { format: "mp3" },
+  };
+
+  let response;
+  try {
+    response = await fetch(`${baseUrl}/t2a_v2?GroupId=${encodeURIComponent(groupId)}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    const message = err && err.name === "AbortError" ? "MiniMax 语音请求超时" : "MiniMax 语音网络请求失败";
+    throw modelError("MODEL_TRANSIENT_ERROR", message, { transient: true, cause: err });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (err) {
+    throw classifyHttpError(response.status, "MiniMax 语音返回了无效响应");
+  }
+  if (!response.ok) {
+    const message = payload && (payload.error && (payload.error.message || payload.error.msg) || payload.base_resp && payload.base_resp.status_msg);
+    throw classifyHttpError(response.status, message);
+  }
+  if (payload.base_resp && payload.base_resp.status_code && payload.base_resp.status_code !== 0) {
+    throw modelError("MODEL_REQUEST_FAILED", payload.base_resp.status_msg || "MiniMax 语音合成失败", { transient: false });
+  }
+  const audioHex = payload && payload.data && payload.data.audio;
+  if (!audioHex) throw modelError("MODEL_INVALID_RESPONSE", "MiniMax 未返回音频数据", { transient: false });
+  return {
+    audioBase64: Buffer.from(audioHex, "hex").toString("base64"),
+    format: "mp3",
+    model,
+  };
+}
+
+module.exports = { chatComplete, generateImage, generateSpeech };

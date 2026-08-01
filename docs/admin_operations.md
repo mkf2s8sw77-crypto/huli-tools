@@ -163,7 +163,7 @@ const res = await app.callFunction({ name: "adminCore", data: { action: "getAdmi
 ### 模型提供方（provider）维护
 
 - 通过 `listModelProviders` / `upsertModelProvider` 维护 `model_providers` 集合。
-- 字段：`providerKey`、`displayName`、`type`（当前 `text_chat`，预留 `image_gen`、`audio_tts`）、`driver`（当前 `minimax`、`cloudbase_ai`，预留 `gpt_image_web`）、`config`（`baseUrl` / `model` / `secretEnv` / `temperature` / `maxTokens` / `timeoutMs`）、`enabled`。
+- 字段：`providerKey`、`displayName`、`type`（`text_chat` / `image_gen` / `audio_tts`）、`driver`（`minimax`、`cloudbase_ai`、`kimi_code`，预留 `gpt_image_web`）、`config`（`baseUrl` / `model` / `secretEnv` / `temperature` / `maxTokens` / `timeoutMs`）、`enabled`。
 - 密钥不写入集合；`config.secretEnv` 只配置 `coreModel` 环境变量名（如 `MINIMAX_API_KEY`），真实密钥值配置在 `coreModel` 云函数环境变量中。`upsertModelProvider` 会拒绝含密钥字段的 `config`。
 
 ### 应用绑定维护

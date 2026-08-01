@@ -31,7 +31,7 @@
 - **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
 - **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
 - **金额与积分**：金额统一用整数"分"，积分统一用整数，时间统一用服务端 `Date`。
-- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。应用侧内部入口同样适用：`app_paper_polish.runTask`、`app_ai_draw.cleanupExpiredAssets`、`app_maic_worker` 的非 Timer 入口（含 `modelSmoke`）、`app_maic_reconcile` 的全部入口。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`generateImage`、`generateSpeech`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。应用侧内部入口同样适用：`app_paper_polish.runTask`、`app_ai_draw.cleanupExpiredAssets`、`app_maic_worker` 的非 Timer 入口（含 `modelSmoke`）、`app_maic_reconcile` 的全部入口。
 - **模型密钥收口**：大模型密钥（如 `MINIMAX_API_KEY`）只允许配置在 `coreModel` 环境变量；`model_providers` 文档只存 `secretEnv` 变量名，禁止写入密钥本体；应用云函数环境变量不得配置任何模型密钥。
 - **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
 
@@ -86,6 +86,8 @@
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
 - `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
 - `MINIMAX_API_KEY` — 仅配置于 `coreModel`；密钥禁止下发客户端、写入仓库或存入集合文档
+- `MINIMAX_GROUP_ID` — 仅配置于 `coreModel`；MiniMax 语音合成（t2a_v2）必需的 GroupId，缺失时 `generateSpeech` 报 `MODEL_CONFIG_MISSING`
+- `KIMI_API_KEY` — 仅配置于 `coreModel`；Kimi Code token plan 密钥（Anthropic 兼容端点），配置后 `seedDefaults` 会补种 `kimi_k3_256k` provider
 - `MAIC_AI_MODEL`、`MINIMAX_BASE_URL`、`CLOUDBASE_AI_MODEL` — 仅配置于 `coreModel`，作为 `seedDefaults` 种子默认值；运行时模型与绑定关系以 `model_providers` / `app_model_bindings` 文档为准（管理端「模型管理」维护）
 - `MAIC_AI_MODE` — 运行清单登记项，当前环境固定为 Worker 服务端直连（`direct_minimax`）
 - `MAIC_DAILY_LIMIT` — 仅配置于 `app_maic`，默认且最大为 3，可降低不可提高
@@ -106,7 +108,7 @@
 - 新应用 `appKey` 使用小写 snake_case；页面放 `miniprogram/pages/apps/<appKey>/`；云函数命名 `app_<appKey>`；私有集合 `app_<appKey>_*`。
 - 新应用竖切模板见 `templates/app_vertical_slice/`，已预配置设计系统。
 - 应用不得绕过 `coreApp.createUsage` / `finishUsage` / `failUsage` 直接操作积分；应用云函数仅允许只读当前 `app_usage_records` 做执行校验，不得直接写公共集合。
-- 应用不得直连任何大模型服务；所有模型调用经 `coreModel.generateText`（`appKey` + `capability`），绑定关系（`app_model_bindings`）与 provider（`model_providers`）由管理端配置，prompt 组装留在应用侧。新应用接入模型时在管理端新增绑定即可，无需改公共代码。
+- 应用不得直连任何大模型服务；所有模型调用经 `coreModel` 网关（文本 `generateText`、图像 `generateImage`、语音 `generateSpeech`，均为 `appKey` + `capability`），绑定关系（`app_model_bindings`）与 provider（`model_providers`）由管理端配置，prompt 组装留在应用侧。新应用接入模型时在管理端新增绑定即可，无需改公共代码。
 - `maic` 是平台垂直应用：小程序课程只存 CloudBase，不与 MAIC Web 账号/课程同步；客户端不得直连 MAIC/MiniMax，不得使用 WebView 或执行服务端内容。
 - MAIC CloudBase 原生化与原生舞台 V2 的权威实施规格在 `specs/maic-cloudbase-native/` 与 `specs/maic-native-stage-v2/`（requirements/design/tasks），改动 MAIC 链路前先对照规格。
 - MAIC 不再有独立 Web、SQLite、PM2、HMAC 或本机 Worker；模型由 `app_maic_worker` 经 `coreModel` 网关服务端调用，新课程首版固定空 `assets`，既有课程资产继续兼容播放和删除。
@@ -117,6 +119,7 @@
 ## 11. 测试与交付
 
 - 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。脚本强制 Node.js ≤22（优先 node@20，高于 22 直接报错），以避免新版 Node 与 `miniprogram-ci` 不兼容。
+- **版本号以 MP 后台线上版本为准**（如 1.4.x），不与 git tag（0.1.x）同步；上传前先确认线上当前版本再递增。上传若报 `errCode -10008 invalid ip`，需在 MP 开发设置维护上传 IP 白名单，本机建议加 IPv4 出口并以 `NODE_OPTIONS="--dns-result-order=ipv4first"` 强制 IPv4。
 - 每次提交前运行 `node --test tests/*.test.js`（node 内置 test runner；现有 4 个测试文件：core-model-router、maic-player-view-model、maic-worker-core、paper-polish-core）、`bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。注意 `node --test tests/` 目录形式会报 "Cannot find module"，必须用 `tests/*.test.js` 通配。
 - 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。

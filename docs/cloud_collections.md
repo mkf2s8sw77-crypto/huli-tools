@@ -350,8 +350,8 @@
 | `_id` | string | 自动生成 |
 | `providerKey` | string | 唯一键，小写 snake_case，如 `minimax_default` |
 | `displayName` | string | 展示名 |
-| `type` | string | `text_chat`；预留 `image_gen` / `audio_tts` |
-| `driver` | string | `minimax` / `cloudbase_ai`；预留 `gpt_image_web` |
+| `type` | string | `text_chat` / `image_gen` / `audio_tts` |
+| `driver` | string | `minimax` / `cloudbase_ai` / `kimi_code`；预留 `gpt_image_web` |
 | `config` | object | `{ baseUrl?, model?, secretEnv?, temperature?, maxTokens?, timeoutMs? }`；禁止包含密钥字段（adminCore 写入时校验） |
 | `enabled` | bool | 停用时 coreModel 跳过该 provider |
 | `createdAt` / `updatedAt` | Date | 服务端时间 |
