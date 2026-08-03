@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Input, InputNumber, Select, Switch, Tabs, Tag, message } from "antd";
+import { Table, Button, Modal, Form, Input, InputNumber, Select, Switch, Tabs, Tag, message, AutoComplete } from "antd";
 import { PlusOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { adminApi } from "../services/adminApi";
 import { PageHeader } from "../components";
@@ -232,6 +232,7 @@ function ProvidersTab() {
 function BindingsTab() {
   const [list, setList] = useState<Record<string, unknown>[]>([]);
   const [providers, setProviders] = useState<Record<string, unknown>[]>([]);
+  const [apps, setApps] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -243,13 +244,15 @@ function BindingsTab() {
   const load = useCallback(async (p: number) => {
     setLoading(true);
     try {
-      const [bindingRes, providerRes] = await Promise.all([
+      const [bindingRes, providerRes, appRes] = await Promise.all([
         adminApi.listModelBindings({ page: p, pageSize: 50 }),
         adminApi.listModelProviders({ page: 1, pageSize: 100 }),
+        adminApi.listApps({ page: 1, pageSize: 100 }),
       ]);
       setList(bindingRes.data.list);
       setTotal(bindingRes.data.total);
       setProviders(providerRes.data.list);
+      setApps(appRes.data.list);
     } catch (err: unknown) {
       message.error("加载失败: " + (err as Error).message);
     } finally {
@@ -262,6 +265,11 @@ function BindingsTab() {
   const providerOptions = providers.map((p) => ({
     value: String(p.providerKey),
     label: `${p.providerKey}（${p.displayName || p.driver}）`,
+  }));
+
+  const appOptions = apps.map((a) => ({
+    value: String(a.appKey),
+    label: `${a.name || a.appKey}（${a.appKey}）`,
   }));
 
   const openEdit = (record: Record<string, unknown> | null) => {
@@ -331,7 +339,15 @@ function BindingsTab() {
       >
         <Form form={form} onFinish={handleSave} layout="vertical">
           <Form.Item name="appKey" label="AppKey" rules={[{ required: true }]}>
-            <Input disabled={!!editing} placeholder="如 maic" />
+            <AutoComplete
+              options={appOptions}
+              disabled={!!editing}
+              placeholder="选择已上架应用，或直接输入新 appKey"
+              filterOption={(input, option) =>
+                String(option?.value || "").toLowerCase().includes(input.toLowerCase())
+                || String(option?.label || "").toLowerCase().includes(input.toLowerCase())
+              }
+            />
           </Form.Item>
           <Form.Item name="capability" label="能力（capability，小写 snake_case）" rules={[{ required: true }]}>
             <Input disabled={!!editing} placeholder="如 course_generate" />
