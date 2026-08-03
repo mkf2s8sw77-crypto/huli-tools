@@ -1,3 +1,4 @@
+import { theme as antdTheme } from "antd";
 import type { ThemeConfig } from "antd";
 
 export const adminThemeTokens = {
@@ -37,6 +38,24 @@ export const adminThemeTokens = {
   shadowLogin: "0 8px 40px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.03)",
 } as const;
 
+// 暗色模式下需要翻转的调色板（品牌色、侧边栏等不变）。
+// 与 index.css 中 @media (prefers-color-scheme: dark) 的 CSS 变量保持一致。
+export const adminThemeTokensDark = {
+  colorBrandSoftLight: "#153B38",
+  colorBgLayout: "#14111F",
+  colorBgContainer: "#1F1B2E",
+  colorBgElevated: "#2A2540",
+  colorSurface: "#262038",
+  colorBorder: "#332C4A",
+  colorBorderSecondary: "#2A2540",
+  colorText: "#EDEAFA",
+  colorTextSecondary: "#B3ACCC",
+  colorTextTertiary: "#7E7799",
+  colorStatSoftBorder: "#3A3358",
+  shadowCard: "0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.25)",
+  shadowElevated: "0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 6px rgba(0, 0, 0, 0.3)",
+} as const;
+
 export const adminThemeGradients = {
   primary: `linear-gradient(135deg, ${adminThemeTokens.colorPrimary} 0%, ${adminThemeTokens.colorPrimaryBright} 100%)`,
   brand: `linear-gradient(135deg, ${adminThemeTokens.colorPrimary} 0%, ${adminThemeTokens.colorBrandSoft} 100%)`,
@@ -44,55 +63,63 @@ export const adminThemeGradients = {
   loginBackground: "linear-gradient(135deg, #F0EDFA 0%, #F6F5FA 40%, #FBE9F4 100%)",
 } as const;
 
-const theme: ThemeConfig = {
-  token: {
-    colorPrimary: adminThemeTokens.colorPrimary,
-    borderRadius: adminThemeTokens.borderRadius,
-    colorSuccess: adminThemeTokens.colorSuccess,
-    colorWarning: adminThemeTokens.colorWarning,
-    colorError: adminThemeTokens.colorError,
-    colorBgLayout: adminThemeTokens.colorBgLayout,
-    colorBgContainer: adminThemeTokens.colorBgContainer,
-    colorBgElevated: adminThemeTokens.colorBgContainer,
-    colorBorder: adminThemeTokens.colorBorder,
-    colorBorderSecondary: adminThemeTokens.colorBorderSecondary,
-    colorText: adminThemeTokens.colorText,
-    colorTextSecondary: adminThemeTokens.colorTextSecondary,
-    colorTextTertiary: adminThemeTokens.colorTextTertiary,
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    fontSize: 14,
-    fontSizeHeading2: 24,
-    fontSizeHeading3: 20,
-    fontSizeHeading4: 16,
-    controlHeight: adminThemeTokens.controlHeight,
-    boxShadow: adminThemeTokens.shadowCard,
-    boxShadowSecondary: adminThemeTokens.shadowElevated,
-  },
-  components: {
-    Layout: {
-      siderBg: adminThemeTokens.colorSider,
-      headerBg: adminThemeTokens.colorBgContainer,
-      bodyBg: adminThemeTokens.colorBgLayout,
-      triggerBg: adminThemeTokens.colorSiderTrigger,
+export function getThemeConfig(isDark: boolean): ThemeConfig {
+  const palette = isDark
+    ? { ...adminThemeTokens, ...adminThemeTokensDark }
+    : adminThemeTokens;
+  return {
+    algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    token: {
+      colorPrimary: adminThemeTokens.colorPrimary,
+      borderRadius: adminThemeTokens.borderRadius,
+      colorSuccess: adminThemeTokens.colorSuccess,
+      colorWarning: adminThemeTokens.colorWarning,
+      colorError: adminThemeTokens.colorError,
+      colorBgLayout: palette.colorBgLayout,
+      colorBgContainer: palette.colorBgContainer,
+      colorBgElevated: isDark ? adminThemeTokensDark.colorBgElevated : palette.colorBgContainer,
+      colorBorder: palette.colorBorder,
+      colorBorderSecondary: palette.colorBorderSecondary,
+      colorText: palette.colorText,
+      colorTextSecondary: palette.colorTextSecondary,
+      colorTextTertiary: palette.colorTextTertiary,
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      fontSize: 14,
+      fontSizeHeading2: 24,
+      fontSizeHeading3: 20,
+      fontSizeHeading4: 16,
+      controlHeight: adminThemeTokens.controlHeight,
+      boxShadow: palette.shadowCard,
+      boxShadowSecondary: palette.shadowElevated,
     },
-    Menu: {
-      darkItemBg: adminThemeTokens.colorSider,
-      darkItemSelectedBg: "rgba(124, 92, 252, 0.28)",
-      darkItemHoverBg: "rgba(255, 255, 255, 0.08)",
-      darkItemColor: "rgba(255, 255, 255, 0.7)",
-      darkItemSelectedColor: adminThemeTokens.colorOnPrimary,
+    components: {
+      Layout: {
+        siderBg: adminThemeTokens.colorSider,
+        headerBg: palette.colorBgContainer,
+        bodyBg: palette.colorBgLayout,
+        triggerBg: adminThemeTokens.colorSiderTrigger,
+      },
+      Menu: {
+        darkItemBg: adminThemeTokens.colorSider,
+        darkItemSelectedBg: "rgba(124, 92, 252, 0.28)",
+        darkItemHoverBg: "rgba(255, 255, 255, 0.08)",
+        darkItemColor: "rgba(255, 255, 255, 0.7)",
+        darkItemSelectedColor: adminThemeTokens.colorOnPrimary,
+      },
+      Card: {
+        borderRadiusLG: adminThemeTokens.borderRadiusCard,
+      },
+      Table: {
+        borderRadiusLG: adminThemeTokens.borderRadius,
+        headerBg: palette.colorSurface,
+      },
+      Button: {
+        borderRadiusLG: adminThemeTokens.borderRadius,
+      },
     },
-    Card: {
-      borderRadiusLG: adminThemeTokens.borderRadiusCard,
-    },
-    Table: {
-      borderRadiusLG: adminThemeTokens.borderRadius,
-      headerBg: adminThemeTokens.colorSurface,
-    },
-    Button: {
-      borderRadiusLG: adminThemeTokens.borderRadius,
-    },
-  },
-};
+  };
+}
+
+const theme: ThemeConfig = getThemeConfig(false);
 
 export default theme;

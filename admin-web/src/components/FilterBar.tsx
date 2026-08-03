@@ -1,7 +1,6 @@
 import { Input, Button, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import type { ReactNode } from "react";
-import { adminThemeTokens } from "../theme";
 
 interface Props {
   keyword: string;
@@ -19,7 +18,7 @@ export default function FilterBar({ keyword, onChange, onSearch, placeholder, ex
       gap: 12,
       marginBottom: 20,
       padding: "12px 16px",
-      background: adminThemeTokens.colorSurface,
+      background: "var(--adm-surface)",
       borderRadius: 10,
       flexWrap: "wrap",
     }}>

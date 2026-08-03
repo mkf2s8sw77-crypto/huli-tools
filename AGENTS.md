@@ -86,7 +86,7 @@
 - `MOCK_PAYMENT_ENABLED` — `true` 仅开发测试
 - `INTERNAL_API_SECRET` — 云函数间调用凭据，必须显式配置为随机字符串，并在 `coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`、`demoSum`、所有 `app_*` 应用云函数中保持一致；未配置时内部写入接口应拒绝执行
 - `MINIMAX_API_KEY` — 仅配置于 `coreModel`；密钥禁止下发客户端、写入仓库或存入集合文档
-- `MINIMAX_GROUP_ID` — 仅配置于 `coreModel`；MiniMax 语音合成（t2a_v2）必需的 GroupId，缺失时 `generateSpeech` 报 `MODEL_CONFIG_MISSING`
+- `MINIMAX_GROUP_ID` — 仅配置于 `coreModel`，可选；MiniMax 语音合成（t2a_v2）新版接口仅 Bearer 鉴权，配置后作为 query 参数一并带上以兼容旧账户体系
 - `KIMI_API_KEY` — 仅配置于 `coreModel`；Kimi Code token plan 密钥（Anthropic 兼容端点），配置后 `seedDefaults` 会补种 `kimi_k3_256k` provider
 - `MAIC_AI_MODEL`、`MINIMAX_BASE_URL`、`CLOUDBASE_AI_MODEL` — 仅配置于 `coreModel`，作为 `seedDefaults` 种子默认值；运行时模型与绑定关系以 `model_providers` / `app_model_bindings` 文档为准（管理端「模型管理」维护）
 - `MAIC_AI_MODE` — 运行清单登记项，当前环境固定为 Worker 服务端直连（`direct_minimax`）

@@ -17,8 +17,8 @@ const variantStyles: Record<NonNullable<Props["variant"]>, CSSProperties> = {
     borderColor: "transparent",
   },
   soft: {
-    background: adminThemeTokens.colorBrandSoftLight,
-    borderColor: adminThemeTokens.colorStatSoftBorder,
+    background: "var(--adm-brand-soft-light)",
+    borderColor: "var(--adm-stat-soft-border)",
   },
 };
 
@@ -35,10 +35,10 @@ export default function StatCard({ title, value, prefix, subtitle, variant = "de
         title={<span style={isPrimary ? { color: "rgba(255,255,255,0.8)" } : undefined}>{title}</span>}
         value={value}
         prefix={prefix}
-        valueStyle={isPrimary ? { color: adminThemeTokens.colorOnPrimary } : { color: adminThemeTokens.colorText }}
+        valueStyle={isPrimary ? { color: adminThemeTokens.colorOnPrimary } : { color: "var(--adm-text)" }}
       />
       {subtitle && (
-        <div style={{ marginTop: 4, fontSize: 12, color: isPrimary ? "rgba(255,255,255,0.7)" : adminThemeTokens.colorTextTertiary }}>
+        <div style={{ marginTop: 4, fontSize: 12, color: isPrimary ? "rgba(255,255,255,0.7)" : "var(--adm-text-tertiary)" }}>
           {subtitle}
         </div>
       )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, Form, Input, Button, message, Typography, Divider } from "antd";
 import { LockOutlined, UserOutlined, WechatOutlined } from "@ant-design/icons";
 import { auth } from "../services/cloudbase";
-import { adminThemeGradients, adminThemeTokens } from "../theme";
+import { adminThemeTokens } from "../theme";
 import huliTechLogo from "../assets/huli-tech-logo.png";
 
 const WECHAT_LOGIN_ENABLED = import.meta.env.VITE_WECHAT_LOGIN_ENABLED === "true";
@@ -46,13 +46,13 @@ const loginStyles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    background: adminThemeGradients.loginBackground,
+    background: "var(--adm-login-bg)",
   } as React.CSSProperties,
   card: {
     width: 420,
     borderRadius: 16,
     boxShadow: adminThemeTokens.shadowLogin,
-    border: "1px solid " + adminThemeTokens.colorBorder,
+    border: "1px solid var(--adm-border)",
   } as React.CSSProperties,
   brandRow: {
     display: "flex",
@@ -139,7 +139,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
       <Card style={loginStyles.card}>
         <div style={loginStyles.brandRow}>
           <img src={huliTechLogo} alt="huli-tech" style={loginStyles.brandMark} />
-          <Typography.Title level={3} style={{ margin: 0, color: adminThemeTokens.colorText }}>
+          <Typography.Title level={3} style={{ margin: 0, color: "var(--adm-text)" }}>
             huli-tools
           </Typography.Title>
         </div>

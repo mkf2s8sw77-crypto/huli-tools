@@ -130,13 +130,13 @@ async function generateImage({ config, prompt, overrides }) {
   return { urls, model: payload.model || model, meta: payload.metadata || {} };
 }
 
-// MiniMax 语音合成（/t2a_v2），需要 GroupId（config.groupId 或 MINIMAX_GROUP_ID 环境变量）。
+// MiniMax 语音合成（/t2a_v2）。GroupId 为可选：新版接口仅 Bearer 鉴权即可，
+// 若配置了 config.groupId 或 MINIMAX_GROUP_ID 则一并带上（兼容旧账户体系）。
 async function generateSpeech({ config, text, overrides }) {
   const secretEnv = config.secretEnv || "MINIMAX_API_KEY";
   const apiKey = String(process.env[secretEnv] || "").trim();
   if (!apiKey) throw modelError("MODEL_CONFIG_MISSING", `模型密钥未配置（${secretEnv}）`);
   const groupId = String(config.groupId || process.env.MINIMAX_GROUP_ID || "").trim();
-  if (!groupId) throw modelError("MODEL_CONFIG_MISSING", "MiniMax 语音需要 GroupId（config.groupId 或 MINIMAX_GROUP_ID）");
   const baseUrl = String(config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
   const parsed = new URL(baseUrl);
   if (parsed.protocol !== "https:") throw modelError("MODEL_CONFIG_INVALID", "MiniMax BaseURL 必须使用 HTTPS");
@@ -157,9 +157,10 @@ async function generateSpeech({ config, text, overrides }) {
     audio_setting: { format: "mp3" },
   };
 
+  const url = `${baseUrl}/t2a_v2${groupId ? `?GroupId=${encodeURIComponent(groupId)}` : ""}`;
   let response;
   try {
-    response = await fetch(`${baseUrl}/t2a_v2?GroupId=${encodeURIComponent(groupId)}`, {
+    response = await fetch(url, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),

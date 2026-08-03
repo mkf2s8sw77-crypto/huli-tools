@@ -101,19 +101,19 @@ const brandStyles = {
   } as React.CSSProperties,
   header: {
     padding: "0 24px",
-    background: adminThemeTokens.colorBgContainer,
+    background: "var(--adm-bg-container)",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    borderBottom: "1px solid " + adminThemeTokens.colorBorder,
+    borderBottom: "1px solid var(--adm-border)",
     boxShadow: "0 1px 4px rgba(0, 0, 0, 0.03)",
   } as React.CSSProperties,
   content: {
     margin: 20,
     padding: 24,
-    background: adminThemeTokens.colorBgContainer,
+    background: "var(--adm-bg-container)",
     borderRadius: adminThemeTokens.borderRadiusCard,
-    boxShadow: adminThemeTokens.shadowCard,
+    boxShadow: "var(--adm-shadow-card)",
     overflow: "auto" as const,
   } as React.CSSProperties,
 };
@@ -240,7 +240,7 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: adminThemeTokens.colorBgLayout }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "var(--adm-bg-layout)" }}>
         <Spin size="large" />
       </div>
     );
