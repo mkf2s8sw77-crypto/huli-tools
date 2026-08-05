@@ -8,6 +8,9 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const CORE_MODEL_FUNCTION = "coreModel";
 const APP_KEY = "maic";
 const CAPABILITY = "course_generate";
+// wx-server-sdk / @cloudbase/node-sdk 的 callFunction 默认 HTTP 超时只有 15s，
+// 课程整课生成远超该值，必须显式放大（worker 函数自身超时 300s，留 60s 余量）。
+const CALL_TIMEOUT_MS = 240000;
 
 function getInternalToken() {
   return process.env.INTERNAL_API_SECRET || "";
@@ -23,6 +26,7 @@ async function requestModel(messages) {
     res = await cloud.callFunction({
       name: CORE_MODEL_FUNCTION,
       data: { action: "generateText", _internalToken: token, appKey: APP_KEY, capability: CAPABILITY, messages },
+      timeout: CALL_TIMEOUT_MS,
     });
   } catch (err) {
     throw Object.assign(new Error("coreModel 调用失败: " + err.message), { code: "MODEL_TRANSIENT_ERROR", transient: true, cause: err });

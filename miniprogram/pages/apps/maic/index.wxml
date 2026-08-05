@@ -37,7 +37,7 @@
         <textarea class="maic-composer__requirements" value="{{requirements}}" maxlength="3000" auto-height placeholder="补充要求（选填）：案例、难度、教学重点……" bindinput="onRequirementsInput" />
 
         <view class="maic-composer__footer">
-          <text class="maic-composer__meta">MiniMax M2.7 · 原生互动 · 云端续学</text>
+          <text class="maic-composer__meta">AI 编排 · 原生互动 · 云端续学</text>
           <ui-action-button extra-class="maic-submit" text="{{loading ? '正在提交…' : '进入智慧课堂'}}" loading="{{loading}}" disabled="{{loading || topic.length < 2 || (appInfo && appInfo.status !== 'active')}}" bind:tap="createCourse" />
         </view>
       </view>

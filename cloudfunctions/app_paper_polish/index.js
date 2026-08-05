@@ -333,6 +333,8 @@ async function runTask(event, context) {
         messages: built.messages,
         overrides: MODEL_OVERRIDES,
       },
+      // callFunction 传输层默认超时仅 15s（@cloudbase/node-sdk），必须与模型侧 timeoutMs 对齐
+      timeout: MODEL_OVERRIDES.timeoutMs,
     });
     const modelResult = modelRes.result;
 

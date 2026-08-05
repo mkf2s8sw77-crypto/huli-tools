@@ -10,6 +10,9 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const CORE_MODEL_FUNCTION = "coreModel";
 const APP_KEY = "nursing_undercover";
 const MAX_SPEECH_LENGTH = 120;
+// callFunction 传输层默认超时仅 15s（@cloudbase/node-sdk）；NPC 发言/投票为循环内串行调用，
+// 函数总超时 60s，单次调用放大到 25s 以兼顾慢响应与总预算
+const CALL_TIMEOUT_MS = 25000;
 
 // 配置类错误：说明绑定/provider 未就绪，本实例后续直接走模板，不再重复 RPC
 const CONFIG_ERROR_CODES = [
@@ -157,6 +160,7 @@ async function generateWithModel(systemPrompt, userPrompt, capability) {
         ],
         overrides: { temperature: 0.7, maxTokens: 500 },
       },
+      timeout: CALL_TIMEOUT_MS,
     });
     result = res.result || {};
   } catch (err) {

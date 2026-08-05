@@ -21,8 +21,8 @@
 - **色板**：背景 `#F6F5FA`、主色 `#7C5CFC`（深 `#6D3FE8`、亮阶 `#9F7BFA`、淡底 `#F0EDFA`）、强调珊瑚橙 `#FF7A59`（价格/推荐）、正文 `#18142A`。应用磁贴主题色：定妆照紫粉渐变、卧底靛蓝渐变、MAIC 青绿渐变、paper_polish 亮蓝渐变（`--gradient-tile-polish`）。微信绿仅用于微信登录按钮。
 - **表面**：白卡片 + `#EEEAF7` 边框 + 轻阴影；磁贴用主题色渐变 + 同色 30% 透明投影。禁止回退土褐米黄（v3）或彩虹多巴胺（v2）体系；数字用 `font-weight:800` + `tabular-nums`，不用衬线字体。
 - **Logo**：两端均使用包内本地化资产（源图 `https://media.huli.sh.cn/huli-tech-logo.png`；小程序端在 `miniprogram/assets/images/`，管理端在 `admin-web/src/assets/`）；展示时必须圆角裁切，不得使用方角原图。
-- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部悬浮胶囊导航在 `miniprogram/custom-tab-bar/`。
-- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入；主色与小程序端一致（活力紫），侧栏深紫灰 `#3D3656`。通用组件在 `admin-web/src/components/`。
+- **小程序端**：全局 Token 在 `miniprogram/styles/tokens.wxss`，通用样式在 `miniprogram/styles/common.wxss`，由 `app.wxss` 统一引入（`app.wxss` 引入 `common.wxss`，后者再引入 `tokens.wxss`）。公共 UI 组件在 `miniprogram/components/ui/`，已在 `app.json` 全局注册。底部悬浮胶囊导航在 `miniprogram/custom-tab-bar/`。首页采用骨架屏 + 本地缓存（`home_cache_v1`）秒开模式：缓存命中先渲染再静默刷新，改动首页结构时骨架屏必须与最终布局同形。
+- **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入；主色与小程序端一致（活力紫），侧栏深紫灰 `#3D3656`。通用组件在 `admin-web/src/components/`。管理端支持暗色主题（跟随系统 `prefers-color-scheme`，antd `darkAlgorithm`），暗色调色板在 `theme.ts` 的 `adminThemeTokensDark` 与 `index.css` 的暗色 CSS 变量双处定义，修改管理端配色必须两侧同步。
 - 新页面和新应用必须使用 v4.1 token 和公共组件，采用"应用执行页"模式。功能图标使用 CSS-only 图标（icon-tile 或等价实现），不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
 
@@ -62,6 +62,7 @@
 - Web 管理员来源：环境变量 `ADMIN_WEB_UIDS` + 首次扫码自动准入持久化于 `system_configs/admin_web_auto_admins`；两者合并校验。
 - `adminCore` 校验 Web 管理员时必须从服务端 CloudBase Auth 上下文读取 uid，不能信任前端传入 uid。
 - 微信扫码登录走 CloudBase Web Auth 的微信开放平台 OAuth（`genProviderRedirectUri` → `grantProviderToken` → `signInWithProvider`），AppSecret 仅存于 CloudBase 控制台，前端不保存；扫码通道受 `VITE_WECHAT_LOGIN_ENABLED` 开关控制。管理端同时保留账号密码登录（用户名/邮箱 + 密码双通道）；无任何管理员时前端触发 `adminCore.bootstrapFirstWebAdmin` 完成首个 Web 管理员自举。
+- 管理端构建期 `VITE_*` 变量：`VITE_CLOUDBASE_ENV_ID`（默认 `cloudbase-3gphz7fk0fe1b760`）、`VITE_CLOUDBASE_ADMIN_FUNCTION`（默认 `adminCore`）、`VITE_WECHAT_PROVIDER_ID`（默认 `wx_open`）、`VITE_WECHAT_REDIRECT_URI`、`VITE_WECHAT_LOGIN_ENABLED`；模板见 `admin-web/.env.example`。
 - 提交前运行 `bash scripts/check-admin-web-boundaries.sh`。
 
 ## 8. 幂等与状态机
@@ -89,6 +90,7 @@
 - `MINIMAX_GROUP_ID` — 仅配置于 `coreModel`，可选；MiniMax 语音合成（t2a_v2）新版接口仅 Bearer 鉴权，配置后作为 query 参数一并带上以兼容旧账户体系
 - `KIMI_API_KEY` — 仅配置于 `coreModel`；Kimi Code token plan 密钥（Anthropic 兼容端点），配置后 `seedDefaults` 会补种 `kimi_k3_256k` provider
 - `MAIC_AI_MODEL`、`MINIMAX_BASE_URL`、`CLOUDBASE_AI_MODEL` — 仅配置于 `coreModel`，作为 `seedDefaults` 种子默认值；运行时模型与绑定关系以 `model_providers` / `app_model_bindings` 文档为准（管理端「模型管理」维护）
+- `CLOUDBASE_AI_ENV_ID` — 仅配置于 `coreModel`，可选；CloudBase AI driver 运行时读取的目标环境 ID
 - `MAIC_AI_MODE` — 运行清单登记项，当前环境固定为 Worker 服务端直连（`direct_minimax`）
 - `MAIC_DAILY_LIMIT` — 仅配置于 `app_maic`，默认且最大为 3，可降低不可提高
 
@@ -114,6 +116,8 @@
 - MAIC 不再有独立 Web、SQLite、PM2、HMAC 或本机 Worker；模型由 `app_maic_worker` 经 `coreModel` 网关服务端调用，新课程首版固定空 `assets`，既有课程资产继续兼容播放和删除。
 - MAIC 原生播放器负责翻页和互动门控：旧协议中的 `navigate` 必须忽略；quiz、interaction、PBL 完成前不得进入下一幕。舞台布局和门控规则集中在 `player-view-model.js`，不要退回通用纵向白卡。
 - OpenMAIC 只读跟踪只评估生成质量、协议、JSON 修复、模型适配和安全修复；Web、编辑器、SQLite、图片/语音/视频与导出更新直接忽略，禁止自动合并上游。上游差异探测用 `bash scripts/check-maic-upstream.sh`（对比基线 SHA 并输出 compare 链接，不自动合并）。
+- `nursing_undercover`（护理卧底）的权威规格在 `promptDocs/prompt-pack-huli-tools-nursing-undercover-0609/master_spec_huli-tools-nursing-undercover_0609.md`；云函数带 `scenarios.js`/`ai.js` 私有模块，改动其剧本或 AI 链路前先对照该规格。
+- `paper_polish`（论文润色）的交接与任务链路说明见 `docs/app_paper_polish_handoff.md`。
 - 公共底座破坏性变更必须先提交 RFC（模板：`docs/templates/core_change_rfc.md`）。
 
 ## 11. 测试与交付
@@ -124,6 +128,7 @@
 - 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。
+- `promptDocs/` 下现有四个 prompt pack：`0526`（主包，持续维护）、`admin-web-0530`（管理端，持续维护）、`nursing-undercover-0609`（卧底应用，改动该应用时同步）、`dopamine-ui-0604`（v2 多巴胺体系，历史归档，不再维护）。
 - 涉及 `admin-web/` 的功能或验收规则时，同步更新 `admin-web/README.md`、`docs/admin_operations.md` 及 `promptDocs/prompt-pack-huli-tools-admin-web-0530/` 中对应测试/运行清单。
 - macOS 上 `tcb` 登录态保存在系统 Keychain（不在 `~/.tcb/`），不要用 `~/.tcb/cli.json` 是否存在判断登录状态；以 `tcb env list` 能否返回为准。
 - 查 CloudBase 业务 collection **必须**用 CloudBase MCP 的 `readNoSqlDatabaseStructure(action="listCollections")` 或 SDK；`tcb db list` 只列 NoSQL 2.0 **数据模型**，看不到业务用的传统 collection，会误判"集合全空"。如未挂 MCP，用 `npx -y mcporter call cloudbase.readNoSqlDatabaseStructure action=listCollections` 调。

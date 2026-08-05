@@ -21,8 +21,8 @@
   height: 72rpx;
   border-radius: 20rpx;
   color: var(--color-on-primary);
-  background: var(--color-maic-ink);
-  box-shadow: var(--shadow-maic-soft);
+  background: var(--gradient-tile-maic);
+  box-shadow: var(--shadow-tile-maic);
 }
 
 .maic-brand__mark text {
@@ -67,9 +67,9 @@
   overflow: hidden;
   border: 1rpx solid var(--color-maic-border);
   border-radius: 34rpx;
-  color: var(--color-on-primary);
-  background: var(--color-maic-ink);
-  box-shadow: var(--shadow-maic);
+  color: var(--color-text);
+  background: var(--color-maic-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .maic-workbench__content {
@@ -82,7 +82,7 @@
   position: absolute;
   border-radius: 50%;
   background: var(--color-maic-cyan);
-  opacity: 0.16;
+  opacity: 0.10;
 }
 
 .maic-workbench__glow--one {
@@ -97,7 +97,7 @@
   left: -100rpx;
   width: 300rpx;
   height: 300rpx;
-  background: var(--color-maic-blue);
+  background: var(--color-maic-cyan);
 }
 
 .maic-workbench__eyebrow,
@@ -107,7 +107,7 @@
 }
 
 .maic-workbench__eyebrow {
-  color: var(--color-maic-soft);
+  color: var(--color-maic-cyan);
   font-size: 19rpx;
   font-weight: 600;
   letter-spacing: 4rpx;
@@ -123,10 +123,9 @@
 
 .maic-workbench__desc {
   margin-top: 12rpx;
-  color: var(--color-maic-soft);
+  color: var(--color-text-secondary);
   font-size: 23rpx;
   line-height: 1.65;
-  opacity: 0.86;
 }
 
 .maic-composer {
@@ -135,8 +134,7 @@
   border: 1rpx solid var(--color-maic-border);
   border-radius: 24rpx;
   color: var(--color-maic-ink);
-  background: var(--color-maic-surface);
-  box-shadow: var(--shadow-maic);
+  background: var(--color-maic-bg);
 }
 
 .maic-composer__topic,
@@ -166,21 +164,30 @@
 
 .maic-toolbar {
   display: flex;
+  align-items: stretch;
   gap: 12rpx;
   padding: 0 10rpx;
 }
 
 .maic-toolbar__picker {
   flex: 0 0 190rpx;
+  align-self: stretch;
+}
+
+.maic-toolbar__picker .maic-toolbar__field {
+  height: 100%;
 }
 
 .maic-toolbar__field {
   box-sizing: border-box;
-  min-height: 92rpx;
-  padding: 14rpx 18rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 92rpx;
+  padding: 0 18rpx;
   border: 1rpx solid var(--color-maic-border);
   border-radius: 16rpx;
-  background: var(--color-maic-bg);
+  background: var(--color-maic-surface);
 }
 
 .maic-toolbar__field--grow {
@@ -200,10 +207,15 @@
 
 .maic-toolbar__input,
 .maic-toolbar__value {
-  margin-top: 5rpx;
+  margin-top: 6rpx;
   color: var(--color-maic-ink-soft);
   font-size: 23rpx;
   font-weight: 500;
+  line-height: 34rpx;
+}
+
+.maic-toolbar__input {
+  height: 34rpx;
 }
 
 .maic-composer__footer {
@@ -222,9 +234,9 @@
 .maic-submit.ui-action-btn {
   min-height: 78rpx;
   border-radius: 16rpx !important;
-  background: var(--color-maic-blue) !important;
+  background: var(--gradient-tile-maic) !important;
   font-size: 28rpx;
-  box-shadow: var(--shadow-maic-blue) !important;
+  box-shadow: var(--shadow-tile-maic) !important;
 }
 
 .maic-recent {
@@ -265,10 +277,10 @@
   position: relative;
   height: 190rpx;
   overflow: hidden;
+  border: 1rpx solid var(--color-maic-border);
   border-radius: 20rpx;
-  color: var(--color-on-primary);
-  background: var(--color-maic-ink-soft);
-  box-shadow: var(--shadow-maic-soft);
+  color: var(--color-maic-muted);
+  background: var(--color-maic-bg);
 }
 
 .maic-course-card__index {
@@ -298,7 +310,7 @@
   right: 42rpx;
   width: 118rpx;
   height: 118rpx;
-  border: 1rpx solid var(--color-maic-soft);
+  border: 1rpx solid var(--color-maic-cyan);
   border-radius: 50%;
   opacity: 0.38;
 }
@@ -321,7 +333,7 @@
   left: 48rpx;
   width: 13rpx;
   height: 13rpx;
-  background: var(--color-maic-soft);
+  background: var(--color-maic-cyan);
 }
 
 .maic-course-card__title {
