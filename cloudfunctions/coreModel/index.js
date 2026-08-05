@@ -1,14 +1,19 @@
 "use strict";
 
 // coreModel — 大模型网关（公共底座层）
-// 所有应用云函数经 _internalToken 内部调用 generateText；
+// 所有应用云函数经 _internalToken 内部调用 generateText（同步，限 60s 内返回）；
+// 长耗时文本生成走 createTextJob → runTextJob（后台自调用）→ getTextJob 轮询的异步 Job 模式。
 // provider / binding 配置存 model_providers / app_model_bindings，由 adminCore 管理。
 
+const cloud = require("wx-server-sdk");
 const registry = require("./lib/registry");
 const router = require("./lib/router");
 const minimaxDriver = require("./drivers/minimax");
 const cloudbaseAiDriver = require("./drivers/cloudbaseAi");
 const kimiCodeDriver = require("./drivers/kimiCode");
+
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+const db = cloud.database();
 
 const DRIVERS = {
   minimax: minimaxDriver,
@@ -54,32 +59,19 @@ function validateMessages(messages) {
 
 // ─── generateText ───────────────────────────────────────
 
-async function generateText(event, context) {
-  const requestId = context.requestId || Date.now().toString();
-  const authError = verifyInternal(event);
-  if (authError) return makeResponse(false, authError, requestId);
-
-  const appKey = String(event.appKey || "").trim();
-  const capability = String(event.capability || "").trim();
-  if (!appKey || !capability) {
-    return makeResponse(false, { code: "INVALID_PARAM", message: "appKey 与 capability 不能为空" }, requestId);
-  }
-  const messagesError = validateMessages(event.messages);
-  if (messagesError) {
-    return makeResponse(false, { code: "INVALID_PARAM", message: messagesError }, requestId);
-  }
-
+// 供 generateText 与 runTextJob 共用的文本生成链：返回 { ok, data|error }（不含 requestId 包络）
+async function runTextChain({ appKey, capability, messages, overrides }) {
   const binding = await registry.getBinding(appKey, capability);
   if (!binding) {
-    return makeResponse(false, { code: "MODEL_BINDING_MISSING", message: `未配置模型绑定：${appKey}__${capability}` }, requestId);
+    return { ok: false, error: { code: "MODEL_BINDING_MISSING", message: `未配置模型绑定：${appKey}__${capability}` } };
   }
   if (binding.enabled === false) {
-    return makeResponse(false, { code: "MODEL_BINDING_DISABLED", message: `模型绑定已停用：${appKey}__${capability}` }, requestId);
+    return { ok: false, error: { code: "MODEL_BINDING_DISABLED", message: `模型绑定已停用：${appKey}__${capability}` } };
   }
 
   const chain = router.buildProviderChain(binding);
   if (chain.length === 0) {
-    return makeResponse(false, { code: "MODEL_BINDING_INVALID", message: "绑定未配置可用 provider" }, requestId);
+    return { ok: false, error: { code: "MODEL_BINDING_INVALID", message: "绑定未配置可用 provider" } };
   }
 
   const attempts = [];
@@ -98,35 +90,163 @@ async function generateText(event, context) {
       attempts.push({ providerKey, code: "MODEL_DRIVER_UNKNOWN", message: `未知驱动：${provider.driver}` });
       continue;
     }
-    const config = router.mergeParams(provider.config, binding.paramOverrides, event.overrides);
+    const config = router.mergeParams(provider.config, binding.paramOverrides, overrides);
     try {
-      const output = await driver.chatComplete({ config, messages: event.messages });
+      const output = await driver.chatComplete({ config, messages });
       attempts.push({ providerKey, ok: true });
-      return makeResponse(true, {
-        text: output.text,
-        usage: output.usage,
-        model: output.model,
-        providerKey,
-        attempts,
-      }, requestId);
+      return { ok: true, data: { text: output.text, usage: output.usage, model: output.model, providerKey, attempts } };
     } catch (err) {
       const code = err.code || "MODEL_REQUEST_FAILED";
       attempts.push({ providerKey, code, message: err.message });
       if (!router.isTransientError(err)) {
-        return makeResponse(false, { code, message: err.message, transient: false, providerKey, attempts }, requestId);
+        return { ok: false, error: { code, message: err.message, transient: false, providerKey, attempts } };
       }
       // transient：继续 fallback 链
     }
   }
 
   const last = attempts[attempts.length - 1] || {};
-  return makeResponse(false, {
+  return { ok: false, error: {
     code: last.code || "MODEL_ALL_PROVIDERS_FAILED",
     message: `全部模型提供方调用失败（${chain.length} 个）：${last.message || "无可用 provider"}`,
     transient: router.TRANSIENT_CODES.includes(last.code),
     allProvidersFailed: true,
     attempts,
-  }, requestId);
+  } };
+}
+
+async function generateText(event, context) {
+  const requestId = context.requestId || Date.now().toString();
+  const authError = verifyInternal(event);
+  if (authError) return makeResponse(false, authError, requestId);
+
+  const appKey = String(event.appKey || "").trim();
+  const capability = String(event.capability || "").trim();
+  if (!appKey || !capability) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "appKey 与 capability 不能为空" }, requestId);
+  }
+  const messagesError = validateMessages(event.messages);
+  if (messagesError) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: messagesError }, requestId);
+  }
+
+  const result = await runTextChain({ appKey, capability, messages: event.messages, overrides: event.overrides });
+  if (!result.ok) return makeResponse(false, result.error, requestId);
+  return makeResponse(true, result.data, requestId);
+}
+
+// ─── 长耗时文本任务（异步 Job 模式） ─────────────────────
+// 云函数间同步调用经 API 网关约 60s 即被切断，MiniMax M3 等思考型模型整课生成需 90s+，
+// 长任务必须走 createTextJob →（自调用后台执行 runTextJob）→ getTextJob 轮询。
+const JOBS = "model_async_jobs";
+const JOB_TTL_MS = 24 * 3600 * 1000;
+
+async function createTextJob(event, context) {
+  const requestId = context.requestId || Date.now().toString();
+  const authError = verifyInternal(event);
+  if (authError) return makeResponse(false, authError, requestId);
+
+  const appKey = String(event.appKey || "").trim();
+  const capability = String(event.capability || "").trim();
+  if (!appKey || !capability) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: "appKey 与 capability 不能为空" }, requestId);
+  }
+  const messagesError = validateMessages(event.messages);
+  if (messagesError) {
+    return makeResponse(false, { code: "INVALID_PARAM", message: messagesError }, requestId);
+  }
+
+  const jobId = `mj_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const now = new Date();
+  try {
+    // 注意：不要预写 result/error 为 null，NoSQL 会把 null 固化为标量，
+    // 后续 update 写入对象会报 "Cannot create field in element {error: null}"
+    await db.collection(JOBS).doc(jobId).set({
+      data: {
+        status: "running",
+        appKey,
+        capability,
+        messages: event.messages,
+        overrides: event.overrides || null,
+        createdAt: now,
+        updatedAt: now,
+        expiresAt: new Date(now.getTime() + JOB_TTL_MS),
+      },
+    });
+  } catch (err) {
+    return makeResponse(false, { code: "DB_ERROR", message: "创建模型任务失败: " + err.message }, requestId);
+  }
+
+  // 后台自调用执行，不等待其完成（与 app_paper_polish triggerRunTask 同模式）
+  cloud.callFunction({
+    name: "coreModel",
+    data: { action: "runTextJob", _internalToken: getInternalToken(), jobId },
+  }).catch((err) => {
+    console.error(JSON.stringify({ event: "run_text_job_trigger_failed", jobId, error: err.message }));
+  });
+
+  return makeResponse(true, { jobId, status: "running" }, requestId);
+}
+
+async function runTextJob(event, context) {
+  const requestId = context.requestId || Date.now().toString();
+  const authError = verifyInternal(event);
+  if (authError) return makeResponse(false, authError, requestId);
+
+  const jobId = String(event.jobId || "").trim();
+  if (!jobId) return makeResponse(false, { code: "INVALID_PARAM", message: "jobId 不能为空" }, requestId);
+
+  let job = null;
+  try {
+    const res = await db.collection(JOBS).doc(jobId).get();
+    job = res.data || null;
+  } catch (err) {
+    job = null;
+  }
+  if (!job) return makeResponse(false, { code: "JOB_NOT_FOUND", message: "模型任务不存在" }, requestId);
+  if (job.status !== "running") {
+    return makeResponse(true, { jobId, status: job.status, note: "任务已处理，跳过重复执行" }, requestId);
+  }
+
+  const finish = async (patch) => {
+    await db.collection(JOBS).doc(jobId).update({ data: { ...patch, updatedAt: new Date() } });
+  };
+
+  try {
+    const result = await runTextChain({
+      appKey: job.appKey,
+      capability: job.capability,
+      messages: job.messages,
+      overrides: job.overrides,
+    });
+    if (result.ok) {
+      await finish({ status: "succeeded", result: result.data });
+    } else {
+      await finish({ status: "failed", error: result.error });
+    }
+  } catch (err) {
+    await finish({ status: "failed", error: { code: err.code || "INTERNAL_ERROR", message: err.message || "模型任务执行失败" } });
+  }
+  return makeResponse(true, { jobId }, requestId);
+}
+
+async function getTextJob(event, context) {
+  const requestId = context.requestId || Date.now().toString();
+  const authError = verifyInternal(event);
+  if (authError) return makeResponse(false, authError, requestId);
+
+  const jobId = String(event.jobId || "").trim();
+  if (!jobId) return makeResponse(false, { code: "INVALID_PARAM", message: "jobId 不能为空" }, requestId);
+
+  let job = null;
+  try {
+    const res = await db.collection(JOBS).doc(jobId).get();
+    job = res.data || null;
+  } catch (err) {
+    job = null;
+  }
+  if (!job) return makeResponse(false, { code: "JOB_NOT_FOUND", message: "模型任务不存在" }, requestId);
+  return makeResponse(true, { jobId, status: job.status, data: job.result || null, error: job.error || null }, requestId);
 }
 
 // ─── generateImage / generateSpeech（多模态输出） ─────────
@@ -328,9 +448,6 @@ async function seedDefaults(event, context) {
   const authError = verifyInternal(event);
   if (authError) return makeResponse(false, authError, requestId);
 
-  const cloud = require("wx-server-sdk");
-  cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
-  const db = cloud.database();
   const now = new Date();
   const createdProviders = [];
   const createdBindings = [];
@@ -509,6 +626,9 @@ exports.main = async (event, context) => {
     generateText,
     generateImage,
     generateSpeech,
+    createTextJob,
+    runTextJob,
+    getTextJob,
     smokeProvider,
     seedDefaults,
   };

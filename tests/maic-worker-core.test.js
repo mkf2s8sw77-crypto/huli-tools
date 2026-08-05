@@ -15,6 +15,10 @@ test("JSON 修复可移除代码围栏和尾随逗号", () => {
   assert.deepEqual(repairJson("```json\n{\"ok\":true,}\n```"), { ok: true });
 });
 
+test("JSON 修复可剥离 think 块（含花括号也不干扰提取）", () => {
+  assert.deepEqual(repairJson('<think>推理过程 {"ok":false} 分析</think>{"ok":true}'), { ok: true });
+});
+
 test("normalizer 过滤 HTML、危险协议和 navigate", () => {
   const course = normalizeCourse({
     title: "<script>alert(1)</script>压疮预防",

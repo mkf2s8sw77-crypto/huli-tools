@@ -171,11 +171,6 @@
 
 .maic-toolbar__picker {
   flex: 0 0 190rpx;
-  align-self: stretch;
-}
-
-.maic-toolbar__picker .maic-toolbar__field {
-  height: 100%;
 }
 
 .maic-toolbar__field {

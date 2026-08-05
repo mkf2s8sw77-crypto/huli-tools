@@ -18,6 +18,7 @@
 | `system_configs` | 系统配置（开关、白名单等） | 是 |
 | `model_providers` | 大模型提供方注册表（coreModel 网关） | 是（模型网关启用时） |
 | `app_model_bindings` | 应用 ↔ 模型绑定与 fallback 链 | 是（模型网关启用时） |
+| `model_async_jobs` | coreModel 长耗时文本任务（异步 Job，24h 过期） | 是（模型网关启用时） |
 | `app_ai_draw_tasks` | 护士职业定妆照任务与 usage/job 绑定 | 是（护士定妆照应用启用时） |
 | `app_nursing_undercover_sessions` | 谁是卧底（护理版）对局数据 | 是（谁是卧底应用启用时） |
 | `app_maic_tasks` | MAIC usage、队列状态、租约与结算协调 | 是（MAIC 应用启用时） |
@@ -419,7 +420,29 @@
 
 （`nursing_undercover__*` 三条仅在 `CLOUDBASE_AI_MODEL` 已配置、cloudbase_ai_default provider 创建成功时写入。）
 
-## 12. app_ai_draw_tasks
+## 12. model_async_jobs
+
+coreModel 长耗时文本任务（异步 Job）。函数间同步调用经 API 网关约 60s 即被切断，思考型模型（如 MiniMax M3）整课生成需 90s+，故长任务由 `createTextJob` 创建并经 coreModel 后台自调用 `runTextJob` 执行，调用方用 `getTextJob` 轮询结果。
+
+### 字段
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `_id` | string | jobId（`mj_<时间戳>_<随机串>`） |
+| `status` | string | `running` / `succeeded` / `failed` |
+| `appKey` / `capability` | string | 应用键与能力键 |
+| `messages` | array | 生成入参（chat messages） |
+| `overrides` | object/null | 调用级参数覆盖 |
+| `result` | object | 成功时写入 `{ text, usage, model, providerKey, attempts }`（`running` 期间该字段不存在） |
+| `error` | object | 失败时写入 `{ code, message, transient?, attempts? }`（`running` 期间该字段不存在） |
+| `createdAt` / `updatedAt` / `expiresAt` | Date | 服务端时间；`expiresAt` = 创建后 24h |
+
+### 权限建议
+
+- 客户端：无权限。
+- 云函数：仅 `coreModel` 读写（内部 action 均校验 `_internalToken`）。
+
+## 13. app_ai_draw_tasks
 
 护士职业定妆照应用私有集合，用于把外部图片生成任务 `jobId` 绑定到当前用户的 `usageId`，防止跨应用 usage 复用、跨任务查询和重复结算；源素材只保存私有 Cloud Storage `fileID/cloudPath`，对外生成时由云函数换取短期临时 URL。
 
@@ -453,7 +476,7 @@
 - 客户端：无直接读写权限。
 - 云函数：仅 `app_ai_draw` 和管理员维护工具读写。
 
-## 13. app_nursing_undercover_sessions
+## 14. app_nursing_undercover_sessions
 
 谁是卧底（护理版）应用私有集合，保存每局对局状态、发言、投票和复盘数据。
 
@@ -492,7 +515,7 @@
 - 客户端：无直接读写权限。
 - 云函数：仅 `app_nursing_undercover` 读写。
 
-## 14. MAIC 私有集合
+## 15. MAIC 私有集合
 
 七个集合均设置为「仅管理端可读写」，客户端只能通过 `app_maic` action 访问。
 
@@ -508,7 +531,7 @@
 
 `usageId` 是端到端幂等键。新任务状态固定为 `queued → processing → importing → succeeded`，终态为 `failed`、`cancelled`、`timed_out`；`submit_pending` 只用于迁移旧任务。只有课程和场景全部导入完成后才能 `finishUsage`；失败、取消或超过 45 分钟必须 `failUsage`。
 
-## 15. app_paper_polish_tasks
+## 16. app_paper_polish_tasks
 
 护理论文英文润色应用私有集合，保存每次润色任务的输入元数据、状态和结果；`_id` 与 `usageId` 一致，作为端到端幂等键。润色为异步任务模式：`submit` 建任务后由内部 `runTask` 后台执行模型调用，`query` 做轮询与 10 分钟 read-time 超时兜底。定价 0 积分，不涉及积分冻结。原始草稿（`inputText`）与成稿（`resultText`）仅存于本集合，客户端不回传原文；任务文档默认 7 天过期（`expiresAt`）。
 

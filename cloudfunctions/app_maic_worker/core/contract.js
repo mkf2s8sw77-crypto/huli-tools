@@ -271,7 +271,10 @@ function normalizeCourse(raw, input) {
 }
 
 function repairJson(text) {
-  const value = String(text || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  const value = String(text || "").trim()
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "");
   const start = value.indexOf("{");
   const end = value.lastIndexOf("}");
   if (start < 0 || end <= start) throw Object.assign(new Error("模型响应中没有 JSON 对象"), { code: "INVALID_PROTOCOL" });

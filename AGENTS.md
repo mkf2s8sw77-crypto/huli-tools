@@ -31,7 +31,7 @@
 - **客户端不可信**：所有写操作必须走云函数；客户端不能直接写敏感 collection。
 - **身份必须从上下文获取**：云函数使用 `cloud.getWXContext().OPENID` 获取调用者身份；禁止信任客户端传入的 `openid`、角色、价格、积分数量。
 - **金额与积分**：金额统一用整数"分"，积分统一用整数，时间统一用服务端 `Date`。
-- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`generateImage`、`generateSpeech`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。应用侧内部入口同样适用：`app_paper_polish.runTask`、`app_ai_draw.cleanupExpiredAssets`、`app_maic_worker` 的非 Timer 入口（含 `modelSmoke`）、`app_maic_reconcile` 的全部入口。
+- **内部接口隔离**：`corePoints` 的 `freezePoints`、`settleFrozenPoints`、`releaseFrozenPoints`、`creditPoints`、`adminAdjustPoints`，`coreApp` 的 `finishUsage`、`failUsage`，以及 `coreModel` 的 `generateText`、`generateImage`、`generateSpeech`、`createTextJob`、`runTextJob`、`getTextJob`、`smokeProvider`、`seedDefaults` 仅供其他云函数内部调用，必须校验 `_internalToken`。应用侧内部入口同样适用：`app_paper_polish.runTask`、`app_ai_draw.cleanupExpiredAssets`、`app_maic_worker` 的非 Timer 入口（含 `modelSmoke`）、`app_maic_reconcile` 的全部入口。
 - **模型密钥收口**：大模型密钥（如 `MINIMAX_API_KEY`）只允许配置在 `coreModel` 环境变量；`model_providers` 文档只存 `secretEnv` 变量名，禁止写入密钥本体；应用云函数环境变量不得配置任何模型密钥。
 - **mock 支付**：受 `MOCK_PAYMENT_ENABLED` 环境变量控制，生产环境必须关闭。
 
@@ -72,7 +72,7 @@
 - 积分账户余额和积分流水必须在 `corePoints` 内同一事务完成，禁止先改余额再另行写流水。
 - 异步业务必须把外部任务 ID 绑定到当前 `usageId` 和用户；成功才结算，失败/超时/取消必须释放冻结积分。
 - AI 生图上游 `gpt-image-2-web` 是单 worker、带冷却的自动化服务；调用方必须分类处理 `rate_limited` / `ui_changed` / `worker_unavailable`，不得自动重试轰炸。
-- 文本大模型调用统一经 `coreModel.generateText`：fallback 链只在绑定 `fallbackProviderKeys` 中显式配置，仅对 transient 错误（`MODEL_RATE_LIMITED` / `MODEL_TRANSIENT_ERROR`）切换；未配置 fallback 时单 provider 失败直接返回，不得自行多路重试。
+- 文本大模型调用统一经 `coreModel.generateText`：fallback 链只在绑定 `fallbackProviderKeys` 中显式配置，仅对 transient 错误（`MODEL_RATE_LIMITED` / `MODEL_TRANSIENT_ERROR`）切换；未配置 fallback 时单 provider 失败直接返回，不得自行多路重试。函数间同步调用经 API 网关约 60s 即被切断，预期超过 60s 的文本生成（如 MAIC 整课生成）必须改用 `createTextJob` / `getTextJob` 异步 Job 模式，不得放大 timeout 硬等。
 - AI 生图等长耗时应用必须采用后台任务模式；页面隐藏或退出只停止轮询，不得自动取消任务，取消只能由用户显式触发。
 - MAIC 定价固定为 0 积分；任务以 `usageId` 贯穿 `queued → processing → importing → succeeded`、课程导入和 usage 结算。`app_maic_worker` 每分钟最多认领一项并用 `app_maic_runtime` 保证全局并发 1；`app_maic_reconcile` 只做遗留迁移、租约恢复、45 分钟超时和失败结算，不调用模型。
 - 用户媒体上传必须先由云函数签发受控 `cloudPath`，客户端只上传到该路径；业务云函数校验 `fileID/cloudPath` 归属后换取短期临时 URL 调上游，源素材默认私有短期保留并设置 `expiresAt`。
