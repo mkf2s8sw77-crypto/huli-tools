@@ -642,6 +642,56 @@ async function cancelGame(event, context) {
   return makeResponse(true, { status: "cancelled", sessionId }, requestId);
 }
 
+// ─── suggestSpeech ───
+// 只读 action：为玩家生成 3 条候选发言，不写库、无需幂等键；模型不可用时模板降级
+async function suggestSpeech(event, context) {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  const requestId = context.requestId || Date.now().toString();
+
+  if (!openid) return makeResponse(false, { code: "UNAUTHORIZED", message: "无法获取用户身份" }, requestId);
+
+  const { sessionId } = event;
+  if (!sessionId) return makeResponse(false, { code: "INVALID_PARAM", message: "缺少 sessionId" }, requestId);
+
+  let session;
+  try {
+    const res = await db.collection(SESSION_COLLECTION).doc(sessionId).get();
+    session = res.data;
+  } catch (err) {
+    return makeResponse(false, { code: "SESSION_NOT_FOUND", message: "对局不存在" }, requestId);
+  }
+  if (!session) return makeResponse(false, { code: "SESSION_NOT_FOUND", message: "对局不存在" }, requestId);
+  if (session.userId !== openid) return makeResponse(false, { code: "FORBIDDEN", message: "无权操作该对局" }, requestId);
+  if (session.status !== "in_progress") return makeResponse(false, { code: "INVALID_STATUS", message: "对局状态不允许获取候选发言" }, requestId);
+
+  session.roles = session.roles || [];
+  session.transcript = session.transcript || [];
+
+  const playerAlreadySpoke = session.transcript.some(
+    (t) => t.roundNo === session.currentRound && t.roleId === "player"
+  );
+  if (playerAlreadySpoke) {
+    return makeResponse(false, { code: "DUPLICATE_ACTION", message: "本轮已发言" }, requestId);
+  }
+
+  const scenario = scenarios.getScenarioByKey(session.scenarioKey);
+  const playerRole = session.roles.find((r) => r.roleId === "player");
+  if (!scenario || !playerRole) {
+    return makeResponse(false, { code: "SESSION_DATA_INCOMPLETE", message: "对局数据不完整" }, requestId);
+  }
+
+  if (ai.isAIReady()) {
+    const result = await ai.generateSpeechSuggestions(playerRole, scenario, session.currentRound, session.transcript, session.mode);
+    if (result.ok) {
+      return makeResponse(true, { suggestions: result.suggestions, fallback: false }, requestId);
+    }
+    console.error("AI suggestions failed:", result.code, result.message);
+  }
+
+  return makeResponse(true, { suggestions: ai.generateTemplateSuggestions(scenario), fallback: true }, requestId);
+}
+
 // ─── entry ───
 exports.main = async (event, context) => {
   const { action } = event;
@@ -650,6 +700,7 @@ exports.main = async (event, context) => {
   if (action === "listConfig") return listConfig(event, context);
   if (action === "startGame") return startGame(event, context);
   if (action === "submitSpeech") return submitSpeech(event, context);
+  if (action === "suggestSpeech") return suggestSpeech(event, context);
   if (action === "submitVote") return submitVote(event, context);
   if (action === "getGame") return getGame(event, context);
   if (action === "listMyGames") return listMyGames(event, context);

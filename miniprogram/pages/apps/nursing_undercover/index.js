@@ -54,6 +54,8 @@ Page({
     isUndercover: false,
     speechText: "",
     canSubmitSpeech: false,
+    speechSuggestions: [],
+    suggestionsLoading: false,
     currentRoundSpeeches: [],
     allRoundSpeeches: [],
 
@@ -144,12 +146,12 @@ Page({
     this.setData({ selectedDifficulty: e.detail.value || e.currentTarget.dataset.difficulty });
   },
 
-  onNpcCountChange(e) {
-    this.setData({ selectedNpcCount: parseInt(e.detail.value, 10) || 4 });
-  },
-
-  onRoundCountChange(e) {
-    this.setData({ selectedRoundCount: parseInt(e.detail.value, 10) || 2 });
+  onStepParam(e) {
+    const { field, delta } = e.currentTarget.dataset;
+    const range = field === "selectedNpcCount" ? this.data.npcRange : this.data.roundRange;
+    const next = (this.data[field] || range.min) + Number(delta);
+    if (next < range.min || next > range.max) return;
+    this.setData({ [field]: next });
   },
 
   async onStartGame() {
@@ -221,6 +223,39 @@ Page({
         }))
         : [],
     });
+
+    // 进入发言环节且本轮尚未发言时，自动拉取 LLM 候选发言
+    const playerSpoke = speeches.current.some((s) => s.roleId === "player");
+    this.setData({ speechSuggestions: [], suggestionsLoading: false });
+    if (phase === "game" && !playerSpoke) {
+      this.loadSpeechSuggestions();
+    }
+  },
+
+  async loadSpeechSuggestions() {
+    const session = this.data.session;
+    if (!session) return;
+    this.setData({ suggestionsLoading: true, speechSuggestions: [] });
+    try {
+      const res = await api.callCloud("app_nursing_undercover", {
+        action: "suggestSpeech",
+        sessionId: session._id,
+      });
+      this.setData({
+        speechSuggestions: res.suggestions || [],
+        suggestionsLoading: false,
+      });
+    } catch (err) {
+      // 候选只是辅助，失败静默隐藏
+      this.setData({ speechSuggestions: [], suggestionsLoading: false });
+    }
+  },
+
+  onPickSuggestion(e) {
+    if (this.data.loading) return;
+    const text = e.currentTarget.dataset.text || "";
+    if (!text) return;
+    this.setData({ speechText: text, canSubmitSpeech: !!text.trim() });
   },
 
   groupSpeeches(session, roleNameMap, revealTeams) {
@@ -341,6 +376,8 @@ Page({
       isUndercover: false,
       speechText: "",
       canSubmitSpeech: false,
+      speechSuggestions: [],
+      suggestionsLoading: false,
       currentRoundSpeeches: [],
       allRoundSpeeches: [],
       voteTargets: [],

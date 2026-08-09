@@ -140,6 +140,9 @@ vars = [
   { name = "MAIC_AI_MODEL", example = "MiniMax-M2.7", note = "仅 coreModel 使用，作 seedDefaults 种子来源" },
   { name = "MINIMAX_BASE_URL", example = "https://api.minimaxi.com/v1", note = "仅 coreModel 使用" },
   { name = "MINIMAX_API_KEY", example = "仅云函数环境变量", note = "仅 coreModel 使用，禁止写入仓库和日志" },
+  { name = "MINIMAX_GROUP_ID", example = "仅云函数环境变量", note = "可选，仅 coreModel 使用；t2a_v2 语音合成兼容旧账户体系" },
+  { name = "KIMI_API_KEY", example = "仅云函数环境变量", note = "可选，仅 coreModel 使用；配置后 seedDefaults 补种 kimi_k3_256k provider" },
+  { name = "ADMIN_WEB_UIDS", example = "uid1,uid2", note = "Web 管理端 CloudBase Auth uid 白名单，逗号分隔" },
   { name = "MAIC_DAILY_LIMIT", example = "3", note = "仅 app_maic 使用，最大为3" },
 ]
 

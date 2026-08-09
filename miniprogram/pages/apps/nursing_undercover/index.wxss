@@ -263,11 +263,14 @@
   padding: var(--spacing-md) var(--spacing-lg);
 }
 
+.nu-param {
+  padding: var(--spacing-xs) 0;
+}
+
 .nu-param__row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xs);
 }
 
 .nu-param__label {
@@ -276,16 +279,45 @@
   color: var(--color-text);
 }
 
-.nu-param__value {
+.nu-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.nu-stepper__btn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  font-size: 36rpx;
+  font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nu-stepper__btn:active {
+  background: var(--color-primary-light);
+}
+
+.nu-stepper__btn--disabled,
+.nu-stepper__btn--disabled:active {
+  border-color: var(--color-border-soft);
+  color: var(--color-text-muted);
+  background: transparent;
+  opacity: 0.5;
+}
+
+.nu-stepper__value {
+  min-width: 96rpx;
+  text-align: center;
   font-size: 30rpx;
   font-weight: 600;
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
-}
-
-.nu-param slider {
-  margin: 0;
-  padding: 0 8rpx;
 }
 
 /* ═══════════════════════════════════════════
@@ -582,6 +614,40 @@
   padding: var(--spacing-md);
   border: 1rpx solid var(--color-border-soft);
   box-shadow: var(--shadow-soft);
+}
+
+.nu-suggestions {
+  margin-bottom: var(--spacing-sm);
+}
+
+.nu-suggestions__label {
+  display: block;
+  font-size: 24rpx;
+  margin-bottom: var(--spacing-xs);
+}
+
+.nu-suggestion-chip {
+  background: var(--color-surface);
+  border: 1rpx solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.nu-suggestion-chip:active {
+  background: var(--color-primary-light);
+}
+
+.nu-suggestion-chip__text {
+  font-size: 26rpx;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.nu-suggestion-chip--loading {
+  border-color: var(--color-border-soft);
+  min-height: 40rpx;
+  background: var(--color-surface);
 }
 
 .nu-textarea {

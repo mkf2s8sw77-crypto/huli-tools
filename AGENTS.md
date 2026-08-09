@@ -25,6 +25,7 @@
 - **管理端**：主题 Token 在 `admin-web/src/theme.ts`（含 Layout/Menu/Card/Table 组件级 token），由 `ConfigProvider` 注入；主色与小程序端一致（活力紫），侧栏深紫灰 `#3D3656`。通用组件在 `admin-web/src/components/`。管理端支持暗色主题（跟随系统 `prefers-color-scheme`，antd `darkAlgorithm`），暗色调色板在 `theme.ts` 的 `adminThemeTokensDark` 与 `index.css` 的暗色 CSS 变量双处定义，修改管理端配色必须两侧同步。
 - 新页面和新应用必须使用 v4.1 token 和公共组件，采用"应用执行页"模式。功能图标使用 CSS-only 图标（icon-tile 或等价实现），不得用单字占位符。不得硬编码色值、不得自定义按钮/状态标签/卡片公共样式。
 - 业务结果展示区允许应用自定义布局和色彩，但必须使用 token 变量。
+- v4.1 设计系统与各页面的静态 HTML 预览稿在 `tmp-preview/`（本地资产，已 gitignore），设计定稿溯源时可查。
 
 ## 4. 安全铁律
 
@@ -52,6 +53,7 @@
   ```
 - 公共底座云函数为 `coreUser`、`coreApp`、`corePoints`、`corePayment`、`coreModel`、`adminCore`。例外：`demoSum` 是单 event 示例函数（无 `action` 分发，仅返回包络一致）；`getOpenId`、`sum` 为微信模板遗留函数，新代码不得仿照。
 - 管理操作必须写入 `admin_audit_logs`。
+- 小程序端统一经 `miniprogram/services/api.js` 的 `callCloud` 调用云函数（统一解包 `{ok, data, error}` 包络、`toastError` 错误提示），页面内不得散落 `wx.cloud.callFunction`。
 
 ## 7. Web 管理端边界
 
@@ -79,6 +81,8 @@
 - 失败路径返回稳定错误码，不得静默吞掉异常。
 
 ## 9. 环境变量
+
+`TCB_ENV` / `SCF_NAMESPACE` 为 SCF 运行时内置变量，无需手工配置；`adminCore` 与 `coreModel` 的 CloudBase AI driver 用其推导当前环境 ID（`CLOUDBASE_AI_ENV_ID` 未配置时的兜底）。
 
 开发最小集：
 - `ADMIN_OPENIDS` — 小程序管理员白名单
@@ -122,9 +126,9 @@
 
 ## 11. 测试与交付
 
-- 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。脚本强制 Node.js ≤22（优先 node@20，高于 22 直接报错），以避免新版 Node 与 `miniprogram-ci` 不兼容。
+- 小程序上传必须使用 `bash scripts/upload-miniprogram.sh <版本号> <版本说明>`，固定体验版入口为 `pages/index/index`；不得再使用缺少 `pagePath` 的临时 `miniprogram-ci` 命令。脚本强制 Node.js ≤22（优先 node@20，高于 22 直接报错），以避免新版 Node 与 `miniprogram-ci` 不兼容。小程序 appid 为 `wx1654159e6e3bb334`（见 `project.config.json`，上传私钥为根目录同名 `.key` 文件）。
 - **版本号以 MP 后台线上版本为准**（如 1.4.x），不与 git tag（0.1.x）同步；上传前先确认线上当前版本再递增。上传若报 `errCode -10008 invalid ip`，需在 MP 开发设置维护上传 IP 白名单，本机建议加 IPv4 出口并以 `NODE_OPTIONS="--dns-result-order=ipv4first"` 强制 IPv4。
-- 每次提交前运行 `node --test tests/*.test.js`（node 内置 test runner；现有 4 个测试文件：core-model-router、maic-player-view-model、maic-worker-core、paper-polish-core）、`bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。注意 `node --test tests/` 目录形式会报 "Cannot find module"，必须用 `tests/*.test.js` 通配。
+- 每次提交前运行 `node --test tests/*.test.js`（node 内置 test runner；现有 4 个测试文件：core-model-router、maic-player-view-model、maic-worker-core、paper-polish-core）、`bash scripts/check-js.sh`、`bash scripts/check-boundaries.sh` 和 `bash scripts/check-admin-web-boundaries.sh`。注意 `node --test tests/` 目录形式会报 "Cannot find module"，必须用 `tests/*.test.js` 通配。已知缺口：两个边界脚本的 `INTERNAL_ACTIONS` 黑名单尚未覆盖 coreModel 内部 action（`generateText`/`createTextJob` 等），`check-admin-web-boundaries.sh` 的集合黑名单缺 `model_providers`/`app_model_bindings`；该缺口由云函数运行时 `_internalToken` 校验兜底，后续可补脚本。
 - 提交前同时运行 `git diff --check`；涉及 `admin-web/` 时额外运行 `npm --prefix admin-web run lint` 和 `npm --prefix admin-web run build`。Vite chunk size warning 不是阻断项，除非本次任务明确要求拆包。
 - 文档中的命令必须能在当前仓库路径下解析；不能写不存在的命令作为 gate。
 - 新增云函数、页面或 collection 时同步更新 `docs/`、`promptDocs/prompt-pack-huli-tools-0526/test_case_huli-tools_0526.md` 和 `run_manifest_huli-tools_0526.toml`。

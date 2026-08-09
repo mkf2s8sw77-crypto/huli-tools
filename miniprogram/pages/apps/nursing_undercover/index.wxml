@@ -35,7 +35,7 @@
           data-mode="{{item.key}}"
           bindtap="onModeChange"
         >
-          <view class="nu-mode-card__icon icon-tile icon-tile--app {{selectedMode === item.key ? 'icon-tile--lavender' : 'icon-tile--coral'}}">
+          <view class="nu-mode-card__icon icon-tile icon-tile--app {{selectedMode === item.key ? 'icon-tile--lavender' : 'icon-tile--coral'}} {{item.key === 'word_undercover' ? 'icon-tile--quote' : 'icon-tile--case'}}">
             <view class="icon-tile__glyph"></view>
           </view>
           <view class="nu-mode-card__body">
@@ -67,35 +67,23 @@
         <view class="nu-param">
           <view class="nu-param__row">
             <text class="nu-param__label">AI 对手</text>
-            <text class="nu-param__value">{{selectedNpcCount}} 人</text>
+            <view class="nu-stepper">
+              <view class="nu-stepper__btn {{selectedNpcCount <= npcRange.min ? 'nu-stepper__btn--disabled' : ''}}" data-field="selectedNpcCount" data-delta="-1" bindtap="onStepParam">−</view>
+              <text class="nu-stepper__value">{{selectedNpcCount}} 人</text>
+              <view class="nu-stepper__btn {{selectedNpcCount >= npcRange.max ? 'nu-stepper__btn--disabled' : ''}}" data-field="selectedNpcCount" data-delta="1" bindtap="onStepParam">＋</view>
+            </view>
           </view>
-          <slider
-            min="{{npcRange.min}}"
-            max="{{npcRange.max}}"
-            step="1"
-            value="{{selectedNpcCount}}"
-            activeColor="var(--color-primary)"
-            backgroundColor="var(--color-border-soft)"
-            block-size="20"
-            bindchange="onNpcCountChange"
-          />
         </view>
         <view class="care-divider"></view>
         <view class="nu-param">
           <view class="nu-param__row">
             <text class="nu-param__label">发言轮数</text>
-            <text class="nu-param__value">{{selectedRoundCount}} 轮</text>
+            <view class="nu-stepper">
+              <view class="nu-stepper__btn {{selectedRoundCount <= roundRange.min ? 'nu-stepper__btn--disabled' : ''}}" data-field="selectedRoundCount" data-delta="-1" bindtap="onStepParam">−</view>
+              <text class="nu-stepper__value">{{selectedRoundCount}} 轮</text>
+              <view class="nu-stepper__btn {{selectedRoundCount >= roundRange.max ? 'nu-stepper__btn--disabled' : ''}}" data-field="selectedRoundCount" data-delta="1" bindtap="onStepParam">＋</view>
+            </view>
           </view>
-          <slider
-            min="{{roundRange.min}}"
-            max="{{roundRange.max}}"
-            step="1"
-            value="{{selectedRoundCount}}"
-            activeColor="var(--color-primary)"
-            backgroundColor="var(--color-border-soft)"
-            block-size="20"
-            bindchange="onRoundCountChange"
-          />
         </view>
       </view>
 
@@ -196,6 +184,23 @@
 
     <!-- 发言输入 -->
     <view class="nu-input-area card">
+      <!-- LLM 候选发言：每轮自动生成，点选填入输入框可编辑 -->
+      <view wx:if="{{suggestionsLoading}}" class="nu-suggestions">
+        <text class="nu-suggestions__label text-muted">正在为你想候选发言...</text>
+        <view class="nu-suggestion-chip nu-suggestion-chip--loading" wx:for="{{[1, 2, 3]}}" wx:key="*this"></view>
+      </view>
+      <view wx:elif="{{speechSuggestions.length > 0}}" class="nu-suggestions">
+        <text class="nu-suggestions__label text-muted">没思路？点一条填进输入框，可直接改：</text>
+        <view
+          wx:for="{{speechSuggestions}}"
+          wx:key="*this"
+          class="nu-suggestion-chip"
+          data-text="{{item}}"
+          bindtap="onPickSuggestion"
+        >
+          <text class="nu-suggestion-chip__text">{{item}}</text>
+        </view>
+      </view>
       <textarea
         class="nu-textarea form-input"
         placeholder="输入你的发言..."

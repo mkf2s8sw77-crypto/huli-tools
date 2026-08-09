@@ -200,6 +200,7 @@
 - `listConfig`：返回模式、难度、NPC 数、轮数范围和可展示场景元数据；不暴露答案。
 - `startGame`：参数 `usageId, mode, difficulty, npcCount, roundCount, scenarioKey?`；校验 usage 后创建 session。
 - `submitSpeech`：参数 `sessionId, roundNo, text, clientActionId`；记录玩家发言，生成本轮 AI NPC 发言，推进轮次。
+- `suggestSpeech`：参数 `sessionId`；只读 action，为当前轮尚未发言的玩家生成 3 条候选发言（经 coreModel 网关，capability `speech_suggestion`），不写库、无需幂等键；模型不可用时按场景知识点模板降级，返回 `{ suggestions, fallback }`。
 - `submitVote`：参数 `sessionId, targetRoleId, clientActionId`；记录玩家投票，生成 AI NPC 投票，计算结果，生成复盘，调用 `coreApp.finishUsage`。
 - `getGame`：参数 `sessionId`；返回当前用户自己的对局，未结束时隐藏答案。
 - `listMyGames`：分页返回当前用户自己的最近对局。
@@ -273,9 +274,9 @@ AI 调用规则：
 建议页面结构：
 
 - 应用头部：图标、名称、价格。
-- 开局配置：模式、难度、AI NPC 数、轮数。
+- 开局配置：模式、难度、AI NPC 数、轮数（数值调整用步进按钮，不用 slider——iOS 微信左缘右滑返回手势会抢占滑杆拖动，导致"一滑就返回"）。
 - 当前身份卡：显示玩家密令和是否卧底，只给玩家自己看。
-- 发言区：当前轮次、玩家输入、AI NPC 发言列表。
+- 发言区：当前轮次、玩家输入、AI NPC 发言列表；玩家发言前展示 3 条 LLM 候选发言 chips（每轮进入发言环节自动生成，点选填入输入框可编辑，自由输入始终可用；加载失败静默隐藏）。
 - 投票区：角色列表、投票理由可选。
 - 结果复盘：胜负、正确卧底、关键线索、知识点、安全提醒。
 - 最近记录：Phase 3 补齐。

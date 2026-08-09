@@ -4,6 +4,8 @@ const cloud = require("wx-server-sdk");
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
+const suggestionsLib = require("./lib/speech-suggestions");
+
 // 谁是卧底不再直连 CloudBase AI：统一经 coreModel 网关，
 // 绑定 nursing_undercover__npc_speech / npc_vote / debrief，模型由 model_providers 配置。
 // 绑定缺失或不可用时降级为模板生成（与迁移前行为一致）。
@@ -220,6 +222,22 @@ async function generateNpcVote(role, transcript, allRoles, scenario, mode) {
   return { ok: true, targetRoleId: target, reason: (data.reason || "").slice(0, 50) };
 }
 
+async function generateSpeechSuggestions(role, scenario, roundNo, transcript, mode) {
+  const { systemPrompt, userPrompt } = suggestionsLib.buildSpeechSuggestionsPrompt(role, scenario, roundNo, transcript, mode);
+  const result = await generateWithModel(systemPrompt, userPrompt, "speech_suggestion");
+  if (!result.ok) return result;
+
+  const suggestions = suggestionsLib.normalizeSuggestions(result.data && result.data.suggestions);
+  if (suggestions.length === 0) {
+    return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回缺少 suggestions 字段" };
+  }
+  return { ok: true, suggestions };
+}
+
+function generateTemplateSuggestions(scenario) {
+  return suggestionsLib.generateTemplateSuggestions(scenario);
+}
+
 async function generateDebrief(scenario, transcript, result, mode) {
   const { systemPrompt, userPrompt } = buildDebriefPrompt(scenario, transcript, result, mode);
   const genResult = await generateWithModel(systemPrompt, userPrompt, "debrief");
@@ -274,8 +292,10 @@ module.exports = {
   isAIReady,
   generateNpcSpeech,
   generateNpcVote,
+  generateSpeechSuggestions,
   generateDebrief,
   generateTemplateSpeech,
   generateTemplateVote,
+  generateTemplateSuggestions,
   generateTemplateDebrief,
 };

@@ -764,3 +764,46 @@ button[type="warn"] {
   border-radius: 50%;
   background: var(--icon-line);
 }
+
+/* quote: 对话气泡(语义"词语/发言") */
+.icon-tile--quote::before {
+  left: 17rpx; top: 18rpx;
+  width: 46rpx; height: 34rpx;
+  border: 5rpx solid var(--icon-line);
+  border-radius: 12rpx;
+}
+.icon-tile--quote::after {
+  left: 25rpx; top: 47rpx;
+  width: 13rpx; height: 13rpx;
+  border-left: 5rpx solid var(--icon-line);
+  border-bottom: 5rpx solid var(--icon-line);
+  transform: rotate(-45deg);
+}
+.icon-tile--quote .icon-tile__glyph::before {
+  left: 28rpx; top: 32rpx;
+  width: 6rpx; height: 6rpx;
+  border-radius: 50%;
+  background: var(--icon-line);
+  box-shadow: 12rpx 0 0 var(--icon-line), 24rpx 0 0 var(--icon-line);
+}
+
+/* case: 病历夹(语义"病例/情境") */
+.icon-tile--case::before {
+  left: 21rpx; top: 18rpx;
+  width: 38rpx; height: 46rpx;
+  border: 5rpx solid var(--icon-line);
+  border-radius: 9rpx;
+}
+.icon-tile--case::after {
+  left: 31rpx; top: 12rpx;
+  width: 18rpx; height: 12rpx;
+  border-radius: 6rpx;
+  background: var(--icon-line);
+}
+.icon-tile--case .icon-tile__glyph::before {
+  left: 29rpx; top: 33rpx;
+  width: 22rpx; height: 5rpx;
+  border-radius: var(--radius-pill);
+  background: var(--icon-line);
+  box-shadow: 0 11rpx 0 var(--icon-line), 0 22rpx 0 var(--icon-line);
+}

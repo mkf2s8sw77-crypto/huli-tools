@@ -330,6 +330,27 @@ node -e "JSON.parse(require('fs').readFileSync('miniprogram/app.json','utf8')); 
 - 客户端没有 `collection("app_nursing_undercover_sessions")`。
 - 仓库没有新增真实密钥。
 
+### TC-16 候选发言（suggestSpeech）
+
+目标：发言环节为玩家提供 3 条 LLM 候选发言，且模型不可用时优雅降级。
+
+前置条件：已开始一局且处于发言环节；管理端已配置 `nursing_undercover__speech_suggestion` 绑定（未配置时验证降级路径）。
+
+步骤：
+
+1. 进入对局，观察发言输入区上方。
+2. 点选一条候选，确认文字填入输入框且可继续编辑，再提交。
+3. 进入下一轮，确认候选自动重新生成。
+4. 移除/停用 `speech_suggestion` 绑定后重复步骤 1，确认展示模板候选（`fallback: true`）而不是报错。
+
+断言：
+
+- 每轮自动生成 3 条候选，候选不直接包含玩家密令原文。
+- 点选候选只填入输入框，不直接提交；自由输入始终可用。
+- 候选请求失败时输入区静默隐藏候选，不影响正常发言提交。
+- 玩家本轮已发言或进入投票后，`suggestSpeech` 返回 `DUPLICATE_ACTION` / `INVALID_STATUS`。
+- 配置页「AI 对手 / 发言轮数」用步进按钮调整，到边界值时对应按钮禁用；不存在 slider。
+
 ## 3. 可选预览
 
 只有本地存在私钥且账号有权限时运行：
