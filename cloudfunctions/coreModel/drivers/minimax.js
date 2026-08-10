@@ -35,6 +35,11 @@ async function chatComplete({ config, messages }) {
   const body = { model, messages };
   if (config.temperature !== undefined) body.temperature = Number(config.temperature);
   if (config.maxTokens !== undefined) body.max_tokens = Number(config.maxTokens);
+  // 推理模型（MiniMax-M3）可选：reasoningSplit 把思维链拆到 reasoning_details，
+  // content 只留正文；thinkingType="disabled" 直接关闭思考（仅 M3 支持，M2.x 忽略）。
+  // 短文本任务（如游戏发言）建议关闭思考以压低时延。
+  if (config.reasoningSplit !== undefined) body.reasoning_split = Boolean(config.reasoningSplit);
+  if (config.thinkingType) body.thinking = { type: String(config.thinkingType) };
 
   let response;
   try {

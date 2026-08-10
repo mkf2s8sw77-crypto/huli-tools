@@ -296,34 +296,36 @@ async function submitSpeech(event, context) {
   const useAI = ai.isAIReady();
   let aiFailed = false;
 
-  for (const npcRole of npcRoles) {
+  // 并行生成全部 NPC 发言：串行时总耗时 = 各 NPC 之和（推理模型下单次 5-25s，
+  // 4-6 个串行会顶到 60s 网关上限）；并行后 ≈ 最慢一次调用
+  const speechResults = await Promise.all(npcRoles.map(async (npcRole) => {
     const alreadySpoke = session.transcript.some(
       (t) => t.roundNo === targetRound && t.roleId === npcRole.roleId
     );
-    if (alreadySpoke) continue;
-
-    let speechText = "";
+    if (alreadySpoke) return null;
 
     if (useAI && scenario) {
       const result = await ai.generateNpcSpeech(npcRole, scenario, targetRound, session.transcript, session.mode);
       if (result.ok) {
-        speechText = result.speech;
-      } else {
-        console.error("AI speech failed for", npcRole.roleId, result.code, result.message);
-        aiFailed = true;
-        speechText = ai.generateTemplateSpeech(npcRole, scenario, targetRound);
+        return { npcRole, text: result.speech };
       }
-    } else if (scenario) {
-      speechText = ai.generateTemplateSpeech(npcRole, scenario, targetRound);
-    } else {
-      speechText = "我觉得这个护理知识点很重要，需要大家认真对待。";
+      console.error("AI speech failed for", npcRole.roleId, result.code, result.message);
+      aiFailed = true;
+      return { npcRole, text: ai.generateTemplateSpeech(npcRole, scenario, targetRound) };
     }
+    if (scenario) {
+      return { npcRole, text: ai.generateTemplateSpeech(npcRole, scenario, targetRound) };
+    }
+    return { npcRole, text: "我觉得这个护理知识点很重要，需要大家认真对待。" };
+  }));
 
+  for (const r of speechResults) {
+    if (!r) continue;
     session.transcript.push({
       roundNo: targetRound,
-      roleId: npcRole.roleId,
+      roleId: r.npcRole.roleId,
       actorType: "ai",
-      text: speechText,
+      text: r.text,
       createdAt: new Date(),
     });
   }
@@ -417,26 +419,29 @@ async function submitVote(event, context) {
   const npcRoles = session.roles.filter((r) => r.actorType === "ai");
   const useAI = ai.isAIReady();
 
-  for (const npcRole of npcRoles) {
+  // 与发言同理：NPC 投票并行生成，避免串行顶到网关超时
+  const voteResults = await Promise.all(npcRoles.map(async (npcRole) => {
     const alreadyVoted = session.votes.some((v) => v.roleId === npcRole.roleId);
-    if (alreadyVoted) continue;
+    if (alreadyVoted) return null;
 
-    let voteResult;
     if (useAI && scenario) {
       const result = await ai.generateNpcVote(npcRole, session.transcript, session.roles, scenario, session.mode);
       if (result.ok) {
-        voteResult = { targetRoleId: result.targetRoleId, reason: result.reason };
-      } else {
-        voteResult = ai.generateTemplateVote(npcRole, session.roles);
+        return { npcRole, targetRoleId: result.targetRoleId, reason: result.reason };
       }
-    } else {
-      voteResult = ai.generateTemplateVote(npcRole, session.roles);
+      const fallback = ai.generateTemplateVote(npcRole, session.roles);
+      return { npcRole, targetRoleId: fallback.targetRoleId, reason: fallback.reason };
     }
+    const fallback = ai.generateTemplateVote(npcRole, session.roles);
+    return { npcRole, targetRoleId: fallback.targetRoleId, reason: fallback.reason };
+  }));
 
+  for (const r of voteResults) {
+    if (!r) continue;
     session.votes.push({
-      roleId: npcRole.roleId,
-      targetRoleId: voteResult.targetRoleId,
-      reason: voteResult.reason || "",
+      roleId: r.npcRole.roleId,
+      targetRoleId: r.targetRoleId,
+      reason: r.reason || "",
       createdAt: new Date(),
     });
   }
