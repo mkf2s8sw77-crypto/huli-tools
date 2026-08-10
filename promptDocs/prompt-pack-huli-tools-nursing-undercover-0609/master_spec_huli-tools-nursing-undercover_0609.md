@@ -200,7 +200,7 @@
 - `listConfig`：返回模式、难度、NPC 数、轮数范围和可展示场景元数据；不暴露答案。
 - `startGame`：参数 `usageId, mode, difficulty, npcCount, roundCount, scenarioKey?`；校验 usage 后创建 session。
 - `submitSpeech`：参数 `sessionId, roundNo, text, clientActionId`；记录玩家发言，生成本轮 AI NPC 发言，推进轮次。
-- `suggestSpeech`：参数 `sessionId`；只读 action，为当前轮尚未发言的玩家生成 3 条候选发言（经 coreModel 网关，capability `speech_suggestion`），不写库、无需幂等键；模型不可用时按场景知识点模板降级，返回 `{ suggestions, fallback }`。
+- `suggestSpeech`：参数 `sessionId`；只读 action，为当前轮尚未发言的玩家生成 3 条候选发言（经 coreModel 网关，capability `speech_suggestion`），不写库、无需幂等键；模型不可用时按场景知识点模板降级，返回 `{ suggestions, fallback }`。质量约束：prompt 按卧底玩法区分平民（具体特征描述）与卧底（安全模糊）策略并内置好坏示例；服务端对 LLM 输出做密令泄露硬过滤（含任一密令原文即丢弃），模板兜底也必须先过滤含密令的知识点再拼装——任何路径都不得把密令原文发给客户端。配置类错误走 5 分钟冷却降级，不永久锁存。推理模型（如 MiniMax-M3）返回的 `<think>` 思维链由 `lib/json-utils.js` 统一剥离后再解析 JSON，`maxTokens` 需给思维链留余量（当前 2000）。
 - `submitVote`：参数 `sessionId, targetRoleId, clientActionId`；记录玩家投票，生成 AI NPC 投票，计算结果，生成复盘，调用 `coreApp.finishUsage`。
 - `getGame`：参数 `sessionId`；返回当前用户自己的对局，未结束时隐藏答案。
 - `listMyGames`：分页返回当前用户自己的最近对局。

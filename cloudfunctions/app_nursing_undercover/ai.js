@@ -5,6 +5,7 @@ const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const suggestionsLib = require("./lib/speech-suggestions");
+const { cleanModelJsonText } = require("./lib/json-utils");
 
 // 谁是卧底不再直连 CloudBase AI：统一经 coreModel 网关，
 // 绑定 nursing_undercover__npc_speech / npc_vote / debrief，模型由 model_providers 配置。
@@ -16,7 +17,8 @@ const MAX_SPEECH_LENGTH = 120;
 // 函数总超时 60s，单次调用放大到 25s 以兼顾慢响应与总预算
 const CALL_TIMEOUT_MS = 25000;
 
-// 配置类错误：说明绑定/provider 未就绪，本实例后续直接走模板，不再重复 RPC
+// 配置类错误：说明绑定/provider 未就绪，进入冷却降级，冷却结束后自动重试
+// （不永久锁存：绑定补建或配置修复后无需等实例回收即可恢复）
 const CONFIG_ERROR_CODES = [
   "MODEL_BINDING_MISSING",
   "MODEL_BINDING_DISABLED",
@@ -24,15 +26,16 @@ const CONFIG_ERROR_CODES = [
   "INTERNAL_SECRET_NOT_CONFIGURED",
   "FORBIDDEN",
 ];
+const CONFIG_RETRY_COOLDOWN_MS = 5 * 60 * 1000;
 
-let aiAvailable = true;
+let aiUnavailableUntil = 0;
 
 function getInternalToken() {
   return process.env.INTERNAL_API_SECRET || "";
 }
 
 function isAIReady() {
-  return aiAvailable && Boolean(getInternalToken());
+  return Date.now() >= aiUnavailableUntil && Boolean(getInternalToken());
 }
 
 function buildNpcSpeechPrompt(role, scenario, roundNo, transcript, mode) {
@@ -138,8 +141,7 @@ function buildDebriefPrompt(scenario, transcript, result, mode) {
 }
 
 function parseJSON(text) {
-  const cleaned = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-  return JSON.parse(cleaned);
+  return JSON.parse(cleanModelJsonText(text));
 }
 
 async function generateWithModel(systemPrompt, userPrompt, capability) {
@@ -160,7 +162,8 @@ async function generateWithModel(systemPrompt, userPrompt, capability) {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        overrides: { temperature: 0.7, maxTokens: 500 },
+        // MiniMax-M3 是推理模型，正文前有 <think> 思维链，maxTokens 要给思维链留余量
+        overrides: { temperature: 0.7, maxTokens: 2000 },
       },
       timeout: CALL_TIMEOUT_MS,
     });
@@ -172,7 +175,7 @@ async function generateWithModel(systemPrompt, userPrompt, capability) {
   if (!result.ok) {
     const error = result.error || {};
     if (CONFIG_ERROR_CODES.includes(error.code)) {
-      aiAvailable = false;
+      aiUnavailableUntil = Date.now() + CONFIG_RETRY_COOLDOWN_MS;
       return { ok: false, code: "AI_NOT_READY", message: error.message || "模型绑定未配置" };
     }
     return { ok: false, code: "AI_GENERATION_FAILED", message: "AI 调用失败: " + (error.message || error.code || "未知错误") };
@@ -201,6 +204,11 @@ async function generateNpcSpeech(role, scenario, roundNo, transcript, mode) {
   }
 
   const speech = data.speech.slice(0, MAX_SPEECH_LENGTH);
+  // 泄露防护：NPC 发言若直接包含其自身密令原文，视为不合格输出，由调用方降级模板
+  const identity = role.team === "undercover" ? scenario.undercoverSecret : scenario.civilianSecret;
+  if (identity && speech.includes(identity)) {
+    return { ok: false, code: "AI_RESPONSE_LEAKED", message: "AI 发言包含密令原文" };
+  }
   return { ok: true, speech, privateReasoning: data.privateReasoning || "" };
 }
 
@@ -227,9 +235,12 @@ async function generateSpeechSuggestions(role, scenario, roundNo, transcript, mo
   const result = await generateWithModel(systemPrompt, userPrompt, "speech_suggestion");
   if (!result.ok) return result;
 
-  const suggestions = suggestionsLib.normalizeSuggestions(result.data && result.data.suggestions);
+  const suggestions = suggestionsLib.filterLeakSuggestions(
+    suggestionsLib.normalizeSuggestions(result.data && result.data.suggestions),
+    scenario
+  );
   if (suggestions.length === 0) {
-    return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回缺少 suggestions 字段" };
+    return { ok: false, code: "AI_RESPONSE_INVALID", message: "AI 返回缺少可用 suggestions（含泄露被过滤）" };
   }
   return { ok: true, suggestions };
 }

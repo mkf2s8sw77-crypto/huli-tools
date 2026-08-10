@@ -346,6 +346,8 @@ node -e "JSON.parse(require('fs').readFileSync('miniprogram/app.json','utf8')); 
 断言：
 
 - 每轮自动生成 3 条候选，候选不直接包含玩家密令原文。
+- 候选与模板兜底均不得包含平民/卧底任一密令原文（服务端 `filterLeakSuggestions` 硬过滤 + 模板知识点预过滤）。
+- 候选应有具体细节、三条角度各异，不出现"很重要/值得重视/格外注意"类空话。
 - 点选候选只填入输入框，不直接提交；自由输入始终可用。
 - 候选请求失败时输入区静默隐藏候选，不影响正常发言提交。
 - 玩家本轮已发言或进入投票后，`suggestSpeech` 返回 `DUPLICATE_ACTION` / `INVALID_STATUS`。

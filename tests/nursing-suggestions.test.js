@@ -1,10 +1,12 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
+const { cleanModelJsonText } = require("../cloudfunctions/app_nursing_undercover/lib/json-utils");
 const {
   MAX_SUGGESTION_COUNT,
   MAX_SUGGESTION_LENGTH,
   buildSpeechSuggestionsPrompt,
   normalizeSuggestions,
+  filterLeakSuggestions,
   generateTemplateSuggestions,
 } = require("../cloudfunctions/app_nursing_undercover/lib/speech-suggestions");
 
@@ -63,8 +65,59 @@ test("generateTemplateSuggestions 基于知识点生成且不含密令原文", (
   assert.ok(out.every((s) => !s.includes("七步洗手法") && !s.includes("外科手消毒")));
 });
 
+test("cleanModelJsonText 剥离 think 思维链与代码围栏", () => {
+  assert.equal(cleanModelJsonText('<think>推理过程...</think>{"a":1}'), '{"a":1}');
+  assert.equal(cleanModelJsonText('<think>未闭合的推理'), ""); // 截断只剩思维链
+  assert.equal(cleanModelJsonText('```json\n{"a":1}\n```'), '{"a":1}');
+  assert.equal(cleanModelJsonText('<think>t</think>```json {"a":1} ```'), '{"a":1}');
+  assert.equal(cleanModelJsonText('{"a":1}'), '{"a":1}');
+  assert.equal(cleanModelJsonText(null), "");
+});
+
 test("generateTemplateSuggestions 无知识点时兜底仍返回满 3 条", () => {
   const out = generateTemplateSuggestions({});
   assert.equal(out.length, MAX_SUGGESTION_COUNT);
   assert.ok(out.every((s) => typeof s === "string" && s.length > 0));
+});
+
+test("buildSpeechSuggestionsPrompt 平民与卧底策略不同", () => {
+  const civilian = buildSpeechSuggestionsPrompt(civilianRole, scenario, 1, [], "word_undercover");
+  const undercover = buildSpeechSuggestionsPrompt(undercoverRole, scenario, 1, [], "word_undercover");
+  assert.ok(civilian.systemPrompt.includes("具体特征描述"));
+  assert.ok(undercover.systemPrompt.includes("安全模糊"));
+});
+
+test("buildSpeechSuggestionsPrompt 明确禁止空话与密令泄露", () => {
+  const { systemPrompt } = buildSpeechSuggestionsPrompt(civilianRole, scenario, 1, [], "word_undercover");
+  assert.ok(systemPrompt.includes("不得包含密令原文"));
+  assert.ok(systemPrompt.includes("空话套话"));
+  assert.ok(systemPrompt.includes("好："));
+  assert.ok(systemPrompt.includes("坏："));
+});
+
+test("filterLeakSuggestions 丢弃含任一密令原文的候选", () => {
+  const list = [
+    "我觉得七步洗手法很关键", // 含平民密令 → 丢弃
+    "外科手消毒适合日常", // 含卧底密令 → 丢弃
+    "揉搓这一步很多人会漏掉指缝", // 安全
+  ];
+  assert.deepEqual(filterLeakSuggestions(list, scenario), ["揉搓这一步很多人会漏掉指缝"]);
+  assert.deepEqual(filterLeakSuggestions(null, scenario), []);
+  assert.deepEqual(filterLeakSuggestions(list, {}), list); // 无密令信息时不过滤
+});
+
+test("generateTemplateSuggestions 知识点含密令时不泄露", () => {
+  const leakyScenario = {
+    civilianSecret: "七步洗手法",
+    undercoverSecret: "快速手消毒液",
+    knowledgePoints: [
+      "七步洗手法适用于手部有可见污染时", // 含平民密令，应被过滤
+      "快速手消毒液适用于手部无明显污染的常规消毒", // 含卧底密令，应被过滤
+      "揉搓时间不少于15秒", // 安全
+    ],
+  };
+  const out = generateTemplateSuggestions(leakyScenario);
+  assert.equal(out.length, MAX_SUGGESTION_COUNT);
+  assert.ok(out.every((s) => !s.includes("七步洗手法") && !s.includes("快速手消毒液")));
+  assert.ok(out.some((s) => s.includes("揉搓时间不少于15秒")));
 });
